@@ -20,6 +20,9 @@ from app.api.settings import router as settings_router
 from app.api.mods import router as mods_router
 from app.api.backups import router as backups_router
 from app.api.players import router as players_router
+from app.api.files import router as files_router
+from app.api.worlds import router as worlds_router
+from app.api.software import router as software_router
 from app.api.chunky import router as chunky_router
 from app.api.audit import router as audit_router
 from app.api.analytics import router as analytics_router
@@ -72,6 +75,9 @@ app.include_router(settings_router)
 app.include_router(mods_router)
 app.include_router(backups_router)
 app.include_router(players_router)
+app.include_router(files_router)
+app.include_router(worlds_router)
+app.include_router(software_router)
 app.include_router(chunky_router)
 app.include_router(audit_router)
 app.include_router(analytics_router)

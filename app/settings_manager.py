@@ -2,11 +2,22 @@ import os
 import difflib
 import datetime
 from pathlib import Path
-from app.config import MC_ENV_PATH, MINECRAFT_DATA_DIR
+from app.config import MC_ENV_PATH, get_minecraft_data_dir
 
 class SettingsManager:
-    def __init__(self, env_path: Path = MC_ENV_PATH):
-        self.env_path = env_path
+    def __init__(self, env_path: Path | None = None):
+        self._env_path = env_path
+
+    @property
+    def env_path(self) -> Path:
+        if self._env_path is not None:
+            return self._env_path
+        from app.config import BASE_DIR
+        return Path(os.environ.get("MC_ENV_PATH", BASE_DIR / "mc.env"))
+
+    @env_path.setter
+    def env_path(self, val: Path):
+        self._env_path = val
 
     def read_raw(self) -> str:
         if not self.env_path.exists():
@@ -28,10 +39,18 @@ class SettingsManager:
     def get_structured_settings(self) -> dict:
         parsed = self.parse_env()
         level_name = parsed.get("LEVEL", "BabaSquadWorld")
-        world_dir = MINECRAFT_DATA_DIR / level_name
+        world_dir = get_minecraft_data_dir() / level_name
         world_exists = world_dir.exists() and world_dir.is_dir()
 
         return {
+            "properties": {
+                "MAX_PLAYERS": int(parsed.get("MAX_PLAYERS", "8")),
+                "MODE": parsed.get("MODE", "survival").lower(),
+                "DIFFICULTY": parsed.get("DIFFICULTY", "easy").lower(),
+                "ENABLE_WHITELIST": parsed.get("ENABLE_WHITELIST", "false").lower() == "true",
+                "ALLOW_FLIGHT": parsed.get("ALLOW_FLIGHT", "false").lower() == "true",
+                "SPAWN_PROTECTION": int(parsed.get("SPAWN_PROTECTION", "16")),
+            },
             "world": {
                 "LEVEL": parsed.get("LEVEL", "BabaSquadWorld"),
                 "SEED": parsed.get("SEED", ""),
@@ -113,6 +132,16 @@ class SettingsManager:
         mode = updates.get("MODE")
         if mode and mode.lower() not in ("survival", "creative", "adventure", "spectator"):
             return False, "MODE must be survival, creative, adventure, or spectator."
+
+        # Validate SPAWN_PROTECTION
+        sp = updates.get("SPAWN_PROTECTION")
+        if sp is not None and sp != "":
+            try:
+                s_int = int(sp)
+                if s_int < 0 or s_int > 1000:
+                    return False, "SPAWN_PROTECTION must be between 0 and 1000."
+            except ValueError:
+                return False, "SPAWN_PROTECTION must be an integer."
 
         return True, ""
 

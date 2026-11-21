@@ -5,7 +5,10 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 DATA_DIR = Path(os.environ.get("DATA_DIR", BASE_DIR / "data"))
-MINECRAFT_DATA_DIR = Path(os.environ.get("MINECRAFT_DATA_DIR", BASE_DIR / "mock_minecraft"))
+def get_minecraft_data_dir() -> Path:
+    return Path(os.environ.get("MINECRAFT_DATA_DIR", BASE_DIR / "mock_minecraft"))
+
+MINECRAFT_DATA_DIR = get_minecraft_data_dir()
 STACKS_DIR = Path(os.environ.get("STACKS_DIR", BASE_DIR / "stacks"))
 MC_ENV_PATH = Path(os.environ.get("MC_ENV_PATH", BASE_DIR / "mc.env"))
 MC_WATCH_STATE_PATH = Path(os.environ.get("MC_WATCH_STATE_PATH", BASE_DIR / "mock_mc_watch" / "state.json"))

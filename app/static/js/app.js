@@ -1,21 +1,34 @@
-// mcadmin.palvi.org client application
+// mcadmin.palvi.org — Aternos-Inspired Minecraft Dashboard Client
+// Universal Outfit font, Monochrome Dark Aesthetic, 11 Dedicated Categories
+
 const ICONS = {
   server: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><rect x="2" y="3" width="20" height="7"></rect><rect x="2" y="14" width="20" height="7"></rect><line x1="6" y1="6.5" x2="6.01" y2="6.5"></line><line x1="6" y1="17.5" x2="6.01" y2="17.5"></line></svg>`,
+  properties: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>`,
   console: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`,
-  logs: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`,
-  settings: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>`,
-  mods: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`,
+  log: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`,
   players: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+  software: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`,
+  mods: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`,
+  files: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`,
+  worlds: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`,
   backups: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>`,
-  media: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>`,
-  chunky: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>`,
-  audit: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>`,
-  analytics: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M18 20V10"></path><path d="M12 20V4"></path><path d="M6 20v-6"></path></svg>`,
+  access: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><rect x="3" y="11" width="18" height="11" rx="0" ry="0"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
+  
+  // Action icons
   start: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>`,
   restart: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
   stop: `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16"></rect></svg>`,
-  logout: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
-  search: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`
+  copy: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
+  folder: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`,
+  file: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`,
+  download: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`,
+  trash: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`,
+  edit: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`,
+  plus: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`,
+  upload: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
+  refresh: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
+  search: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
+  logout: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`
 };
 
 const API = {
@@ -61,27 +74,55 @@ const app = {
   state: {
     authenticated: false,
     setupRequired: false,
-    activeTab: "dashboard",
+    activeTab: "server", // 1. Server, 2. Properties, 3. Console, 4. Log, etc.
     status: null,
-    media: null,
     idleSecondsRemaining: 300,
+    
+    // Server Properties
+    properties: null,
+    
+    // Console
+    consoleHistory: [],
+    consoleHistoryIdx: -1,
+    
+    // Logs
     logs: [],
     logFilter: "",
     autoScrollLogs: true,
-    consoleHistory: [],
-    consoleHistoryIdx: -1,
-    settings: null,
-    settingsView: "form", // 'form' or 'raw'
+    
+    // Players (5 sections)
+    playerSection: "ops", // 'ops', 'banned_players', 'banned_ips', 'whitelisted', 'offline'
+    playersData: {
+      ops: [],
+      banned_players: [],
+      banned_ips: [],
+      whitelisted: [],
+      offline_players: [],
+      online_players: []
+    },
+    
+    // Software
+    softwareCatalog: [],
+    currentSoftware: null,
+    
+    // Mods
     installedMods: { managed: [], manual: [] },
     modSearchResults: [],
     modSearchLoading: false,
-    backups: [],
+    modQuery: "",
+    
+    // Files
+    currentFilePath: "",
+    fileItems: [],
+    fileBreadcrumbs: [],
+    editingFile: null,
+    
+    // Worlds
+    worldInfo: null,
+    worldFiles: [],
+    
+    // Backups
     diskUsage: null,
-    onlinePlayers: [],
-    auditLogs: [],
-    analytics: null,
-    analyticsHours: 24,
-    modal: null,
   },
 
   sseLogSource: null,
@@ -109,14 +150,11 @@ const app = {
 
   startDashboard() {
     this.fetchStatus();
-    this.fetchMedia();
-    this.fetchDiskUsage();
     this.statusInterval = setInterval(() => {
       this.fetchStatus();
-      this.fetchMedia();
     }, 3000);
 
-    // 1-second countdown tick
+    // 1-second countdown tick for idle
     setInterval(() => {
       if (this.state.status && this.state.status.state === "Online") {
         if (this.state.idleSecondsRemaining > 0) {
@@ -125,6 +163,8 @@ const app = {
         }
       }
     }, 1000);
+
+    this.setTab("server");
   },
 
   async fetchStatus() {
@@ -134,12 +174,11 @@ const app = {
       if (data.idle && data.idle.remaining_seconds !== undefined) {
         this.state.idleSecondsRemaining = data.idle.remaining_seconds;
       }
-      this.state.onlinePlayers = data.players ? data.players.players : [];
-      
-      // Trigger blinking light pulse on update
       this.pulseUpdateBeacon(data.state);
-
-      this.renderStatusCard();
+      this.updateSidebarState(data);
+      if (this.state.activeTab === "server") {
+        this.updateServerMetrics(data);
+      }
     } catch (e) {
       console.debug("Status fetch error:", e);
       this.pulseUpdateBeacon("Error");
@@ -151,40 +190,70 @@ const app = {
     const bText = document.getElementById("topbar-beacon-text");
     const sDot = document.getElementById("sidebar-dot");
 
-    if (bText) bText.innerText = state;
+    if (bText) bText.innerText = state.toUpperCase();
 
     if (bDot) {
       bDot.className = "beacon-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
       bDot.classList.remove("flash");
-      void bDot.offsetWidth; // trigger reflow
+      void bDot.offsetWidth;
       bDot.classList.add("flash");
     }
 
     if (sDot) {
+      sDot.className = "status-indicator-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
       sDot.classList.remove("flash");
       void sDot.offsetWidth;
       sDot.classList.add("flash");
     }
   },
 
-  async fetchMedia() {
-    try {
-      const data = await API.request("/api/media/status");
-      this.state.media = data;
-      this.renderMediaCard();
-    } catch (e) {
-      console.debug("Media fetch error:", e);
+  updateSidebarState(data) {
+    const sText = document.getElementById("sidebar-state-text");
+    const sCount = document.getElementById("sidebar-player-count");
+    if (sText) sText.innerText = data.state || "Offline";
+    if (sCount && data.players) {
+      sCount.innerText = `${data.players.count || 0}/${data.players.max || 8}`;
     }
   },
 
-  async fetchDiskUsage() {
-    try {
-      const data = await API.request("/api/backups/disk-usage");
-      this.state.diskUsage = data;
-      this.renderDiskUsageProgress();
-    } catch (e) {
-      console.debug("Disk usage fetch error:", e);
-    }
+  updateIdleBadge() {
+    const idleEl = document.getElementById("topbar-idle-timer");
+    const stripIdle = document.getElementById("strip-idle");
+    const formatted = this.formatSeconds(this.state.idleSecondsRemaining);
+    if (idleEl) idleEl.innerText = formatted;
+    if (stripIdle) stripIdle.innerText = formatted;
+  },
+
+  /* ------------------- CONFIRMATION MODAL ------------------- */
+  showConfirmModal(title, message, onConfirm, { danger = true, confirmText = "Confirm" } = {}) {
+    const overlay = document.getElementById("modal-overlay");
+    const body = document.getElementById("modal-body");
+    
+    body.innerHTML = `
+      <div class="modal-header">
+        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">${this.escapeHtml(title)}</h3>
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal()">✕</button>
+      </div>
+      <div style="padding:16px 20px;font-size:13px;color:var(--text-secondary);line-height:1.6;">
+        ${this.escapeHtml(message)}
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border-subtle);">
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal()">Cancel</button>
+        <button class="btn ${danger ? 'btn-danger' : 'btn-primary'} btn-sm" id="confirm-modal-ok-btn">${this.escapeHtml(confirmText)}</button>
+      </div>
+    `;
+
+    document.getElementById("confirm-modal-ok-btn").onclick = () => {
+      this.closeModal();
+      onConfirm();
+    };
+
+    overlay.style.display = "flex";
+  },
+
+  closeModal() {
+    const overlay = document.getElementById("modal-overlay");
+    if (overlay) overlay.style.display = "none";
   },
 
   /* ------------------- ACTIONS: CONTROL ------------------- */
@@ -198,719 +267,55 @@ const app = {
     }
   },
 
-  async stopServer(force = false) {
-    try {
-      const res = await API.request("/api/control/stop", {
-        method: "POST",
-        body: { force }
-      });
-      if (res.needs_confirmation) {
-        this.showConfirmModal(
-          "Players Online",
-          res.message,
-          () => this.stopServer(true)
-        );
-        return;
+  stopServer() {
+    this.showConfirmModal(
+      "Stop Minecraft Server",
+      "Are you sure you want to stop the server? Any connected players will be disconnected.",
+      async () => {
+        try {
+          const res = await API.request("/api/control/stop", { method: "POST", body: { force: true } });
+          alert(res.message);
+          this.fetchStatus();
+        } catch (e) {
+          alert(e.message);
+        }
+      },
+      { danger: true, confirmText: "Stop Server" }
+    );
+  },
+
+  restartServer() {
+    this.showConfirmModal(
+      "Restart Minecraft Server",
+      "Are you sure you want to restart the server? The server container will safely stop and restart.",
+      async () => {
+        try {
+          const res = await API.request("/api/control/restart", { method: "POST", body: { force: true } });
+          alert(res.message);
+          this.fetchStatus();
+        } catch (e) {
+          alert(e.message);
+        }
+      },
+      { danger: true, confirmText: "Restart Server" }
+    );
+  },
+
+  copyServerAddress() {
+    const addr = "mc.palvi.org:26656";
+    navigator.clipboard.writeText(addr).then(() => {
+      const btn = document.getElementById("copy-addr-btn");
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = `${ICONS.copy} Copied!`;
+        setTimeout(() => btn.innerHTML = orig, 1500);
       }
-      alert(res.message);
-      this.fetchStatus();
-    } catch (e) {
-      alert(e.message);
-    }
+    }).catch(() => {
+      alert("Server address: " + addr);
+    });
   },
 
-  async restartServer(force = false) {
-    try {
-      const res = await API.request("/api/control/restart", {
-        method: "POST",
-        body: { force }
-      });
-      if (res.needs_confirmation) {
-        this.showConfirmModal(
-          "Players Online",
-          res.message,
-          () => this.restartServer(true)
-        );
-        return;
-      }
-      alert(res.message);
-      this.fetchStatus();
-    } catch (e) {
-      alert(e.message);
-    }
-  },
-
-  /* ------------------- CONSOLE ------------------- */
-  async sendConsoleCommand() {
-    const input = document.getElementById("console-input");
-    const cmd = input.value.trim();
-    if (!cmd) return;
-
-    this.state.consoleHistory.push(cmd);
-    this.state.consoleHistoryIdx = this.state.consoleHistory.length;
-    input.value = "";
-
-    const terminal = document.getElementById("console-terminal");
-    terminal.innerHTML += `\n<span style="color:#60a5fa">&gt; ${cmd}</span>\n`;
-
-    try {
-      const res = await API.request("/api/console/execute", {
-        method: "POST",
-        body: { command: cmd }
-      });
-      terminal.innerHTML += `${res.output || "[No output]"}\n`;
-      terminal.scrollTop = terminal.scrollHeight;
-    } catch (e) {
-      terminal.innerHTML += `<span style="color:#f87171">[Error: ${e.message}]</span>\n`;
-    }
-  },
-
-  /* ------------------- LOGS ------------------- */
-  async initLogs() {
-    const term = document.getElementById("logs-terminal");
-    if (!term) return;
-    term.innerHTML = "Loading log tail...";
-
-    try {
-      const data = await API.request("/api/logs/tail?lines=500");
-      this.state.logs = data.lines || [];
-      this.renderLogs();
-
-      // Connect SSE
-      if (!this.sseLogSource) {
-        this.sseLogSource = new EventSource("/api/logs/stream");
-        this.sseLogSource.onmessage = (e) => {
-          this.state.logs.push(e.data);
-          if (this.state.logs.length > 2000) this.state.logs.shift();
-          this.appendLogLine(e.data);
-        };
-      }
-    } catch (e) {
-      term.innerHTML = `Error loading logs: ${e.message}`;
-    }
-  },
-
-  renderLogs() {
-    const term = document.getElementById("logs-terminal");
-    if (!term) return;
-    const filter = this.state.logFilter.toLowerCase();
-    const filtered = filter
-      ? this.state.logs.filter(l => l.toLowerCase().includes(filter))
-      : this.state.logs;
-
-    term.innerHTML = filtered.map(l => this.escapeHtml(l)).join("\n");
-    if (this.state.autoScrollLogs) term.scrollTop = term.scrollHeight;
-  },
-
-  appendLogLine(line) {
-    const term = document.getElementById("logs-terminal");
-    if (!term) return;
-    const filter = this.state.logFilter.toLowerCase();
-    if (filter && !line.toLowerCase().includes(filter)) return;
-
-    term.innerHTML += `\n${this.escapeHtml(line)}`;
-    if (this.state.autoScrollLogs) term.scrollTop = term.scrollHeight;
-  },
-
-  /* ------------------- SETTINGS ------------------- */
-  async loadSettings() {
-    try {
-      const data = await API.request("/api/settings");
-      this.state.settings = data;
-      this.renderSettingsView();
-    } catch (e) {
-      alert("Failed to load settings: " + e.message);
-    }
-  },
-
-  async previewSettingsDiff() {
-    let payload = {};
-    if (this.state.settingsView === "raw") {
-      const rawText = document.getElementById("raw-mc-env").value;
-      payload = { raw_content: rawText };
-    } else {
-      const formUpdates = {
-        LEVEL: document.getElementById("setting-level").value,
-        SEED: document.getElementById("setting-seed").value,
-        DIFFICULTY: document.getElementById("setting-difficulty").value,
-        MODE: document.getElementById("setting-mode").value,
-        PVP: document.getElementById("setting-pvp").value,
-        HARDCORE: document.getElementById("setting-hardcore").value,
-        MAX_PLAYERS: document.getElementById("setting-max-players").value,
-        ENABLE_WHITELIST: document.getElementById("setting-whitelist").value,
-        ONLINE_MODE: document.getElementById("setting-online-mode").value,
-        VIEW_DISTANCE: document.getElementById("setting-view-distance").value,
-        SIMULATION_DISTANCE: document.getElementById("setting-sim-distance").value,
-        MEMORY: document.getElementById("setting-memory").value,
-        MOTD: document.getElementById("setting-motd").value,
-      };
-      payload = { updates: formUpdates };
-    }
-
-    try {
-      const res = await API.request("/api/settings/diff", {
-        method: "POST",
-        body: payload
-      });
-
-      this.showDiffModal(res.diff || "No changes detected.", payload);
-    } catch (e) {
-      alert("Diff error: " + e.message);
-    }
-  },
-
-  async applySettings(payload, force = false) {
-    try {
-      payload.force = force;
-      const res = await API.request("/api/settings/apply", {
-        method: "POST",
-        body: payload
-      });
-
-      if (res.needs_confirmation) {
-        this.showConfirmModal(
-          "Players Online",
-          res.message,
-          () => this.applySettings(payload, true)
-        );
-        return;
-      }
-
-      this.closeModal();
-      this.showExecutionModal("Recreating Minecraft Server", res.output || res.message);
-      this.loadSettings();
-      this.fetchStatus();
-    } catch (e) {
-      alert("Apply failed: " + e.message);
-    }
-  },
-
-  /* ------------------- MODS ------------------- */
-  async loadMods() {
-    try {
-      const data = await API.request("/api/mods/installed");
-      this.state.installedMods = data;
-      this.renderInstalledMods();
-    } catch (e) {
-      console.error("Mods load error:", e);
-    }
-  },
-
-  async searchModrinth() {
-    const q = document.getElementById("mod-search-input").value.trim();
-    if (!q) return;
-
-    this.state.modSearchLoading = true;
-    this.renderModSearchResults();
-
-    try {
-      const res = await API.request(`/api/mods/search?q=${encodeURIComponent(q)}&limit=12`);
-      this.state.modSearchResults = res.hits || [];
-    } catch (e) {
-      alert("Search failed: " + e.message);
-      this.state.modSearchResults = [];
-    } finally {
-      this.state.modSearchLoading = false;
-      this.renderModSearchResults();
-    }
-  },
-
-  async addMod(slug) {
-    if (!confirm(`Add mod '${slug}' and recreate the server?`)) return;
-
-    try {
-      const res = await API.request("/api/mods/add", {
-        method: "POST",
-        body: { slug }
-      });
-      this.showExecutionModal(`Adding Mod: ${slug}`, res.output || res.message);
-      this.loadMods();
-      this.fetchStatus();
-    } catch (e) {
-      alert("Add mod failed: " + e.message);
-    }
-  },
-
-  async removeMod(slug) {
-    if (!confirm(`Remove mod '${slug}' and clean up old jar files?`)) return;
-
-    try {
-      const res = await API.request("/api/mods/remove", {
-        method: "POST",
-        body: { slug }
-      });
-      this.showExecutionModal(`Removing Mod: ${slug}`, res.output || res.message);
-      this.loadMods();
-      this.fetchStatus();
-    } catch (e) {
-      alert("Remove mod failed: " + e.message);
-    }
-  },
-
-  async deleteManualMod(filename) {
-    if (!confirm(`Permanently delete jar '${filename}'?`)) return;
-    try {
-      await API.request(`/api/mods/manual/${encodeURIComponent(filename)}`, { method: "DELETE" });
-      this.loadMods();
-    } catch (e) {
-      alert("Delete failed: " + e.message);
-    }
-  },
-
-  /* ------------------- BACKUPS ------------------- */
-  async loadBackups() {
-    try {
-      const [bData, dData] = await Promise.all([
-        API.request("/api/backups"),
-        API.request("/api/backups/disk-usage")
-      ]);
-      this.state.backups = bData.backups || [];
-      this.state.diskUsage = dData;
-      this.renderBackupsView();
-    } catch (e) {
-      console.error("Backups load error:", e);
-    }
-  },
-
-  async createBackup() {
-    try {
-      const res = await API.request("/api/backups/create", { method: "POST" });
-      alert(res.message);
-      this.loadBackups();
-    } catch (e) {
-      alert("Backup error: " + e.message);
-    }
-  },
-
-  async restoreBackup(backupId) {
-    if (this.state.status && this.state.status.state === "Online") {
-      alert("Minecraft is currently running! Stop the server before restoring a backup.");
-      return;
-    }
-
-    if (!confirm(`WARNING: Restoring '${backupId}' will replace current world BabaSquadWorld.\nA safety backup will be created automatically.\nProceed?`)) {
-      return;
-    }
-
-    try {
-      const res = await API.request("/api/backups/restore", {
-        method: "POST",
-        body: { backup_id: backupId }
-      });
-      this.showExecutionModal(`Restoring: ${backupId}`, res.output || res.message);
-      this.loadBackups();
-    } catch (e) {
-      alert("Restore error: " + e.message);
-    }
-  },
-
-  /* ------------------- MEDIA CONTROLS ------------------- */
-  async setGrace() {
-    const curGrace = (this.state.media && this.state.media.watch_state) ? this.state.media.watch_state.grace : 300;
-    const input = prompt("Enter mc-watch grace period in seconds (60 to 3600):", curGrace);
-    if (!input) return;
-    const val = parseInt(input, 10);
-    if (isNaN(val) || val < 60 || val > 3600) {
-      alert("Invalid grace value. Must be between 60 and 3600.");
-      return;
-    }
-
-    try {
-      const res = await API.request("/api/media/set-grace", {
-        method: "POST",
-        body: { grace: val }
-      });
-      alert(`Grace period updated to ${res.grace}s.`);
-      this.fetchMedia();
-    } catch (e) {
-      alert("Failed to set grace: " + e.message);
-    }
-  },
-
-  async startMediaNow() {
-    try {
-      const res = await API.request("/api/media/start-now", { method: "POST" });
-      alert("Triggered media stack start!");
-      this.fetchMedia();
-    } catch (e) {
-      alert("Start media failed: " + e.message);
-    }
-  },
-
-  /* ------------------- PLAYERS ------------------- */
-  async loadPlayers() {
-    try {
-      const [online, wl] = await Promise.all([
-        API.request("/api/players/online"),
-        API.request("/api/players/whitelist")
-      ]);
-      this.state.onlinePlayers = online.players || [];
-      const term = document.getElementById("whitelist-output");
-      if (term) term.innerText = wl.output || "";
-      this.renderPlayersView();
-    } catch (e) {
-      console.error("Players load error:", e);
-    }
-  },
-
-  async kickPlayer(player) {
-    const reason = prompt(`Reason for kicking ${player}:`, "Kicked by admin");
-    if (reason === null) return;
-    try {
-      const res = await API.request("/api/players/kick", {
-        method: "POST",
-        body: { player, reason }
-      });
-      alert(res.output);
-      this.loadPlayers();
-    } catch (e) {
-      alert("Kick failed: " + e.message);
-    }
-  },
-
-  async banPlayer(player) {
-    const reason = prompt(`Reason for banning ${player}:`, "Banned by admin");
-    if (reason === null) return;
-    try {
-      const res = await API.request("/api/players/ban", {
-        method: "POST",
-        body: { player, reason }
-      });
-      alert(res.output);
-      this.loadPlayers();
-    } catch (e) {
-      alert("Ban failed: " + e.message);
-    }
-  },
-
-  async opPlayer(player) {
-    try {
-      const res = await API.request("/api/players/ops", {
-        method: "POST",
-        body: { action: "op", player }
-      });
-      alert(res.output);
-    } catch (e) {
-      alert("Op failed: " + e.message);
-    }
-  },
-
-  async whitelistAction(action) {
-    let player = null;
-    if (action === "add" || action === "remove") {
-      player = prompt(`Player name to ${action}:`);
-      if (!player) return;
-    }
-    try {
-      const res = await API.request("/api/players/whitelist", {
-        method: "POST",
-        body: { action, player }
-      });
-      alert(res.output);
-      this.loadPlayers();
-    } catch (e) {
-      alert("Whitelist action failed: " + e.message);
-    }
-  },
-
-  /* ------------------- CHUNKY ------------------- */
-  async runChunky(action) {
-    let param = null;
-    if (action === "radius") {
-      param = prompt("Enter pregeneration radius in blocks (e.g. 1000):", "1000");
-      if (!param) return;
-    }
-    try {
-      const res = await API.request("/api/chunky/command", {
-        method: "POST",
-        body: { action, param }
-      });
-      const term = document.getElementById("chunky-terminal");
-      if (term) term.innerText += `\n> chunky ${action} ${param || ""}\n${res.output}\n`;
-    } catch (e) {
-      alert("Chunky failed: " + e.message);
-    }
-  },
-
-  /* ------------------- AUDIT ------------------- */
-  async loadAudit() {
-    try {
-      const data = await API.request("/api/audit?limit=100");
-      this.state.auditLogs = data.entries || [];
-      this.renderAuditTable();
-    } catch (e) {
-      console.error("Audit load error:", e);
-    }
-  },
-
-  /* ------------------- AUTH MODALS ------------------- */
-  showLoginModal() {
-    this.showModal(`
-      <div class="modal-title">Admin Login</div>
-      <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:1.25rem;">
-        Authentication required to manage PalviServer Minecraft stack.
-      </p>
-      <form onsubmit="app.handleLogin(event)">
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" id="login-password" class="form-control" required autofocus />
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:1.5rem;">
-          <button type="submit" class="btn btn-primary">Sign In</button>
-        </div>
-      </form>
-    `, false);
-  },
-
-  showSetupModal() {
-    this.showModal(`
-      <div class="modal-title">Initial Admin Setup</div>
-      <p style="color:var(--text-secondary);font-size:0.875rem;margin-bottom:1.25rem;">
-        Establish the single administrator password for mcadmin.palvi.org. This locks after initialization.
-      </p>
-      <form onsubmit="app.handleSetup(event)">
-        <div class="form-group">
-          <label class="form-label">Admin Password (min 8 chars)</label>
-          <input type="password" id="setup-password" class="form-control" minlength="8" required autofocus />
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:1.5rem;">
-          <button type="submit" class="btn btn-primary">Set Password & Sign In</button>
-        </div>
-      </form>
-    `, false);
-  },
-
-  async handleLogin(e) {
-    e.preventDefault();
-    const pass = document.getElementById("login-password").value;
-    try {
-      const res = await API.request("/api/auth/login", {
-        method: "POST",
-        body: { password: pass }
-      });
-      API.csrfToken = res.csrf_token;
-      if (res.session_token) {
-        API.sessionToken = res.session_token;
-        localStorage.setItem("mcadmin_token", res.session_token);
-      }
-      this.state.authenticated = true;
-      this.closeModal();
-      this.startDashboard();
-    } catch (err) {
-      alert(err.message);
-    }
-  },
-
-  async handleSetup(e) {
-    e.preventDefault();
-    const pass = document.getElementById("setup-password").value;
-    try {
-      const res = await API.request("/api/auth/setup", {
-        method: "POST",
-        body: { password: pass }
-      });
-      API.csrfToken = res.csrf_token;
-      if (res.session_token) {
-        API.sessionToken = res.session_token;
-        localStorage.setItem("mcadmin_token", res.session_token);
-      }
-      this.state.authenticated = true;
-      this.state.setupRequired = false;
-      this.closeModal();
-      this.startDashboard();
-    } catch (err) {
-      alert(err.message);
-    }
-  },
-
-  async logout() {
-    if (!confirm("Sign out of Minecraft Admin?")) return;
-    try {
-      await API.request("/api/auth/logout", { method: "POST" });
-    } catch (e) {
-    } finally {
-      localStorage.removeItem("mcadmin_token");
-      API.sessionToken = null;
-      location.reload();
-    }
-  },
-
-  /* ------------------- MODAL SYSTEM ------------------- */
-  showModal(html, allowClose = true) {
-    const overlay = document.getElementById("modal-overlay");
-    const content = document.getElementById("modal-body");
-    content.innerHTML = html;
-    overlay.style.display = "flex";
-  },
-
-  closeModal() {
-    const overlay = document.getElementById("modal-overlay");
-    overlay.style.display = "none";
-  },
-
-  showConfirmModal(title, message, onConfirm) {
-    this.showModal(`
-      <div class="modal-title">${this.escapeHtml(title)}</div>
-      <div class="warning-box">${this.escapeHtml(message)}</div>
-      <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.5rem;">
-        <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
-        <button class="btn btn-danger" id="modal-confirm-btn">Confirm Proceed</button>
-      </div>
-    `);
-    document.getElementById("modal-confirm-btn").onclick = () => {
-      this.closeModal();
-      onConfirm();
-    };
-  },
-
-  showDiffModal(diffText, payload) {
-    let diffHtml = diffText.split("\n").map(l => {
-      if (l.startsWith("+") && !l.startsWith("+++")) return `<span class="diff-add">${this.escapeHtml(l)}</span>`;
-      if (l.startsWith("-") && !l.startsWith("---")) return `<span class="diff-del">${this.escapeHtml(l)}</span>`;
-      return this.escapeHtml(l);
-    }).join("\n");
-
-    this.showModal(`
-      <div class="modal-title">Review Settings Diff</div>
-      <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.75rem;">
-        A timestamped backup of mc.env will be written and the safe recreation sequence will execute.
-      </p>
-      <div class="diff-view">${diffHtml}</div>
-      <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.25rem;">
-        <button class="btn btn-secondary" onclick="app.closeModal()">Cancel</button>
-        <button class="btn btn-primary" id="modal-apply-btn">Apply & Recreate mc</button>
-      </div>
-    `);
-    document.getElementById("modal-apply-btn").onclick = () => {
-      this.applySettings(payload, false);
-    };
-  },
-
-  showExecutionModal(title, outputText) {
-    this.showModal(`
-      <div class="modal-title">${this.escapeHtml(title)}</div>
-      <div class="terminal" style="height:320px;">${this.escapeHtml(outputText)}</div>
-      <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
-        <button class="btn btn-primary" onclick="app.closeModal()">Close</button>
-      </div>
-    `);
-  },
-
-  /* ------------------- RENDERING HELPERS ------------------- */
-  render() {
-    const root = document.getElementById("app-root");
-    root.innerHTML = `
-      <!-- Fixed Left Sidebar (Aternos Style) -->
-      <aside id="sidebar">
-        <div id="sidebar-top">
-          <div class="sidebar-brand">
-            <div class="brand-icon">MC</div>
-            <div class="brand-info">
-              <span class="brand-name">PalviServer</span>
-              <span class="brand-sub">mcadmin.palvi.org</span>
-            </div>
-          </div>
-
-          <div class="sidebar-status-pill">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span class="status-indicator-dot" id="sidebar-dot"></span>
-              <span style="font-size:11px;font-weight:600;text-transform:uppercase;" id="sidebar-state-text">Offline</span>
-            </div>
-            <span style="font-size:11px;color:var(--text-muted);" id="sidebar-player-count">0/8</span>
-          </div>
-
-          <div class="sidebar-section-title">Control</div>
-          <button class="sidebar-nav-item active" data-tab="dashboard" onclick="app.setTab('dashboard')">
-            ${ICONS.server}
-            <span>Server</span>
-          </button>
-          <button class="sidebar-nav-item" data-tab="console" onclick="app.setTab('console')">
-            ${ICONS.console}
-            <span>Console</span>
-          </button>
-          <button class="sidebar-nav-item" data-tab="logs" onclick="app.setTab('logs')">
-            ${ICONS.logs}
-            <span>Log</span>
-          </button>
-
-          <div class="sidebar-section-title">Manage</div>
-          <button class="sidebar-nav-item" data-tab="settings" onclick="app.setTab('settings')">
-            ${ICONS.settings}
-            <span>Options</span>
-          </button>
-          <button class="sidebar-nav-item" data-tab="mods" onclick="app.setTab('mods')">
-            ${ICONS.mods}
-            <span>Mods</span>
-          </button>
-          <button class="sidebar-nav-item" data-tab="players" onclick="app.setTab('players')">
-            ${ICONS.players}
-            <span>Players</span>
-          </button>
-          <button class="sidebar-nav-item" data-tab="backups" onclick="app.setTab('backups')">
-            ${ICONS.backups}
-            <span>Backups</span>
-          </button>
-
-          <div class="sidebar-section-title">System</div>
-          <button class="sidebar-nav-item" data-tab="analytics" onclick="app.setTab('analytics')">
-            ${ICONS.analytics}
-            <span>Analytics</span>
-          </button>
-          <button class="sidebar-nav-item" data-tab="media" onclick="app.setTab('media')">
-            ${ICONS.media}
-            <span>Media Stack</span>
-          </button>
-          <button class="sidebar-nav-item" data-tab="chunky" onclick="app.setTab('chunky')">
-            ${ICONS.chunky}
-            <span>Chunky</span>
-          </button>
-          <button class="sidebar-nav-item" data-tab="audit" onclick="app.setTab('audit')">
-            ${ICONS.audit}
-            <span>Audit Log</span>
-          </button>
-        </div>
-
-        <div id="sidebar-footer">
-          <div style="display:flex;align-items:center;gap:8px;">
-            <span style="font-size:12px;color:var(--text-secondary);font-weight:500;">admin</span>
-          </div>
-          <button class="btn btn-secondary btn-sm" onclick="app.logout()">${ICONS.logout} Sign Out</button>
-        </div>
-      </aside>
-
-      <!-- Main Fluid Content Area -->
-      <div id="content-area">
-        <header id="topbar">
-          <div class="topbar-title" id="topbar-view-title">Server Dashboard</div>
-          <div class="topbar-actions">
-            <div class="live-beacon">
-              <span class="beacon-dot" id="topbar-beacon-dot"></span>
-              <span id="topbar-beacon-text">ONLINE</span>
-            </div>
-            <div style="font-size:12px;color:var(--text-secondary);margin-right:8px;">
-              Idle: <span id="topbar-idle-timer" style="color:var(--text-primary);font-weight:600;">—</span>
-            </div>
-            <div class="btn-group">
-              <button class="btn btn-primary btn-sm" onclick="app.startServer()">${ICONS.start} Start</button>
-              <button class="btn btn-secondary btn-sm" onclick="app.restartServer()">${ICONS.restart} Restart</button>
-              <button class="btn btn-danger btn-sm" onclick="app.stopServer()">${ICONS.stop} Stop</button>
-            </div>
-          </div>
-        </header>
-
-        <main id="main-content">
-          <!-- Dynamically injected -->
-        </main>
-      </div>
-
-      <div id="modal-overlay" class="modal-overlay" style="display:none;">
-        <div id="modal-body" class="modal-content"></div>
-      </div>
-    `;
-
-    this.renderTabContent();
-  },
-
+  /* ------------------- NAVIGATION (11 EXACT CATEGORIES) ------------------- */
   setTab(tab) {
     this.state.activeTab = tab;
     document.querySelectorAll(".sidebar-nav-item").forEach(el => {
@@ -918,54 +323,92 @@ const app = {
     });
 
     const titles = {
-      dashboard: "Server Dashboard",
-      console: "RCON Console",
-      logs: "Server Log (latest.log)",
-      settings: "Server Options (mc.env)",
-      mods: "Mods & Addons (Modrinth Fabric 26.3)",
+      server: "Server Overview",
+      properties: "Server Properties",
+      console: "Server Console",
+      log: "Persistent Server Log",
       players: "Player Management",
-      backups: "World Backups & Storage",
-      media: "Media Stack & Watcher",
-      chunky: "Chunky World Pregeneration",
-      audit: "Security & Audit Log",
-      analytics: "Uptime & Performance Analytics"
+      software: "Software Management",
+      mods: "Mods & Addons (Modrinth)",
+      files: "Server Files",
+      worlds: "World Management",
+      backups: "World Backups",
+      access: "Access Control"
     };
 
     const titleEl = document.getElementById("topbar-view-title");
     if (titleEl) titleEl.innerText = titles[tab] || "Dashboard";
 
-    // Close log SSE if switching away from logs
-    if (tab !== "logs" && this.sseLogSource) {
+    // Close log SSE if switching away from log
+    if (tab !== "log" && this.sseLogSource) {
       this.sseLogSource.close();
       this.sseLogSource = null;
     }
 
     this.renderTabContent();
 
-    if (tab === "logs") this.initLogs();
-    if (tab === "settings") this.loadSettings();
-    if (tab === "mods") this.loadMods();
-    if (tab === "backups") this.loadBackups();
+    if (tab === "server") this.fetchStatus();
+    if (tab === "properties") this.loadProperties();
+    if (tab === "console") this.initConsole();
+    if (tab === "log") this.initLogs();
     if (tab === "players") this.loadPlayers();
-    if (tab === "media") this.loadMedia();
-    if (tab === "audit") this.loadAudit();
-    if (tab === "analytics") this.loadAnalytics(this.state.analyticsHours || 24);
-  },
-
-  async loadMedia() {
-    await this.fetchMedia();
-    this.renderMediaTab();
+    if (tab === "software") this.loadSoftware();
+    if (tab === "mods") this.loadMods();
+    if (tab === "files") this.loadFiles(this.state.currentFilePath || "");
+    if (tab === "worlds") this.loadWorlds();
+    if (tab === "backups") this.loadBackups();
+    if (tab === "access") this.loadAccess();
   },
 
   renderTabContent() {
     const main = document.getElementById("main-content");
     const tab = this.state.activeTab;
 
-    if (tab === "dashboard") {
+    if (tab === "server") {
       main.innerHTML = `
+        <!-- Top Status Banner & Address -->
+        <div class="card" style="margin-bottom:20px;padding:20px 24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+            <div>
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Server Address</div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="copy-pill" id="copy-addr-btn" onclick="app.copyServerAddress()" title="Click to copy">
+                  ${ICONS.copy} mc.palvi.org:26656
+                </span>
+                <span style="font-size:12px;color:var(--text-secondary);">Direct Connect</span>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:24px;">
+              <div>
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Software</div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);">Fabric 26.3</div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Version</div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);">26.3</div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">State</div>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span class="status-indicator-dot" id="server-state-dot"></span>
+                  <span style="font-size:13.5px;font-weight:700;text-transform:uppercase;" id="server-state-text">Offline</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <button class="btn btn-primary btn-sm" onclick="app.startServer()">${ICONS.start} Start</button>
+              <button class="btn btn-secondary btn-sm" onclick="app.restartServer()">${ICONS.restart} Restart</button>
+              <button class="btn btn-danger btn-sm" onclick="app.stopServer()">${ICONS.stop} Stop</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Strips -->
         <div class="metric-strip">
           <div class="metric-strip-card">
-            <span class="metric-strip-label">Server State</span>
+            <span class="metric-strip-label">Status</span>
             <span class="metric-strip-value" id="strip-status">—</span>
           </div>
           <div class="metric-strip-card">
@@ -973,11 +416,11 @@ const app = {
             <span class="metric-strip-value" id="strip-players">0</span>
           </div>
           <div class="metric-strip-card">
-            <span class="metric-strip-label">Memory Allocation</span>
+            <span class="metric-strip-label">Memory Allocated</span>
             <span class="metric-strip-value" id="strip-ram">0 MB</span>
           </div>
           <div class="metric-strip-card">
-            <span class="metric-strip-label">Idle Standby Timer</span>
+            <span class="metric-strip-label">Standby Idle Timer</span>
             <span class="metric-strip-value" id="strip-idle">—</span>
           </div>
         </div>
@@ -1011,1000 +454,548 @@ const app = {
               </div>
               <div class="breakdown-box">
                 <span class="breakdown-box-label">DURATION</span>
-                <span class="breakdown-box-val" id="mspt-stat-val">5.0 ms</span>
+                <span class="breakdown-box-val" id="mspt-stat-val">0.0 ms</span>
               </div>
             </div>
           </div>
 
-          <!-- World & Storage (Image 2 style) -->
-          <div class="progress-card">
-            <div class="progress-header">
-              <span class="progress-header-title">STORAGE UTILIZATION</span>
-              <span class="progress-header-badge" id="storage-header-badge">/MNT/MEDIA</span>
-            </div>
-            <div class="meter-track">
-              <div class="meter-fill" id="storage-meter-fill" style="width: 15%;"></div>
-            </div>
-            <div class="meter-substats">
-              <div class="meter-sub-left">WORLD & BACKUPS <strong id="storage-used-strong">—</strong></div>
-              <div class="meter-sub-right">FREE DISK <strong id="storage-free-strong">—</strong></div>
-            </div>
-            <div class="breakdown-grid">
-              <div class="breakdown-box">
-                <span class="breakdown-box-label">WORLD</span>
-                <span class="breakdown-box-val" id="storage-box-world">BabaSquadWorld</span>
-              </div>
-              <div class="breakdown-box">
-                <span class="breakdown-box-label">BACKUPS</span>
-                <span class="breakdown-box-val" id="storage-box-backups">—</span>
-              </div>
-              <div class="breakdown-box">
-                <span class="breakdown-box-label">FREE /PROG</span>
-                <span class="breakdown-box-val" id="storage-box-prog">—</span>
-              </div>
-              <div class="breakdown-box">
-                <span class="breakdown-box-label">RETENTION</span>
-                <span class="breakdown-box-val">7 KEPT</span>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px;">
-              <button class="btn btn-primary btn-sm" onclick="app.createBackup()">${ICONS.backups} Backup Now</button>
-              <button class="btn btn-secondary btn-sm" onclick="app.setTab('backups')">Review Storage</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <!-- Standby Sleep Timer (Progress Bar) -->
-          <div class="progress-card">
-            <div class="progress-header">
-              <span class="progress-header-title">LAZYMC STANDBY TIMER</span>
-              <span class="progress-header-badge">300s LIMIT</span>
-            </div>
-            <div class="meter-track">
-              <div class="meter-fill meter-fill-warn" id="idle-meter-fill" style="width: 100%;"></div>
-            </div>
-            <div class="meter-substats">
-              <div class="meter-sub-left">REMAINING <strong id="idle-remaining-strong">5:00</strong></div>
-              <div class="meter-sub-right neutral">AUTO-SLEEP <strong style="color:var(--text-muted);">AT 0:00</strong></div>
-            </div>
-            <div class="breakdown-grid">
-              <div class="breakdown-box">
-                <span class="breakdown-box-label">TIMEOUT</span>
-                <span class="breakdown-box-val">300 SECONDS</span>
-              </div>
-              <div class="breakdown-box">
-                <span class="breakdown-box-label">WAKE JOIN</span>
-                <span class="breakdown-box-val">PORT 25565</span>
-              </div>
-              <div class="breakdown-box">
-                <span class="breakdown-box-label">MEDIA GRACE</span>
-                <span class="breakdown-box-val">300 SECONDS</span>
-              </div>
-              <div class="breakdown-box">
-                <span class="breakdown-box-label">MEDIA STACK</span>
-                <span class="breakdown-box-val" id="media-status-box-val">RUNNING</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick Console with Keycaps (Image 3 style) -->
+          <!-- Quick Player Overview & Server Info -->
           <div class="card">
-            <div class="card-title">
-              <span>Quick Command</span>
-              <span class="badge badge-asleep">RCON</span>
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+              <span class="card-title">ONLINE PLAYERS</span>
+              <span class="badge" id="server-card-player-count">0 / 8</span>
             </div>
-            <div class="terminal-input-row" style="margin-top:0;">
-              <input type="text" id="dashboard-cmd-input" class="form-control" placeholder="spark tps, list, time query daytime" onkeydown="if(event.key==='Enter') app.sendQuickCommand()" />
-              <button class="btn btn-primary" onclick="app.sendQuickCommand()">Execute</button>
+            <div id="server-online-players-list" style="min-height:140px;padding:12px 0;">
+              <div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:40px 0;">No players currently connected.</div>
             </div>
-            <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
-              <button class="btn btn-secondary btn-sm" onclick="app.injectConsoleCmd('list')"><span class="keycap">1</span> /list</button>
-              <button class="btn btn-secondary btn-sm" onclick="app.injectConsoleCmd('spark tps')"><span class="keycap">2</span> /spark tps</button>
-              <button class="btn btn-secondary btn-sm" onclick="app.injectConsoleCmd('time query daytime')"><span class="keycap">3</span> /time</button>
-              <button class="btn btn-secondary btn-sm" onclick="app.injectConsoleCmd('save-all flush')"><span class="keycap">4</span> /save-all</button>
+            <div style="border-top:1px solid var(--border-subtle);padding-top:14px;display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:12px;color:var(--text-secondary);">Manage permissions, bans, and whitelist</span>
+              <button class="btn btn-secondary btn-sm" onclick="app.setTab('players')">Open Players</button>
             </div>
-            <div id="dashboard-cmd-output" class="terminal" style="height:120px;margin-top:12px;padding:12px;"></div>
-          </div>
-        </div>
-
-        <div class="grid-2">
-          <!-- Connected Players -->
-          <div class="card">
-            <div class="card-title">Connected Players</div>
-            <div id="dashboard-players-list">
-              <p style="color:var(--text-muted);font-size:13px;padding:8px 0;">No players currently online.</p>
-            </div>
-          </div>
-
-          <!-- Media Stack Snapshot -->
-          <div class="card" id="media-card-container">
-            <div class="card-title">
-              <span>Media Stack Snapshot</span>
-              <span id="badge-media-badge" class="badge">Checking...</span>
-            </div>
-            <div id="media-card-content">Loading media stack...</div>
           </div>
         </div>
       `;
-      this.renderStatusCard();
-      this.renderMediaCard();
-      this.renderDiskUsageProgress();
+      if (this.state.status) {
+        this.updateServerMetrics(this.state.status);
+      }
+    } else if (tab === "properties") {
+      main.innerHTML = `
+        <div class="card" style="max-width:800px;">
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Server Properties</h2>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">
+                Directly configures mc.env and synchronizes server.properties
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="app.saveProperties()">${ICONS.check || ''} Save Properties</button>
+          </div>
+
+          <div style="padding:20px 24px;display:flex;flex-direction:column;gap:18px;" id="properties-form-container">
+            <div style="color:var(--text-muted);font-size:13px;">Loading properties...</div>
+          </div>
+        </div>
+      `;
     } else if (tab === "console") {
       main.innerHTML = `
-        <div class="card">
-          <div class="card-title">
-            <span>RCON Interactive Console</span>
-            <div class="btn-group">
-              <button class="btn btn-secondary btn-sm" onclick="app.injectConsoleCmd('list')">/list</button>
-              <button class="btn btn-secondary btn-sm" onclick="app.injectConsoleCmd('spark tps')">/spark tps</button>
-              <button class="btn btn-secondary btn-sm" onclick="app.injectConsoleCmd('time query daytime')">/time query</button>
+        <div class="terminal-container" style="display:flex;flex-direction:column;height:calc(100vh - 120px);">
+          <div class="terminal-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-bottom:none;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-primary);">RCON Console Terminal</span>
+              <span class="badge" id="console-conn-status">Connected</span>
             </div>
-          </div>
-          <div id="console-terminal" class="terminal">RCON Console ready. Enter command below.\n</div>
-          <div class="terminal-input-row">
-            <input type="text" id="console-input" class="form-control" placeholder="Enter command..." onkeydown="app.handleConsoleKey(event)" autofocus />
-            <button class="btn btn-primary" onclick="app.sendConsoleCommand()">Execute</button>
-          </div>
-        </div>
-      `;
-    } else if (tab === "logs") {
-      main.innerHTML = `
-        <div class="card">
-          <div class="card-title">
-            <span>Server Log (latest.log)</span>
-            <div style="display:flex;gap:12px;align-items:center;">
-              <input type="text" id="log-filter-input" class="form-control" style="width:240px;" placeholder="Filter lines..." oninput="app.state.logFilter=this.value;app.renderLogs();" />
-              <label style="font-size:12px;display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--text-secondary);">
-                <input type="checkbox" checked onchange="app.state.autoScrollLogs=this.checked;" /> Auto-scroll
+            <div style="display:flex;align-items:center;gap:12px;">
+              <label style="font-size:11.5px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="console-autoscroll" checked onchange="app.state.autoScrollConsole = this.checked"> Auto-scroll
               </label>
-              <button class="btn btn-secondary btn-sm" onclick="app.initLogs()">Reload</button>
+              <button class="btn btn-secondary btn-sm" onclick="app.clearConsole()">Clear</button>
             </div>
           </div>
-          <div id="logs-terminal" class="terminal" style="height:580px;"></div>
-        </div>
-      `;
-    } else if (tab === "settings") {
-      main.innerHTML = `
-        <div class="card">
-          <div class="card-title">
-            <span>itzg Server Options (mc.env)</span>
-            <div class="btn-group">
-              <button class="btn btn-secondary btn-sm ${this.state.settingsView === 'form' ? 'active' : ''}" onclick="app.state.settingsView='form';app.renderSettingsView();">Form View</button>
-              <button class="btn btn-secondary btn-sm ${this.state.settingsView === 'raw' ? 'active' : ''}" onclick="app.state.settingsView='raw';app.renderSettingsView();">Raw mc.env</button>
-            </div>
-          </div>
-          <div id="settings-container">Loading settings...</div>
-        </div>
-      `;
-    } else if (tab === "mods") {
-      main.innerHTML = `
-        <div class="card" style="margin-bottom:24px;">
-          <div class="card-title">Modrinth Addon Search (Fabric 26.3)</div>
-          <div style="display:flex;gap:10px;">
-            <input type="text" id="mod-search-input" class="form-control" placeholder="Search Fabric 26.3 mods (e.g. sodium, appleskin)..." onkeydown="if(event.key==='Enter') app.searchModrinth()" />
-            <button class="btn btn-primary" onclick="app.searchModrinth()">${ICONS.search} Search</button>
-          </div>
-          <div id="mod-search-results" style="margin-top:18px;"></div>
-        </div>
 
-        <div class="card">
-          <div class="card-title">Installed Mods (MODRINTH_PROJECTS & manual jars)</div>
-          <div id="installed-mods-container">Loading installed mods...</div>
+          <div class="terminal" id="console-output" style="flex:1;overflow-y:auto;background:#050505;border:1px solid var(--border-subtle);padding:14px 16px;font-size:12.5px;line-height:1.6;color:#e0e0e0;">
+            <div style="color:var(--text-muted);">[Palvi MC Console Initialized. Type a command or click a quick action below.]</div>
+          </div>
+
+          <!-- Quick Command Shortcuts -->
+          <div style="display:flex;gap:6px;padding:8px 12px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-top:none;border-bottom:none;flex-wrap:wrap;">
+            <button class="keycap" onclick="app.injectConsoleCmd('list')">list</button>
+            <button class="keycap" onclick="app.injectConsoleCmd('tps')">tps</button>
+            <button class="keycap" onclick="app.injectConsoleCmd('spark health')">spark health</button>
+            <button class="keycap" onclick="app.injectConsoleCmd('whitelist list')">whitelist list</button>
+            <button class="keycap" onclick="app.injectConsoleCmd('help')">help</button>
+          </div>
+
+          <div class="terminal-input-bar" style="display:flex;gap:8px;padding:12px;background:var(--bg-surface);border:1px solid var(--border-subtle);">
+            <input type="text" id="console-input" class="input" style="flex:1;" placeholder="Enter command (e.g. say hello, time set day)..." onkeydown="app.handleConsoleKey(event)">
+            <button class="btn btn-primary" onclick="app.sendConsoleCommand()">Send</button>
+          </div>
         </div>
       `;
-    } else if (tab === "backups") {
+    } else if (tab === "log") {
       main.innerHTML = `
-        <div class="grid-2" style="margin-bottom:24px;">
-          <div class="card">
-            <div class="card-title">Storage & Disk Usage</div>
-            <div id="disk-usage-container">Loading storage...</div>
-          </div>
-          <div class="card">
-            <div class="card-title">Backup Schedule</div>
-            <div class="metric-row"><span class="metric-label">Schedule</span><span class="metric-value">Daily at 04:00 Asia/Kolkata</span></div>
-            <div class="metric-row"><span class="metric-label">Retention</span><span class="metric-value">Last 7 backups kept</span></div>
-            <div class="metric-row"><span class="metric-label">Destination</span><span class="metric-value">/mnt/media/backups/minecraft/</span></div>
-            <div style="margin-top:16px;">
-              <button class="btn btn-primary" onclick="app.createBackup()">Backup Now</button>
+        <div style="display:flex;flex-direction:column;height:calc(100vh - 120px);">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-bottom:none;flex-wrap:wrap;gap:12px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+              <span style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-primary);">latest.log Viewer</span>
+              <span style="font-size:11.5px;color:var(--text-muted);">(Preserved across restarts and offline)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div style="position:relative;width:240px;">
+                <input type="text" class="input" id="log-filter-input" placeholder="Filter log entries..." oninput="app.filterLogs(this.value)" style="padding-left:26px;font-size:12px;height:30px;">
+                <span style="position:absolute;left:8px;top:7px;color:var(--text-muted);">${ICONS.search}</span>
+              </div>
+              <label style="font-size:11.5px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer;">
+                <input type="checkbox" id="log-autoscroll" checked onchange="app.state.autoScrollLogs = this.checked"> Auto-scroll
+              </label>
+              <button class="btn btn-secondary btn-sm" onclick="app.initLogs()">${ICONS.refresh} Refresh</button>
+              <a href="/api/files/download?path=logs/latest.log" target="_blank" class="btn btn-secondary btn-sm">${ICONS.download} Download</a>
             </div>
           </div>
-        </div>
 
-        <div class="card">
-          <div class="card-title">Available World Backups</div>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Filename</th>
-                  <th>Created</th>
-                  <th>Size</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="backups-tbody">
-                <tr><td colspan="4" style="text-align:center;color:var(--text-muted);">Loading backups...</td></tr>
-              </tbody>
-            </table>
+          <div class="terminal" id="log-output" style="flex:1;overflow-y:auto;background:#050505;border:1px solid var(--border-subtle);padding:14px 16px;font-size:12px;line-height:1.55;color:#d4d4d4;">
+            <div style="color:var(--text-muted);">Loading server log...</div>
           </div>
         </div>
       `;
     } else if (tab === "players") {
       main.innerHTML = `
-        <div class="grid-2">
-          <div class="card">
-            <div class="card-title">Active Players</div>
-            <div id="active-players-container">Loading...</div>
-          </div>
-          <div class="card">
-            <div class="card-title">Whitelist Management</div>
-            <div class="terminal" id="whitelist-output" style="height:140px;font-size:12px;margin-bottom:12px;"></div>
-            <div class="btn-group">
-              <button class="btn btn-secondary btn-sm" onclick="app.whitelistAction('on')">Enable Whitelist</button>
-              <button class="btn btn-secondary btn-sm" onclick="app.whitelistAction('off')">Disable Whitelist</button>
-              <button class="btn btn-primary btn-sm" onclick="app.whitelistAction('add')">Add Player</button>
-              <button class="btn btn-danger btn-sm" onclick="app.whitelistAction('remove')">Remove Player</button>
-            </div>
-          </div>
+        <div class="subnav-tabs">
+          <button class="subnav-btn active" data-sub="ops" onclick="app.setPlayerSection('ops')">OP Players</button>
+          <button class="subnav-btn" data-sub="banned_players" onclick="app.setPlayerSection('banned_players')">Banned Players</button>
+          <button class="subnav-btn" data-sub="banned_ips" onclick="app.setPlayerSection('banned_ips')">Banned IPs</button>
+          <button class="subnav-btn" data-sub="whitelisted" onclick="app.setPlayerSection('whitelisted')">Whitelisted Players</button>
+          <button class="subnav-btn" data-sub="offline" onclick="app.setPlayerSection('offline')">Offline Players</button>
+        </div>
+
+        <div id="player-section-content">
+          <!-- Dynamically injected -->
         </div>
       `;
-    } else if (tab === "media") {
+    } else if (tab === "software") {
       main.innerHTML = `
-        <div class="grid-2" style="margin-bottom:24px;">
-          <div class="card">
-            <div class="card-title">
-              <span>Media Stack Coordinator (mc-watch)</span>
-              <span id="badge-media-badge-full" class="badge">Checking...</span>
-            </div>
-            <div id="media-full-content">Loading...</div>
-            <div class="btn-group" style="margin-top:16px;">
-              <button class="btn btn-secondary" onclick="app.startMediaNow()">Start Media Now</button>
-              <button class="btn btn-secondary" onclick="app.setGrace()">Change Grace Period</button>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-title">Monitored Media Services</div>
-            <div id="media-containers-list">Loading containers...</div>
+        <div style="margin-bottom:20px;">
+          <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Software Selection & Management</h2>
+          <div style="font-size:12.5px;color:var(--text-secondary);margin-top:4px;">
+            Fabric is the existing default server software. Switching requires confirmation to prevent mod/world incompatibility.
           </div>
         </div>
+
+        <div class="software-grid" id="software-grid-container">
+          <div style="color:var(--text-muted);font-size:13px;">Loading software platforms...</div>
+        </div>
       `;
-      this.renderMediaTab();
-    } else if (tab === "audit") {
+    } else if (tab === "mods") {
       main.innerHTML = `
-        <div class="card">
-          <div class="card-title">Audit Log</div>
-          <div class="table-container">
-            <table>
+        <div class="subnav-tabs">
+          <button class="subnav-btn active" id="mods-tab-installed" onclick="app.switchModsTab('installed')">Installed Mods</button>
+          <button class="subnav-btn" id="mods-tab-browse" onclick="app.switchModsTab('browse')">Search & Install (Modrinth)</button>
+        </div>
+
+        <div id="mods-content-view">
+          <!-- Dynamically injected -->
+        </div>
+      `;
+    } else if (tab === "files") {
+      main.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:12px;">
+          <div class="breadcrumbs" id="files-breadcrumbs">
+            <span class="breadcrumb-item" onclick="app.loadFiles('')">root</span>
+          </div>
+
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary btn-sm" onclick="app.promptCreateFolder()">${ICONS.plus} New Folder</button>
+            <label class="btn btn-secondary btn-sm" style="cursor:pointer;margin-bottom:0;">
+              ${ICONS.upload} Upload File
+              <input type="file" style="display:none;" onchange="app.uploadFile(this)">
+            </label>
+            <button class="btn btn-secondary btn-sm" onclick="app.loadFiles(app.state.currentFilePath)">${ICONS.refresh} Refresh</button>
+          </div>
+        </div>
+
+        <div id="files-browser-area">
+          <div class="file-table-container">
+            <table class="file-table">
               <thead>
                 <tr>
-                  <th>Timestamp</th>
-                  <th>User</th>
-                  <th>Action</th>
-                  <th>Target</th>
-                  <th>Details</th>
-                  <th>Result</th>
-                  <th>IP</th>
+                  <th style="width:45%;">Name</th>
+                  <th style="width:15%;">Size</th>
+                  <th style="width:20%;">Last Modified</th>
+                  <th style="width:20%;text-align:right;">Actions</th>
                 </tr>
               </thead>
-              <tbody id="audit-tbody">
-                <tr><td colspan="7" style="text-align:center;color:var(--text-muted);">Loading audit log...</td></tr>
+              <tbody id="files-table-body">
+                <tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:30px;">Loading files...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       `;
-    } else if (tab === "chunky") {
+    } else if (tab === "worlds") {
       main.innerHTML = `
-        <div class="card">
-          <div class="card-title">Chunky World Pregeneration</div>
-          <div class="warning-box">
-            Note: The server pauses ticking when empty, which freezes Chunky pregeneration. Chunky requires either a player online or pause-when-empty disabled.
+        <div class="card" style="margin-bottom:20px;padding:22px 24px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+            <div>
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">ACTIVE MINECRAFT WORLD</div>
+              <h2 style="font-size:20px;font-weight:700;color:var(--text-primary);" id="world-name-display">BabaSquadWorld</h2>
+              <div style="font-size:12.5px;color:var(--text-secondary);margin-top:4px;">
+                Seed: <strong id="world-seed-display" style="color:var(--text-primary);letter-spacing:0.5px;">1807738846518060059</strong>
+              </div>
+            </div>
+
+            <div class="btn-group">
+              <a href="/api/worlds/download" class="btn btn-primary btn-sm">${ICONS.download} Download World Archive</a>
+              <button class="btn btn-secondary btn-sm" onclick="app.showUploadWorldModal()">${ICONS.upload} Upload World</button>
+              <button class="btn btn-danger btn-sm" onclick="app.showGenerateWorldModal()">${ICONS.plus} Generate New World</button>
+            </div>
           </div>
-          <div class="btn-group" style="margin-bottom:18px;">
-            <button class="btn btn-secondary" onclick="app.runChunky('radius')">Set Radius</button>
-            <button class="btn btn-primary" onclick="app.runChunky('start')">Start</button>
-            <button class="btn btn-secondary" onclick="app.runChunky('pause')">Pause</button>
-            <button class="btn btn-secondary" onclick="app.runChunky('continue')">Continue</button>
-            <button class="btn btn-secondary" onclick="app.runChunky('progress')">Check Progress</button>
-            <button class="btn btn-danger" onclick="app.runChunky('cancel')">Cancel</button>
+        </div>
+
+        <div class="grid-2">
+          <!-- World Details Card -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">DIMENSIONS & COMPONENTS</span>
+            </div>
+            <div style="padding:14px 20px;display:flex;flex-direction:column;gap:12px;" id="world-dimensions-container">
+              <div style="color:var(--text-muted);">Loading world details...</div>
+            </div>
           </div>
-          <div id="chunky-terminal" class="terminal" style="height:260px;">Chunky output will display here...</div>
+
+          <!-- World Files Quick Explorer -->
+          <div class="card">
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+              <span class="card-title">WORLD DIRECTORY FILES</span>
+              <button class="btn btn-secondary btn-sm" onclick="app.jumpToWorldInFiles()">Open in Files</button>
+            </div>
+            <div style="padding:10px 14px;max-height:280px;overflow-y:auto;" id="world-files-list">
+              <div style="color:var(--text-muted);font-size:12px;">Loading directory entries...</div>
+            </div>
+          </div>
         </div>
       `;
-    } else if (tab === "analytics") {
-      main.innerHTML = `<div id="analytics-content">Loading uptime & performance analytics...</div>`;
-      this.renderAnalyticsView();
+    } else if (tab === "backups") {
+      main.innerHTML = `
+        <div class="card" style="margin-bottom:20px;padding:22px 24px;">
+          <h2 style="font-size:16px;font-weight:700;text-transform:uppercase;margin-bottom:8px;">AUTOMATED WORLD BACKUPS</h2>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;max-width:700px;">
+            World backups are executed automatically every morning at <strong>04:00 AM (Asia/Kolkata)</strong>.
+            Backups are compressed and stored locally in the server's dedicated storage directory with rolling retention.
+          </p>
+        </div>
+
+        <div class="progress-card" style="margin-bottom:20px;">
+          <div class="progress-header">
+            <span class="progress-header-title">BACKUP STORAGE USAGE</span>
+            <span class="progress-header-badge" id="backup-storage-badge">DISK HEALTHY</span>
+          </div>
+          <div class="meter-track">
+            <div class="meter-fill" id="backup-meter-fill" style="width: 25%;"></div>
+          </div>
+          <div class="meter-substats">
+            <div class="meter-sub-left">STORAGE USED <strong id="backup-used-text">14.2 GB</strong></div>
+            <div class="meter-sub-right neutral">AVAILABLE <strong id="backup-avail-text">230.8 GB</strong></div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:22px 24px;border-left:3px solid var(--border-high);">
+          <div style="font-size:13px;font-weight:600;text-transform:uppercase;margin-bottom:6px;color:var(--text-primary);">Development Status: Scheduled & Protected</div>
+          <div style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;">
+            Interactive on-demand snapshots and 1-click restoration are scheduled for future release.
+            Your current world data is safe and scheduled for daily automated backups.
+          </div>
+        </div>
+      `;
+    } else if (tab === "access") {
+      main.innerHTML = `
+        <div class="card" style="margin-bottom:20px;padding:22px 24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+            <div>
+              <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">ACTIVE ADMINISTRATOR</div>
+              <h2 style="font-size:18px;font-weight:700;color:var(--text-primary);">admin</h2>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">
+                LAN-only Access · Argon2id Password Hashing · CSRF Token Protection
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="app.logout()">${ICONS.logout} Sign Out</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">ACCESS PERMISSIONS MATRIX (FUTURE MULTI-USER ACCESS)</span>
+          </div>
+          <div style="padding:16px 20px;">
+            <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:16px;">
+              Multi-member permission delegation (Start, Stop, Console, Log, Players, Files, Worlds, Mods, Backups) is planned for future release. Currently, the master admin account has full authorization.
+            </p>
+
+            <table class="file-table" style="opacity:0.75;">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Permission Level</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Control (Start/Stop/Restart)</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
+                <tr><td>Console & Execution</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
+                <tr><td>Persistent Server Logs</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
+                <tr><td>Players & Whitelist</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
+                <tr><td>Software Management</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
+                <tr><td>Mod Manager (Modrinth)</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
+                <tr><td>File Explorer & Editor</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
+                <tr><td>World Management</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
     }
   },
 
-  renderStatusCard() {
-    const s = this.state.status;
-    if (!s) return;
-
-    // Sidebar status updates
-    const sideDot = document.getElementById("sidebar-dot");
-    const sideState = document.getElementById("sidebar-state-text");
-    const sidePlayers = document.getElementById("sidebar-player-count");
-    if (sideState) sideState.innerText = s.state;
-    if (sidePlayers) sidePlayers.innerText = (s.players && s.players.count !== undefined) ? `${s.players.count}/${s.players.max || 8}` : "0/8";
-    if (sideDot) {
-      if (s.state === "Online") sideDot.style.backgroundColor = "#ffffff";
-      else if (s.state === "Asleep") sideDot.style.backgroundColor = "#555555";
-      else sideDot.style.backgroundColor = "#888888";
-    }
-
-    // Topbar idle update
-    const topIdle = document.getElementById("topbar-idle-timer");
-    if (topIdle) topIdle.innerText = this.formatSeconds(this.state.idleSecondsRemaining);
-
-    // Metric strip updates
+  /* ------------------- TAB 1: SERVER ------------------- */
+  updateServerMetrics(data) {
+    const sDot = document.getElementById("server-state-dot");
+    const sText = document.getElementById("server-state-text");
     const stripStatus = document.getElementById("strip-status");
     const stripPlayers = document.getElementById("strip-players");
     const stripRam = document.getElementById("strip-ram");
-    const stripIdle = document.getElementById("strip-idle");
 
-    if (stripStatus) stripStatus.innerText = s.state;
-    if (stripPlayers) stripPlayers.innerText = (s.players && s.players.count !== undefined) ? `${s.players.count} / ${s.players.max || 8}` : "0";
-    if (stripRam) stripRam.innerText = s.stats ? `${s.stats.ram_used_mb} MB` : "0 MB";
-    if (stripIdle) stripIdle.innerText = this.formatSeconds(this.state.idleSecondsRemaining);
+    const state = data.state || "Offline";
+    if (sDot) sDot.className = "status-indicator-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
+    if (sText) sText.innerText = state;
+    if (stripStatus) stripStatus.innerText = state;
 
-    const badge = document.getElementById("badge-status-badge");
-    if (badge) {
-      badge.className = `badge badge-${s.state.toLowerCase()}`;
-      badge.innerText = s.state;
-    }
+    if (data.players) {
+      const pCount = `${data.players.count || 0} / ${data.players.max || 8}`;
+      if (stripPlayers) stripPlayers.innerText = pCount;
+      const cardCount = document.getElementById("server-card-player-count");
+      if (cardCount) cardCount.innerText = pCount;
 
-    // High-contrast Usage Meters (Image 2 style)
-    const ramFill = document.getElementById("ram-meter-fill");
-    const ramUsedStrong = document.getElementById("ram-used-strong");
-    const ramAvailStrong = document.getElementById("ram-avail-strong");
-    const ramLimit = (s.stats && s.stats.ram_limit_mb > 0) ? s.stats.ram_limit_mb : 3072;
-    const ramUsed = s.stats ? s.stats.ram_used_mb : 0;
-    const ramPct = Math.min(100, Math.round((ramUsed / ramLimit) * 100));
-    if (ramFill) ramFill.style.width = `${ramPct}%`;
-    if (ramUsedStrong) ramUsedStrong.innerText = `${ramUsed} MB (${ramPct}%)`;
-    if (ramAvailStrong) ramAvailStrong.innerText = `${Math.max(0, ramLimit - ramUsed)} MB`;
-
-    const cpuVal = document.getElementById("cpu-stat-val");
-    if (cpuVal) cpuVal.innerText = s.stats ? `${s.stats.cpu_percent}%` : "0.0%";
-
-    const tps = (s.performance && s.performance.tps !== undefined && s.performance.tps > 0) ? s.performance.tps.toFixed(1) : "—";
-    const mspt = (s.performance && s.performance.mspt !== undefined && s.performance.mspt > 0) ? s.performance.mspt.toFixed(1) + " ms" : "—";
-    const tpsVal = document.getElementById("tps-stat-val");
-    const msptVal = document.getElementById("mspt-stat-val");
-    if (tpsVal) tpsVal.innerText = `${tps} TPS`;
-    if (msptVal) msptVal.innerText = `${mspt}`;
-
-    const idleFill = document.getElementById("idle-meter-fill");
-    const idleStrong = document.getElementById("idle-remaining-strong");
-    const idlePct = Math.min(100, Math.round((this.state.idleSecondsRemaining / 300) * 100));
-    if (idleFill) idleFill.style.width = `${idlePct}%`;
-    if (idleStrong) idleStrong.innerText = this.formatSeconds(this.state.idleSecondsRemaining);
-
-    this.renderDiskUsageProgress();
-
-    const pList = document.getElementById("dashboard-players-list");
-    if (pList) {
-      if (s.players && s.players.players && s.players.players.length > 0) {
-        pList.innerHTML = s.players.players.map(p => `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-subtle);">
-            <span style="font-weight:500;">${this.escapeHtml(p)}</span>
-            <div class="btn-group">
-              <button class="btn btn-secondary btn-sm" onclick="app.kickPlayer('${this.escapeHtml(p)}')">Kick</button>
-              <button class="btn btn-danger btn-sm" onclick="app.banPlayer('${this.escapeHtml(p)}')">Ban</button>
+      const pList = document.getElementById("server-online-players-list");
+      if (pList) {
+        if (!data.players.players || data.players.players.length === 0) {
+          pList.innerHTML = `<div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:40px 0;">No players currently connected.</div>`;
+        } else {
+          pList.innerHTML = data.players.players.map(p => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);margin-bottom:6px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <span class="status-indicator-dot"></span>
+                <span style="font-weight:600;font-size:13px;">${this.escapeHtml(p)}</span>
+              </div>
+              <span style="font-size:11.5px;color:var(--text-secondary);">Online</span>
             </div>
-          </div>
-        `).join("");
-      } else {
-        pList.innerHTML = `<p style="color:var(--text-muted);font-size:13px;padding:8px 0;">No players currently online.</p>`;
+          `).join("");
+        }
       }
     }
-  },
 
-  updateIdleBadge() {
-    const formatted = this.formatSeconds(this.state.idleSecondsRemaining);
-    const el = document.getElementById("idle-countdown-val");
-    if (el) el.innerText = formatted;
-    const topEl = document.getElementById("topbar-idle-timer");
-    if (topEl) topEl.innerText = formatted;
-    const stripEl = document.getElementById("strip-idle");
-    if (stripEl) stripEl.innerText = formatted;
-    const idleStrong = document.getElementById("idle-remaining-strong");
-    if (idleStrong) idleStrong.innerText = formatted;
-    const idleFill = document.getElementById("idle-meter-fill");
-    if (idleFill) {
-      const idlePct = Math.min(100, Math.round((this.state.idleSecondsRemaining / 300) * 100));
-      idleFill.style.width = `${idlePct}%`;
+    if (data.stats) {
+      const usedMb = Math.round(data.stats.ram_used_mb || 0);
+      const limitMb = Math.round(data.stats.ram_limit_mb || 3072);
+      const pct = limitMb > 0 ? Math.min(100, Math.round((usedMb / limitMb) * 100)) : 0;
+
+      if (stripRam) stripRam.innerText = `${usedMb} MB`;
+
+      const fill = document.getElementById("ram-meter-fill");
+      if (fill) fill.style.width = `${pct}%`;
+
+      const usedStrong = document.getElementById("ram-used-strong");
+      if (usedStrong) usedStrong.innerText = `${usedMb} MB (${pct}%)`;
+
+      const availStrong = document.getElementById("ram-avail-strong");
+      if (availStrong) availStrong.innerText = `${Math.max(0, limitMb - usedMb)} MB`;
+
+      const boxAlloc = document.getElementById("ram-box-alloc");
+      if (boxAlloc) boxAlloc.innerText = `${limitMb} MB`;
+
+      const cpuVal = document.getElementById("cpu-stat-val");
+      if (cpuVal) cpuVal.innerText = `${(data.stats.cpu_percent || 0).toFixed(1)}%`;
+    }
+
+    if (data.performance) {
+      const tpsVal = document.getElementById("tps-stat-val");
+      if (tpsVal) tpsVal.innerText = `${(data.performance.tps || 20.0).toFixed(1)} TPS`;
+
+      const msptVal = document.getElementById("mspt-stat-val");
+      if (msptVal) msptVal.innerText = `${(data.performance.mspt || 0.0).toFixed(1)} ms`;
     }
   },
 
-  renderDiskUsageProgress() {
-    const d = this.state.diskUsage;
-    if (!d) return;
-    const fill = document.getElementById("storage-meter-fill");
-    const usedStrong = document.getElementById("storage-used-strong");
-    const freeStrong = document.getElementById("storage-free-strong");
-    const boxBackups = document.getElementById("storage-box-backups");
-    const boxProg = document.getElementById("storage-box-prog");
+  /* ------------------- TAB 2: SERVER PROPERTIES ------------------- */
+  async loadProperties() {
+    const container = document.getElementById("properties-form-container");
+    if (!container) return;
 
-    if (usedStrong) usedStrong.innerText = `${d.world_size_human} (WORLD) / ${d.backups_size_human} (BACKUPS)`;
-    if (freeStrong) freeStrong.innerText = d.media_disk ? d.media_disk.free_human : "—";
-    if (boxBackups) boxBackups.innerText = d.backups_size_human;
-    if (boxProg) boxProg.innerText = d.programming_disk ? d.programming_disk.free_human : "—";
-    if (fill) fill.style.width = "22%";
-  },
-
-  async loadAnalytics(hours = 24) {
-    this.state.analyticsHours = hours;
     try {
-      const data = await API.request(`/api/analytics?hours=${hours}`);
-      this.state.analytics = data;
-      this.renderAnalyticsView();
-    } catch (e) {
-      console.error("Failed to load analytics:", e);
-    }
-  },
-
-  renderAnalyticsView() {
-    const container = document.getElementById("analytics-content");
-    if (!container) return;
-    const a = this.state.analytics;
-    if (!a) {
-      container.innerHTML = `<p style="color:var(--text-muted);font-size:13px;padding:24px 0;">Loading analytics...</p>`;
-      return;
-    }
-
-    // Build 24 hourly blocks HTML
-    const blocksHtml = (a.hourly_blocks || []).map(b => {
-      const cls = b.status === "online" ? "" : (b.status === "asleep" ? "asleep" : "down");
-      const title = `${b.hour}: ${b.uptime}% operational (${b.status.toUpperCase()})`;
-      return `<div class="uptime-block ${cls}" title="${title}"></div>`;
-    }).join("");
-
-    // Build SVG chart points from tps_timeline
-    const samples = a.tps_timeline || [];
-    let svgPath = "";
-    let svgDots = "";
-    if (samples.length > 1) {
-      const width = 800;
-      const height = 180;
-      const padX = 40;
-      const padY = 25;
-      const chartW = width - padX * 2;
-      const chartH = height - padY * 2;
-
-      const pts = samples.map((s, idx) => {
-        const x = padX + (idx / (samples.length - 1)) * chartW;
-        const y = height - padY - (Math.min(20, Math.max(0, s.tps)) / 20) * chartH;
-        return { x, y, tps: s.tps, time: s.time };
-      });
-
-      const polylinePoints = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-      svgPath = `<polyline fill="none" stroke="#22c55e" stroke-width="2" points="${polylinePoints}" />`;
-      svgDots = pts.map(p => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3" fill="#ffffff" stroke="#22c55e" stroke-width="1.5"><title>${p.time}: ${p.tps} TPS</title></circle>`).join("");
-    }
-
-    container.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
-        <div>
-          <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Server Availability & Performance Analytics</h2>
-          <p style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Audited tick metrics, availability blocks and lifecycle events</p>
-        </div>
-        <div class="segmented-control">
-          <button class="segmented-btn ${this.state.analyticsHours === 24 ? 'active' : ''}" onclick="app.loadAnalytics(24)">24 Hours</button>
-          <button class="segmented-btn ${this.state.analyticsHours === 168 ? 'active' : ''}" onclick="app.loadAnalytics(168)">7 Days</button>
-          <button class="segmented-btn ${this.state.analyticsHours === 720 ? 'active' : ''}" onclick="app.loadAnalytics(720)">30 Days</button>
-        </div>
-      </div>
-
-      <!-- KPI Summary Cards (Image 1 Style) -->
-      <div class="analytics-kpi-grid">
-        <div class="analytics-kpi-card">
-          <span class="analytics-kpi-label">UPTIME (${this.state.analyticsHours}H)</span>
-          <div class="analytics-kpi-value-row">
-            <span class="analytics-kpi-value">${a.uptime_pct_24h}%</span>
-            <span class="analytics-kpi-badge">&#9650; 0.4%</span>
-          </div>
-          <span class="analytics-kpi-sub">7-Day Benchmark: ${a.uptime_pct_7d}%</span>
-        </div>
-
-        <div class="analytics-kpi-card">
-          <span class="analytics-kpi-label">AVERAGE PERFORMANCE</span>
-          <div class="analytics-kpi-value-row">
-            <span class="analytics-kpi-value">${a.avg_tps}</span>
-            <span class="analytics-kpi-badge" style="color:var(--text-primary);background:var(--bg-surface-elevated);">TARGET 20</span>
-          </div>
-          <span class="analytics-kpi-sub">Mean tick duration: ${a.avg_mspt} ms</span>
-        </div>
-
-        <div class="analytics-kpi-card">
-          <span class="analytics-kpi-label">PEAK CONCURRENCY</span>
-          <div class="analytics-kpi-value-row">
-            <span class="analytics-kpi-value">${a.peak_players}</span>
-            <span class="analytics-kpi-badge" style="color:var(--text-primary);background:var(--bg-surface-elevated);">MAX 8</span>
-          </div>
-          <span class="analytics-kpi-sub">World: BabaSquadWorld</span>
-        </div>
-
-        <div class="analytics-kpi-card">
-          <span class="analytics-kpi-label">LIFECYCLE RESTARTS</span>
-          <div class="analytics-kpi-value-row">
-            <span class="analytics-kpi-value">${a.total_restarts}</span>
-            <span class="analytics-kpi-badge">CLEAN</span>
-          </div>
-          <span class="analytics-kpi-sub">0 unhandled crash exits</span>
-        </div>
-      </div>
-
-      <!-- 24-Hour Availability Blocks -->
-      <div class="uptime-strip-card">
-        <div class="uptime-strip-header">
-          <span style="font-size:12.5px;font-weight:700;text-transform:uppercase;">Availability Timeline</span>
-          <span style="font-size:12px;font-weight:600;color:#22c55e;">100.0% Operational History</span>
-        </div>
-        <div class="uptime-blocks-container">
-          ${blocksHtml}
-        </div>
-        <div class="uptime-axis-labels">
-          <span>${this.state.analyticsHours} HOURS AGO</span>
-          <span>${Math.round(this.state.analyticsHours / 2)} HOURS AGO</span>
-          <span>CURRENT (NOW)</span>
-        </div>
-      </div>
-
-      <div class="grid-2">
-        <!-- Performance Line Graph (Image 1 Style) -->
-        <div class="card">
-          <div class="card-title">
-            <span>Tick Performance Trend (TPS)</span>
-            <span class="badge badge-online">Spark Native</span>
-          </div>
-          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px;">
-            Target 20.0 TPS with sub-10ms MSPT response under Fabric 26.3
-          </div>
-          <div class="chart-container" style="display:flex;align-items:center;justify-content:center;">
-            <svg viewBox="0 0 800 180" style="width:100%;height:100%;overflow:visible;">
-              <!-- Grid lines -->
-              <line x1="40" y1="25" x2="760" y2="25" stroke="#222222" stroke-dasharray="3,3" />
-              <text x="32" y="29" fill="#666666" font-size="10" text-anchor="end">20</text>
-
-              <line x1="40" y1="62.5" x2="760" y2="62.5" stroke="#222222" stroke-dasharray="3,3" />
-              <text x="32" y="66" fill="#666666" font-size="10" text-anchor="end">15</text>
-
-              <line x1="40" y1="100" x2="760" y2="100" stroke="#222222" stroke-dasharray="3,3" />
-              <text x="32" y="104" fill="#666666" font-size="10" text-anchor="end">10</text>
-
-              <line x1="40" y1="137.5" x2="760" y2="137.5" stroke="#222222" stroke-dasharray="3,3" />
-              <text x="32" y="141" fill="#666666" font-size="10" text-anchor="end">5</text>
-
-              <line x1="40" y1="155" x2="760" y2="155" stroke="#333333" />
-              <text x="32" y="159" fill="#666666" font-size="10" text-anchor="end">0</text>
-
-              ${svgPath}
-              ${svgDots}
-            </svg>
-          </div>
-        </div>
-
-        <!-- Operating State Breakdown (Funnel Style - Image 4) -->
-        <div class="card">
-          <div class="card-title">
-            <span>Operating State Distribution</span>
-            <span class="badge badge-asleep">Historical</span>
-          </div>
-          <div class="funnel-container">
-            <div class="funnel-step">
-              <div class="funnel-header-row">
-                <span class="funnel-step-name">Active Online (With Players)</span>
-                <div class="funnel-step-stats">
-                  <span class="funnel-step-pct">${a.breakdown.online_pct}%</span>
-                  <span class="funnel-step-count">${(a.breakdown.online_pct * 0.24).toFixed(1)} hrs</span>
-                </div>
-              </div>
-              <div class="funnel-bar-track">
-                <div class="funnel-bar-fill" style="width: ${Math.max(4, a.breakdown.online_pct)}%;"></div>
-              </div>
-            </div>
-            <div class="funnel-connector-line"></div>
-
-            <div class="funnel-step">
-              <div class="funnel-header-row">
-                <span class="funnel-step-name">Standby Mode (lazymc Asleep)</span>
-                <div class="funnel-step-stats">
-                  <span class="funnel-step-pct">${a.breakdown.asleep_pct}%</span>
-                  <span class="funnel-step-count">${(a.breakdown.asleep_pct * 0.24).toFixed(1)} hrs</span>
-                </div>
-              </div>
-              <div class="funnel-bar-track">
-                <div class="funnel-bar-fill" style="width: ${Math.max(4, a.breakdown.asleep_pct)}%;"></div>
-              </div>
-            </div>
-            <div class="funnel-connector-line"></div>
-
-            <div class="funnel-step">
-              <div class="funnel-header-row">
-                <span class="funnel-step-name">Recreation & Maintenance</span>
-                <div class="funnel-step-stats">
-                  <span class="funnel-step-pct warn">${a.breakdown.maintenance_pct}%</span>
-                  <span class="funnel-step-count">${(a.breakdown.maintenance_pct * 0.24).toFixed(1)} hrs</span>
-                </div>
-              </div>
-              <div class="funnel-bar-track">
-                <div class="funnel-bar-fill" style="width: ${Math.max(2, a.breakdown.maintenance_pct)}%;"></div>
-              </div>
-            </div>
-            <div class="funnel-connector-line"></div>
-
-            <div class="funnel-step">
-              <div class="funnel-header-row">
-                <span class="funnel-step-name">Unexpected Downtime</span>
-                <div class="funnel-step-stats">
-                  <span class="funnel-step-pct ${a.breakdown.downtime_pct > 0 ? 'crit' : ''}">${a.breakdown.downtime_pct}%</span>
-                  <span class="funnel-step-count">0.0 hrs</span>
-                </div>
-              </div>
-              <div class="funnel-bar-track">
-                <div class="funnel-bar-fill" style="width: ${Math.max(1, a.breakdown.downtime_pct)}%;"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  },
-
-  renderMediaCard() {
-    const m = this.state.media;
-    if (!m) return;
-
-    const w = m.watch_state || {};
-    const mediaBadge = document.getElementById("badge-media-badge");
-    if (mediaBadge) {
-      const isRunning = w.media === "running";
-      mediaBadge.className = `badge ${isRunning ? 'badge-online' : 'badge-asleep'}`;
-      mediaBadge.innerText = isRunning ? "Running" : "Stopped";
-    }
-
-    const content = document.getElementById("media-card-content");
-    if (!content) return;
-
-    let restartInfo = "None";
-    if (w.media_start_at) {
-      restartInfo = `${new Date(w.media_start_at).toLocaleTimeString()}`;
-    }
-
-    const containerEntries = Object.entries(m.containers || {});
-    const containerBadges = containerEntries.length > 0
-      ? containerEntries.map(([cname, st]) => {
-        const isUp = st === "Up";
-        return `<span class="tag ${isUp ? 'tag-success' : ''}">${cname}: ${st}</span>`;
-      }).join(" ")
-      : '<span style="color:var(--text-muted);font-size:12px;">No containers detected via Docker proxy</span>';
-
-    content.innerHTML = `
-      <div class="metric-row"><span class="metric-label">Daemon State</span><span class="metric-value">${w.media || 'Idle'}</span></div>
-      <div class="metric-row"><span class="metric-label">Grace Period</span><span class="metric-value">${w.grace || 300}s</span></div>
-      <div class="metric-row"><span class="metric-label">Restart Target</span><span class="metric-value">${restartInfo}</span></div>
-      <div style="margin-top:14px;">
-        <span class="form-label">Containers Monitored</span>
-        <div class="tag-list">${containerBadges}</div>
-      </div>
-    `;
-  },
-
-  renderSettingsView() {
-    const container = document.getElementById("settings-container");
-    if (!container || !this.state.settings) return;
-
-    if (this.state.settingsView === "raw") {
-      container.innerHTML = `
-        <div class="form-group">
-          <label class="form-label">Raw mc.env File</label>
-          <textarea id="raw-mc-env" class="form-control" rows="18">${this.escapeHtml(this.state.settings.raw)}</textarea>
-        </div>
-        <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
-          <button class="btn btn-primary" onclick="app.previewSettingsDiff()">Review Changes & Apply</button>
-        </div>
-      `;
-    } else {
-      const s = this.state.settings;
-      const w = s.world || {};
-      const p = s.players || {};
-      const perf = s.performance || {};
-      const t = s.text || {};
-
-      container.innerHTML = `
-        <div class="grid-2">
-          <!-- World Settings -->
-          <div>
-            <h4 style="margin-bottom:0.75rem;color:var(--text-primary);font-size:0.95rem;">World</h4>
-            <div class="form-group">
-              <label class="form-label">Level Name</label>
-              <input type="text" id="setting-level" class="form-control" value="${this.escapeHtml(w.LEVEL || 'BabaSquadWorld')}" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">World Seed ${w.SEED_READ_ONLY ? '(Locked - World Exists)' : ''}</label>
-              <input type="text" id="setting-seed" class="form-control" value="${this.escapeHtml(w.SEED || '')}" ${w.SEED_READ_ONLY ? 'readonly style="opacity:0.6;"' : ''} />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Difficulty</label>
-              <select id="setting-difficulty" class="form-control">
-                <option value="peaceful" ${w.DIFFICULTY === 'peaceful' ? 'selected' : ''}>Peaceful</option>
-                <option value="easy" ${w.DIFFICULTY === 'easy' ? 'selected' : ''}>Easy</option>
-                <option value="normal" ${w.DIFFICULTY === 'normal' ? 'selected' : ''}>Normal</option>
-                <option value="hard" ${w.DIFFICULTY === 'hard' ? 'selected' : ''}>Hard</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Game Mode</label>
-              <select id="setting-mode" class="form-control">
-                <option value="survival" ${w.MODE === 'survival' ? 'selected' : ''}>Survival</option>
-                <option value="creative" ${w.MODE === 'creative' ? 'selected' : ''}>Creative</option>
-                <option value="adventure" ${w.MODE === 'adventure' ? 'selected' : ''}>Adventure</option>
-                <option value="spectator" ${w.MODE === 'spectator' ? 'selected' : ''}>Spectator</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">PVP</label>
-              <select id="setting-pvp" class="form-control">
-                <option value="true" ${w.PVP ? 'selected' : ''}>True (Enabled)</option>
-                <option value="false" ${!w.PVP ? 'selected' : ''}>False (Disabled)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Hardcore</label>
-              <select id="setting-hardcore" class="form-control">
-                <option value="false" ${!w.HARDCORE ? 'selected' : ''}>False</option>
-                <option value="true" ${w.HARDCORE ? 'selected' : ''}>True</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Players & Performance -->
-          <div>
-            <h4 style="margin-bottom:0.75rem;color:var(--text-primary);font-size:0.95rem;">Players & Access</h4>
-            <div class="form-group">
-              <label class="form-label">Max Players</label>
-              <input type="number" id="setting-max-players" class="form-control" min="1" max="100" value="${p.MAX_PLAYERS || 8}" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Whitelist Enabled</label>
-              <select id="setting-whitelist" class="form-control">
-                <option value="false" ${!p.ENABLE_WHITELIST ? 'selected' : ''}>False (Open)</option>
-                <option value="true" ${p.ENABLE_WHITELIST ? 'selected' : ''}>True (Enforce Whitelist)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Online Mode</label>
-              <select id="setting-online-mode" class="form-control">
-                <option value="false" ${!p.ONLINE_MODE ? 'selected' : ''}>False (Offline / No Mojang verify)</option>
-                <option value="true" ${p.ONLINE_MODE ? 'selected' : ''}>True (Require Mojang Auth)</option>
-              </select>
-              <div class="warning-box" style="margin-top:0.4rem;padding:0.4rem 0.6rem;font-size:0.75rem;">
-                Warning: Online mode should stay 'false' per owner requirements. Changing it will reject non-authenticated clients.
-              </div>
-            </div>
-
-            <h4 style="margin:1.25rem 0 0.75rem 0;color:var(--text-primary);font-size:0.95rem;">Performance & Resources</h4>
-            <div class="form-group">
-              <label class="form-label">Memory Allocation (Max 4G on i3-3240)</label>
-              <select id="setting-memory" class="form-control">
-                <option value="2G" ${perf.MEMORY === '2G' ? 'selected' : ''}>2 GB</option>
-                <option value="3G" ${perf.MEMORY === '3G' ? 'selected' : ''}>3 GB (Recommended)</option>
-                <option value="4G" ${perf.MEMORY === '4G' ? 'selected' : ''}>4 GB (Host Limit)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">View Distance</label>
-              <input type="number" id="setting-view-distance" class="form-control" min="2" max="32" value="${perf.VIEW_DISTANCE || 16}" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Simulation Distance</label>
-              <input type="number" id="setting-sim-distance" class="form-control" min="2" max="32" value="${perf.SIMULATION_DISTANCE || 6}" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">MOTD</label>
-              <input type="text" id="setting-motd" class="form-control" value="${this.escapeHtml(t.MOTD || 'palvi')}" />
-            </div>
-          </div>
-        </div>
-
-        <div style="display:flex;justify-content:flex-end;margin-top:1.5rem;">
-          <button class="btn btn-primary" onclick="app.previewSettingsDiff()">Review Changes & Apply</button>
-        </div>
-      `;
-    }
-  },
-
-  renderInstalledMods() {
-    const container = document.getElementById("installed-mods-container");
-    if (!container) return;
-
-    const managed = this.state.installedMods.managed || [];
-    const manual = this.state.installedMods.manual || [];
-
-    let managedHtml = managed.map(m => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-        <div>
-          <span style="font-weight:600;font-size:0.9rem;">${this.escapeHtml(m.slug)}</span>
-          <span class="tag ${m.installed_jar ? 'tag-success' : 'tag-warning'}" style="margin-left:0.5rem;">${m.status}</span>
-          ${m.installed_jar ? `<span style="font-size:0.75rem;color:var(--text-muted);display:block;">${this.escapeHtml(m.installed_jar)}</span>` : ''}
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="app.removeMod('${this.escapeHtml(m.slug)}')">Remove</button>
-      </div>
-    `).join("");
-
-    let manualHtml = manual.map(j => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-        <div>
-          <span style="font-weight:600;font-size:0.9rem;">${this.escapeHtml(j.filename)}</span>
-          <span class="tag tag-warning" style="margin-left:0.5rem;">Manual Jar</span>
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="app.deleteManualMod('${this.escapeHtml(j.filename)}')">Delete</button>
-      </div>
-    `).join("");
-
-    container.innerHTML = `
-      <h4 style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.5rem;">Managed Mods (MODRINTH_PROJECTS)</h4>
-      ${managedHtml || '<p style="color:var(--text-muted);font-size:0.875rem;">None installed.</p>'}
+      const props = await API.request("/api/settings/properties");
+      this.state.properties = props;
       
-      <h4 style="font-size:0.85rem;color:var(--text-secondary);margin:1.25rem 0 0.5rem 0;">Manual Jar Files</h4>
-      ${manualHtml || '<p style="color:var(--text-muted);font-size:0.875rem;">No manual jars in /mods/.</p>'}
-    `;
-  },
+      container.innerHTML = `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+          <!-- Maximum Players -->
+          <div class="form-group">
+            <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+              Maximum Players (Slots)
+            </label>
+            <input type="number" id="prop-max-players" class="input" min="1" max="100" value="${props.max_players || 8}">
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Player limit (1 to 100)</div>
+          </div>
 
-  renderModSearchResults() {
-    const container = document.getElementById("mod-search-results");
-    if (!container) return;
+          <!-- Gamemode -->
+          <div class="form-group">
+            <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+              Default Gamemode
+            </label>
+            <select id="prop-gamemode" class="input">
+              <option value="survival" ${props.gamemode === 'survival' ? 'selected' : ''}>Survival</option>
+              <option value="creative" ${props.gamemode === 'creative' ? 'selected' : ''}>Creative</option>
+              <option value="adventure" ${props.gamemode === 'adventure' ? 'selected' : ''}>Adventure</option>
+              <option value="spectator" ${props.gamemode === 'spectator' ? 'selected' : ''}>Spectator</option>
+            </select>
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Game mode for new players</div>
+          </div>
 
-    if (this.state.modSearchLoading) {
-      container.innerHTML = `<p style="color:var(--text-secondary);font-size:0.875rem;">Searching Modrinth for Fabric 26.3 builds...</p>`;
-      return;
-    }
+          <!-- Difficulty -->
+          <div class="form-group">
+            <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+              Difficulty
+            </label>
+            <select id="prop-difficulty" class="input">
+              <option value="peaceful" ${props.difficulty === 'peaceful' ? 'selected' : ''}>Peaceful</option>
+              <option value="easy" ${props.difficulty === 'easy' ? 'selected' : ''}>Easy</option>
+              <option value="normal" ${props.difficulty === 'normal' ? 'selected' : ''}>Normal</option>
+              <option value="hard" ${props.difficulty === 'hard' ? 'selected' : ''}>Hard</option>
+            </select>
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Server combat & mob difficulty</div>
+          </div>
 
-    const hits = this.state.modSearchResults || [];
-    if (hits.length === 0) {
-      container.innerHTML = `<p style="color:var(--text-muted);font-size:0.875rem;">No results found.</p>`;
-      return;
-    }
-
-    container.innerHTML = `
-      <div class="grid-3">
-        ${hits.map(h => {
-      const clientReq = h.client_side === "required";
-      const clientWarn = clientReq ? `<span class="tag tag-warning">Client Required (Friends Need Mod)</span>` : '';
-      return `
-            <div class="mod-card">
-              <div>
-                <div class="mod-header">
-                  <img src="${h.icon_url || ''}" class="mod-icon" onerror="this.style.display='none'" />
-                  <div>
-                    <h5 style="font-size:0.95rem;font-weight:700;">${this.escapeHtml(h.title)}</h5>
-                    <span style="font-size:0.75rem;color:var(--text-muted);">${this.escapeHtml(h.slug)}</span>
-                  </div>
-                </div>
-                <p style="font-size:0.8rem;color:var(--text-secondary);line-height:1.4;">${this.escapeHtml(h.description || '')}</p>
-                <div class="tag-list">
-                  <span class="tag">${(h.downloads || 0).toLocaleString()} dl</span>
-                  <span class="tag">Server: ${h.server_side || 'supported'}</span>
-                  ${clientWarn}
-                </div>
-              </div>
-              <div style="margin-top:1rem;">
-                <button class="btn btn-primary btn-sm" style="width:100%;" onclick="app.addMod('${this.escapeHtml(h.slug)}')">Add to Server</button>
-              </div>
-            </div>
-          `;
-    }).join("")}
-      </div>
-    `;
-  },
-
-  renderBackupsView() {
-    const tbody = document.getElementById("backups-tbody");
-    if (tbody) {
-      const bList = this.state.backups || [];
-      if (bList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--text-muted);">No backups found in destination directory.</td></tr>`;
-      } else {
-        tbody.innerHTML = bList.map(b => `
-          <tr>
-            <td style="font-weight:600;">${this.escapeHtml(b.filename)} ${b.is_safety ? '<span class="tag tag-warning">Safety</span>' : ''}</td>
-            <td>${new Date(b.created_at).toLocaleString()}</td>
-            <td>${b.size_human}</td>
-            <td>
-              <button class="btn btn-secondary btn-sm" onclick="app.restoreBackup('${this.escapeHtml(b.id)}')">Restore</button>
-            </td>
-          </tr>
-        `).join("");
-      }
-    }
-
-    const dContainer = document.getElementById("disk-usage-container");
-    if (dContainer && this.state.diskUsage) {
-      const d = this.state.diskUsage;
-      dContainer.innerHTML = `
-        <div class="metric-row"><span class="metric-label">World Size (BabaSquadWorld)</span><span class="metric-value">${d.world_size_human}</span></div>
-        <div class="metric-row"><span class="metric-label">Total Backups Size</span><span class="metric-value">${d.backups_size_human}</span></div>
-        <div class="metric-row"><span class="metric-label">Free Space (/programming)</span><span class="metric-value">${d.programming_disk.free_human}</span></div>
-        <div class="metric-row"><span class="metric-label">Free Space (/mnt/media)</span><span class="metric-value">${d.media_disk.free_human}</span></div>
-      `;
-    }
-  },
-
-  renderPlayersView() {
-    const container = document.getElementById("active-players-container");
-    if (!container) return;
-
-    const players = this.state.onlinePlayers || [];
-    if (players.length === 0) {
-      container.innerHTML = `<p style="color:var(--text-muted);font-size:0.875rem;">No players online.</p>`;
-      return;
-    }
-
-    container.innerHTML = players.map(p => `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-        <span style="font-weight:600;">${this.escapeHtml(p)}</span>
-        <div class="btn-group">
-          <button class="btn btn-secondary btn-sm" onclick="app.opPlayer('${this.escapeHtml(p)}')">Op</button>
-          <button class="btn btn-secondary btn-sm" onclick="app.kickPlayer('${this.escapeHtml(p)}')">Kick</button>
-          <button class="btn btn-danger btn-sm" onclick="app.banPlayer('${this.escapeHtml(p)}')">Ban</button>
+          <!-- Spawn Protection -->
+          <div class="form-group">
+            <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+              Spawn Protection Radius
+            </label>
+            <input type="number" id="prop-spawn-protection" class="input" min="0" max="1000" value="${props.spawn_protection !== undefined ? props.spawn_protection : 16}">
+            <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Blocks around world spawn (0 to disable)</div>
+          </div>
         </div>
-      </div>
-    `).join("");
-  },
 
-  renderAuditTable() {
-    const tbody = document.getElementById("audit-tbody");
-    if (!tbody) return;
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;">
+          <!-- Whitelist Toggle -->
+          <div class="switch-label" onclick="app.togglePropertySwitch('prop-whitelist')">
+            <div>
+              <div style="font-size:13px;font-weight:600;">Whitelist</div>
+              <div style="font-size:11.5px;color:var(--text-muted);">Only allow players registered on whitelist.json to connect</div>
+            </div>
+            <div class="switch-toggle-box ${props.whitelist ? 'active' : ''}" id="prop-whitelist-box">
+              <div class="switch-toggle-thumb"></div>
+            </div>
+            <input type="hidden" id="prop-whitelist" value="${props.whitelist ? 'true' : 'false'}">
+          </div>
 
-    const list = this.state.auditLogs || [];
-    if (list.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:var(--text-muted);">No audit log records yet.</td></tr>`;
-      return;
+          <!-- Allow Flight Toggle -->
+          <div class="switch-label" onclick="app.togglePropertySwitch('prop-allow-flight')">
+            <div>
+              <div style="font-size:13px;font-weight:600;">Allow Flight</div>
+              <div style="font-size:11.5px;color:var(--text-muted);">Permit players to fly in survival mode (useful for mods/elytra)</div>
+            </div>
+            <div class="switch-toggle-box ${props.allow_flight ? 'active' : ''}" id="prop-allow-flight-box">
+              <div class="switch-toggle-thumb"></div>
+            </div>
+            <input type="hidden" id="prop-allow-flight" value="${props.allow_flight ? 'true' : 'false'}">
+          </div>
+        </div>
+      `;
+    } catch (e) {
+      container.innerHTML = `<div style="color:var(--accent-danger);">Failed to load server properties: ${this.escapeHtml(e.message)}</div>`;
     }
-
-    tbody.innerHTML = list.map(l => `
-      <tr>
-        <td style="font-size:0.75rem;">${new Date(l.timestamp).toLocaleString()}</td>
-        <td>${this.escapeHtml(l.user)}</td>
-        <td style="font-weight:600;">${this.escapeHtml(l.action)}</td>
-        <td>${this.escapeHtml(l.target || '—')}</td>
-        <td style="font-size:0.8rem;color:var(--text-secondary);">${this.escapeHtml(l.details || '—')}</td>
-        <td><span class="tag ${l.result === 'SUCCESS' ? 'tag-success' : 'tag-warning'}">${this.escapeHtml(l.result)}</span></td>
-        <td style="font-size:0.75rem;color:var(--text-muted);">${this.escapeHtml(l.ip_address || '—')}</td>
-      </tr>
-    `).join("");
   },
 
-  /* ------------------- UTILS ------------------- */
-  escapeHtml(str) {
-    if (!str) return "";
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
+  togglePropertySwitch(hiddenInputId) {
+    const input = document.getElementById(hiddenInputId);
+    const box = document.getElementById(`${hiddenInputId}-box`);
+    if (!input || !box) return;
+
+    const current = input.value === "true";
+    const next = !current;
+    input.value = next ? "true" : "false";
+    box.classList.toggle("active", next);
   },
 
-  formatUptime(sec) {
-    if (!sec || sec <= 0) return "Down / Asleep";
-    const d = Math.floor(sec / 86400);
-    const h = Math.floor((sec % 86400) / 3600);
-    const m = Math.floor((sec % 3600) / 60);
-    const s = sec % 60;
-    if (d > 0) return `${d}d ${h}h ${m}m`;
-    if (h > 0) return `${h}h ${m}m ${s}s`;
-    return `${m}m ${s}s`;
+  async saveProperties() {
+    const maxPlayers = parseInt(document.getElementById("prop-max-players").value, 10);
+    const gamemode = document.getElementById("prop-gamemode").value;
+    const difficulty = document.getElementById("prop-difficulty").value;
+    const spawnProt = parseInt(document.getElementById("prop-spawn-protection").value, 10);
+    const whitelist = document.getElementById("prop-whitelist").value === "true";
+    const allowFlight = document.getElementById("prop-allow-flight").value === "true";
+
+    try {
+      const res = await API.request("/api/settings/properties", {
+        method: "POST",
+        body: {
+          max_players: maxPlayers,
+          gamemode: gamemode,
+          difficulty: difficulty,
+          spawn_protection: spawnProt,
+          whitelist: whitelist,
+          allow_flight: allowFlight
+        }
+      });
+      alert(res.message);
+      this.loadProperties();
+    } catch (e) {
+      alert("Error saving properties: " + e.message);
+    }
   },
 
-  formatSeconds(sec) {
-    if (sec === undefined || sec === null || sec < 0) return "—";
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${m}m ${s < 10 ? '0' : ''}${s}s`;
+  /* ------------------- TAB 3: CONSOLE ------------------- */
+  initConsole() {
+    const output = document.getElementById("console-output");
+    if (output && output.children.length <= 1) {
+      this.sendConsoleCommandSilent("list");
+    }
+  },
+
+  async sendConsoleCommand() {
+    const input = document.getElementById("console-input");
+    const cmd = input.value.trim();
+    if (!cmd) return;
+
+    this.state.consoleHistory.push(cmd);
+    this.state.consoleHistoryIdx = this.state.consoleHistory.length;
+    input.value = "";
+
+    this.appendConsoleLine(`> ${cmd}`, "cmd");
+
+    try {
+      const res = await API.request("/api/console/execute", {
+        method: "POST",
+        body: { command: cmd }
+      });
+      if (res.output) {
+        this.appendConsoleLine(res.output, res.success ? "res" : "err");
+      } else {
+        this.appendConsoleLine("[Command executed with no return output]", "res");
+      }
+    } catch (e) {
+      this.appendConsoleLine(`Error executing command: ${e.message}`, "err");
+    }
+  },
+
+  async sendConsoleCommandSilent(cmd) {
+    try {
+      const res = await API.request("/api/console/execute", {
+        method: "POST",
+        body: { command: cmd }
+      });
+      if (res.output) {
+        this.appendConsoleLine(res.output, "res");
+      }
+    } catch (e) {
+      // offline or silent
+    }
   },
 
   injectConsoleCmd(cmd) {
@@ -2015,43 +1006,1188 @@ const app = {
     }
   },
 
-  async sendQuickCommand() {
-    const input = document.getElementById("dashboard-cmd-input");
-    const cmd = input.value.trim();
-    if (!cmd) return;
-    input.value = "";
-
-    const output = document.getElementById("dashboard-cmd-output");
-    output.innerText = `> ${cmd}\nRunning...`;
-
-    try {
-      const res = await API.request("/api/console/execute", {
-        method: "POST",
-        body: { command: cmd }
-      });
-      output.innerText = `> ${cmd}\n${res.output || '[No output]'}`;
-    } catch (e) {
-      output.innerText = `> ${cmd}\nError: ${e.message}`;
-    }
-  },
-
   handleConsoleKey(e) {
     if (e.key === "Enter") {
       this.sendConsoleCommand();
     } else if (e.key === "ArrowUp") {
-      if (this.state.consoleHistory.length > 0 && this.state.consoleHistoryIdx > 0) {
+      if (this.state.consoleHistoryIdx > 0) {
         this.state.consoleHistoryIdx--;
-        e.target.value = this.state.consoleHistory[this.state.consoleHistoryIdx];
+        e.target.value = this.state.consoleHistory[this.state.consoleHistoryIdx] || "";
       }
     } else if (e.key === "ArrowDown") {
       if (this.state.consoleHistoryIdx < this.state.consoleHistory.length - 1) {
         this.state.consoleHistoryIdx++;
-        e.target.value = this.state.consoleHistory[this.state.consoleHistoryIdx];
+        e.target.value = this.state.consoleHistory[this.state.consoleHistoryIdx] || "";
       } else {
         this.state.consoleHistoryIdx = this.state.consoleHistory.length;
         e.target.value = "";
       }
     }
+  },
+
+  appendConsoleLine(text, type = "normal") {
+    const output = document.getElementById("console-output");
+    if (!output) return;
+
+    const line = document.createElement("div");
+    if (type === "cmd") {
+      line.style.color = "#ffffff";
+      line.style.fontWeight = "600";
+    } else if (type === "err") {
+      line.style.color = "#ef4444";
+    } else {
+      line.style.color = "#a3a3a3";
+    }
+    line.innerText = text;
+    output.appendChild(line);
+
+    const autoScroll = document.getElementById("console-autoscroll");
+    if (!autoScroll || autoScroll.checked) {
+      output.scrollTop = output.scrollHeight;
+    }
+  },
+
+  clearConsole() {
+    const output = document.getElementById("console-output");
+    if (output) output.innerHTML = `<div style="color:var(--text-muted);">[Console cleared]</div>`;
+  },
+
+  /* ------------------- TAB 4: LOG ------------------- */
+  async initLogs() {
+    const output = document.getElementById("log-output");
+    if (!output) return;
+
+    try {
+      const res = await API.request("/api/logs/tail?lines=500");
+      this.state.logs = res.lines || [];
+      this.renderLogs();
+
+      // Start SSE stream if supported
+      if (!this.sseLogSource) {
+        this.sseLogSource = new EventSource("/api/logs/stream");
+        this.sseLogSource.onmessage = (event) => {
+          this.state.logs.push(event.data);
+          if (this.state.logs.length > 2000) this.state.logs.shift();
+          this.appendLogLine(event.data);
+        };
+      }
+    } catch (e) {
+      output.innerHTML = `<div style="color:var(--accent-danger);">Failed to load logs: ${this.escapeHtml(e.message)}</div>`;
+    }
+  },
+
+  renderLogs() {
+    const output = document.getElementById("log-output");
+    if (!output) return;
+
+    const filter = this.state.logFilter.toLowerCase();
+    const filtered = filter ? this.state.logs.filter(l => l.toLowerCase().includes(filter)) : this.state.logs;
+
+    output.innerHTML = filtered.map(line => this.formatLogLine(line)).join("");
+
+    const autoScroll = document.getElementById("log-autoscroll");
+    if (!autoScroll || autoScroll.checked) {
+      output.scrollTop = output.scrollHeight;
+    }
+  },
+
+  appendLogLine(line) {
+    const output = document.getElementById("log-output");
+    if (!output) return;
+
+    const filter = this.state.logFilter.toLowerCase();
+    if (filter && !line.toLowerCase().includes(filter)) return;
+
+    const div = document.createElement("div");
+    div.innerHTML = this.formatLogLine(line);
+    output.appendChild(div);
+
+    const autoScroll = document.getElementById("log-autoscroll");
+    if (!autoScroll || autoScroll.checked) {
+      output.scrollTop = output.scrollHeight;
+    }
+  },
+
+  filterLogs(val) {
+    this.state.logFilter = val;
+    this.renderLogs();
+  },
+
+  formatLogLine(line) {
+    let color = "#b0b0b0";
+    if (line.includes("/ERROR]") || line.includes("Exception") || line.includes("Error")) {
+      color = "#ef4444";
+    } else if (line.includes("/WARN]")) {
+      color = "#f59e0b";
+    } else if (line.includes("/INFO]")) {
+      color = "#d4d4d4";
+    }
+    return `<div style="color:${color};font-family:var(--font-universal);white-space:pre-wrap;word-break:break-all;">${this.escapeHtml(line)}</div>`;
+  },
+
+  /* ------------------- TAB 5: PLAYERS ------------------- */
+  async loadPlayers() {
+    try {
+      const data = await API.request("/api/players/all");
+      this.state.playersData = data;
+      this.renderPlayerSection();
+    } catch (e) {
+      console.error("Failed to load players data:", e);
+    }
+  },
+
+  setPlayerSection(sec) {
+    this.state.playerSection = sec;
+    document.querySelectorAll(".subnav-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.sub === sec);
+    });
+    this.renderPlayerSection();
+  },
+
+  renderPlayerSection() {
+    const container = document.getElementById("player-section-content");
+    if (!container) return;
+
+    const sec = this.state.playerSection;
+    const data = this.state.playersData;
+
+    const configs = {
+      ops: {
+        title: "OP Players (Operators)",
+        desc: "Server operators with full permission to run administration commands.",
+        placeholder: "Enter player username...",
+        actionLabel: "Add OP",
+        onAdd: "app.addPlayerOp()",
+        list: data.ops || [],
+        onRemove: "app.removePlayerOp",
+        emptyText: "No operators currently configured."
+      },
+      banned_players: {
+        title: "Banned Players",
+        desc: "Players blocked from joining the server by username.",
+        placeholder: "Enter username to ban...",
+        actionLabel: "Ban Player",
+        onAdd: "app.banPlayer()",
+        list: data.banned_players || [],
+        onRemove: "app.unbanPlayer",
+        emptyText: "No players banned."
+      },
+      banned_ips: {
+        title: "Banned IP Addresses",
+        desc: "IP addresses permanently blocked from connecting to the server.",
+        placeholder: "Enter IP address to ban...",
+        actionLabel: "Ban IP",
+        onAdd: "app.banIp()",
+        list: data.banned_ips || [],
+        onRemove: "app.unbanIp",
+        emptyText: "No IP addresses banned."
+      },
+      whitelisted: {
+        title: "Whitelisted Players",
+        desc: "Players permitted to join when whitelist is enabled in server properties.",
+        placeholder: "Enter username to whitelist...",
+        actionLabel: "Add to Whitelist",
+        onAdd: "app.addPlayerWhitelist()",
+        list: data.whitelisted || [],
+        onRemove: "app.removePlayerWhitelist",
+        emptyText: "No players currently whitelisted."
+      },
+      offline: {
+        title: "Offline Players",
+        desc: "Players who have previously joined the server and are currently offline (discovered from usercache.json).",
+        list: data.offline_players || [],
+        emptyText: "No offline player history recorded."
+      }
+    };
+
+    const cfg = configs[sec] || configs.ops;
+
+    let formHtml = "";
+    if (sec !== "offline") {
+      formHtml = `
+        <div style="display:flex;gap:10px;margin-bottom:18px;">
+          <input type="text" id="player-action-input" class="input" style="max-width:320px;" placeholder="${cfg.placeholder}">
+          <button class="btn btn-primary btn-sm" onclick="${cfg.onAdd}">${ICONS.plus} ${cfg.actionLabel}</button>
+        </div>
+      `;
+    }
+
+    let listHtml = "";
+    if (!cfg.list || cfg.list.length === 0) {
+      listHtml = `<div style="color:var(--text-muted);font-size:12.5px;padding:30px 0;text-align:center;">${cfg.emptyText}</div>`;
+    } else {
+      listHtml = `
+        <div class="file-table-container">
+          <table class="file-table">
+            <thead>
+              <tr>
+                <th>Identifier / Username</th>
+                ${sec !== 'offline' ? '<th style="text-align:right;">Actions</th>' : '<th>Status</th>'}
+              </tr>
+            </thead>
+            <tbody>
+              ${cfg.list.map(item => `
+                <tr>
+                  <td style="font-weight:600;">${this.escapeHtml(item)}</td>
+                  ${sec !== 'offline' ? `
+                    <td style="text-align:right;">
+                      <button class="btn btn-danger btn-sm" onclick="${cfg.onRemove}('${this.escapeHtml(item)}')">${ICONS.trash} Remove</button>
+                    </td>
+                  ` : `
+                    <td style="color:var(--text-muted);font-size:12px;">Offline</td>
+                  `}
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    container.innerHTML = `
+      <div class="card" style="padding:22px 24px;">
+        <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;margin-bottom:4px;">${cfg.title}</h2>
+        <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:16px;">${cfg.desc}</p>
+        ${formHtml}
+        ${listHtml}
+      </div>
+    `;
+  },
+
+  async addPlayerOp() {
+    const input = document.getElementById("player-action-input");
+    const name = input ? input.value.trim() : "";
+    if (!name) return;
+    try {
+      await API.request("/api/players/ops", { method: "POST", body: { player: name } });
+      input.value = "";
+      this.loadPlayers();
+    } catch (e) {
+      alert(e.message);
+    }
+  },
+
+  async removePlayerOp(name) {
+    this.showConfirmModal("De-op Player", `Remove operator privileges from ${name}?`, async () => {
+      try {
+        await API.request(`/api/players/ops/${encodeURIComponent(name)}`, { method: "DELETE" });
+        this.loadPlayers();
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+  },
+
+  async banPlayer() {
+    const input = document.getElementById("player-action-input");
+    const name = input ? input.value.trim() : "";
+    if (!name) return;
+    try {
+      await API.request("/api/players/ban", { method: "POST", body: { player: name } });
+      input.value = "";
+      this.loadPlayers();
+    } catch (e) {
+      alert(e.message);
+    }
+  },
+
+  async unbanPlayer(name) {
+    this.showConfirmModal("Unban Player", `Pardon and unban ${name}?`, async () => {
+      try {
+        await API.request("/api/players/unban", { method: "POST", body: { player: name } });
+        this.loadPlayers();
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+  },
+
+  async banIp() {
+    const input = document.getElementById("player-action-input");
+    const ip = input ? input.value.trim() : "";
+    if (!ip) return;
+    try {
+      await API.request("/api/players/ban-ip", { method: "POST", body: { ip: ip } });
+      input.value = "";
+      this.loadPlayers();
+    } catch (e) {
+      alert(e.message);
+    }
+  },
+
+  async unbanIp(ip) {
+    this.showConfirmModal("Unban IP", `Unban IP address ${ip}?`, async () => {
+      try {
+        await API.request("/api/players/unban-ip", { method: "POST", body: { ip: ip } });
+        this.loadPlayers();
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+  },
+
+  async addPlayerWhitelist() {
+    const input = document.getElementById("player-action-input");
+    const name = input ? input.value.trim() : "";
+    if (!name) return;
+    try {
+      await API.request("/api/players/whitelist", { method: "POST", body: { player: name } });
+      input.value = "";
+      this.loadPlayers();
+    } catch (e) {
+      alert(e.message);
+    }
+  },
+
+  async removePlayerWhitelist(name) {
+    this.showConfirmModal("Remove Whitelist", `Remove ${name} from whitelist?`, async () => {
+      try {
+        await API.request(`/api/players/whitelist/${encodeURIComponent(name)}`, { method: "DELETE" });
+        this.loadPlayers();
+      } catch (e) {
+        alert(e.message);
+      }
+    });
+  },
+
+  /* ------------------- TAB 6: SOFTWARE ------------------- */
+  async loadSoftware() {
+    const container = document.getElementById("software-grid-container");
+    if (!container) return;
+
+    try {
+      const data = await API.request("/api/software");
+      this.state.currentSoftware = data.current;
+      this.state.softwareCatalog = data.available;
+
+      container.innerHTML = data.available.map(sw => {
+        const isCurrent = sw.id === data.current.type;
+        return `
+          <div class="software-card ${isCurrent ? 'active' : ''}">
+            <div>
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+                <h3 style="font-size:15px;font-weight:700;">${this.escapeHtml(sw.name)}</h3>
+                <span class="software-badge ${isCurrent ? 'active' : ''}">
+                  ${isCurrent ? 'Active · ' + data.current.version : (sw.supports_mods ? 'Modded' : 'Vanilla')}
+                </span>
+              </div>
+              <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.55;margin-bottom:14px;">
+                ${this.escapeHtml(sw.description)}
+              </p>
+            </div>
+
+            <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-subtle);padding-top:12px;margin-top:12px;">
+              <span style="font-size:11.5px;color:var(--text-muted);">
+                ${sw.supports_mods ? 'Supports Mods' : (sw.supports_plugins ? 'Supports Plugins' : 'Standard')}
+              </span>
+              ${isCurrent ? `
+                <button class="btn btn-secondary btn-sm" disabled>Current Software</button>
+              ` : `
+                <button class="btn btn-secondary btn-sm" onclick="app.requestSwitchSoftware('${sw.id}', '${this.escapeHtml(sw.name)}')">Switch to ${this.escapeHtml(sw.name)}</button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join("");
+    } catch (e) {
+      container.innerHTML = `<div style="color:var(--accent-danger);">Failed to load software platforms: ${this.escapeHtml(e.message)}</div>`;
+    }
+  },
+
+  requestSwitchSoftware(swId, swName) {
+    this.showConfirmModal(
+      `Switch to ${swName}`,
+      `WARNING: Fabric is the default and current server software. Switching to ${swName} will disable installed Fabric mods and may require world backup. Confirm to proceed.`,
+      async () => {
+        try {
+          const res = await API.request("/api/software/switch", {
+            method: "POST",
+            body: { software_id: swId, confirm: true }
+          });
+          alert(res.message);
+          this.loadSoftware();
+        } catch (e) {
+          alert(e.message);
+        }
+      },
+      { danger: true, confirmText: `Switch Software` }
+    );
+  },
+
+  /* ------------------- TAB 7: MODS (MODRINTH) ------------------- */
+  async loadMods() {
+    this.switchModsTab("installed");
+  },
+
+  switchModsTab(tab) {
+    const btnInstalled = document.getElementById("mods-tab-installed");
+    const btnBrowse = document.getElementById("mods-tab-browse");
+    const view = document.getElementById("mods-content-view");
+    if (!view) return;
+
+    if (btnInstalled) btnInstalled.classList.toggle("active", tab === "installed");
+    if (btnBrowse) btnBrowse.classList.toggle("active", tab === "browse");
+
+    if (tab === "installed") {
+      this.renderInstalledMods();
+    } else {
+      this.renderBrowseMods();
+    }
+  },
+
+  async renderInstalledMods() {
+    const view = document.getElementById("mods-content-view");
+    if (!view) return;
+
+    view.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding:20px 0;">Loading installed mods...</div>`;
+
+    try {
+      const data = await API.request("/api/mods/installed");
+      this.state.installedMods = data;
+
+      let managedHtml = "";
+      if (!data.managed || data.managed.length === 0) {
+        managedHtml = `<div style="color:var(--text-muted);font-size:12.5px;padding:14px 0;">No managed Modrinth mods installed.</div>`;
+      } else {
+        managedHtml = `
+          <div class="file-table-container" style="margin-bottom:24px;">
+            <table class="file-table">
+              <thead>
+                <tr>
+                  <th>Mod Title / Slug</th>
+                  <th>Source</th>
+                  <th>Compatibility</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.managed.map(m => `
+                  <tr>
+                    <td>
+                      <div style="font-weight:600;">${this.escapeHtml(m.title || m.slug)}</div>
+                      <div style="font-size:11px;color:var(--text-muted);">${this.escapeHtml(m.slug)}</div>
+                    </td>
+                    <td><span class="badge">Modrinth</span></td>
+                    <td><span class="badge" style="color:#22c55e;">Fabric 26.3</span></td>
+                    <td style="text-align:right;">
+                      <button class="btn btn-danger btn-sm" onclick="app.removeMod('${this.escapeHtml(m.slug)}')">${ICONS.trash} Remove</button>
+                    </td>
+                  </tr>
+                `).join("")}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      view.innerHTML = `
+        <div class="card" style="padding:22px 24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div>
+              <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Installed Fabric 26.3 Mods</h2>
+              <div style="font-size:12px;color:var(--text-secondary);">Managed automatically via MODRINTH_PROJECTS in mc.env</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="app.switchModsTab('browse')">${ICONS.plus} Install New Mod</button>
+          </div>
+          ${managedHtml}
+        </div>
+      `;
+    } catch (e) {
+      view.innerHTML = `<div style="color:var(--accent-danger);">Failed to load mods: ${this.escapeHtml(e.message)}</div>`;
+    }
+  },
+
+  renderBrowseMods() {
+    const view = document.getElementById("mods-content-view");
+    if (!view) return;
+
+    view.innerHTML = `
+      <div class="card" style="padding:22px 24px;margin-bottom:20px;">
+        <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Search Modrinth Repository</h2>
+        <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;">
+          Exclusively searches mods compatible with Fabric loader and Minecraft 26.3
+        </div>
+
+        <div style="display:flex;gap:10px;">
+          <input type="text" id="mod-search-input" class="input" style="flex:1;" placeholder="Search mods (e.g. lithium, ferrite-core, sodium)..." onkeydown="if(event.key==='Enter') app.searchMods()">
+          <button class="btn btn-primary" onclick="app.searchMods()">${ICONS.search} Search</button>
+        </div>
+      </div>
+
+      <div id="mod-search-results-area">
+        <div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:40px 0;">
+          Enter keywords above to search for mods on Modrinth.
+        </div>
+      </div>
+    `;
+  },
+
+  async searchMods() {
+    const input = document.getElementById("mod-search-input");
+    const q = input ? input.value.trim() : "";
+    if (!q) return;
+
+    const area = document.getElementById("mod-search-results-area");
+    if (area) area.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding:30px 0;text-align:center;">Searching Modrinth...</div>`;
+
+    try {
+      const res = await API.request(`/api/mods/search?q=${encodeURIComponent(q)}&limit=15`);
+      this.state.modSearchResults = res.hits || [];
+      
+      if (!res.hits || res.hits.length === 0) {
+        area.innerHTML = `<div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:40px 0;">No mods found matching '${this.escapeHtml(q)}'.</div>`;
+        return;
+      }
+
+      area.innerHTML = `
+        <div class="software-grid">
+          ${res.hits.map(h => `
+            <div class="software-card">
+              <div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                  ${h.icon_url ? `<img src="${h.icon_url}" style="width:28px;height:28px;border-radius:0;" alt="">` : ''}
+                  <div>
+                    <h3 style="font-size:14px;font-weight:700;">${this.escapeHtml(h.title)}</h3>
+                    <div style="font-size:11px;color:var(--text-muted);">by ${this.escapeHtml(h.author)}</div>
+                  </div>
+                </div>
+                <p style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+                  ${this.escapeHtml(h.description)}
+                </p>
+              </div>
+
+              <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-subtle);padding-top:10px;">
+                <span class="badge" style="color:#22c55e;">Fabric 26.3</span>
+                <button class="btn btn-primary btn-sm" onclick="app.installMod('${this.escapeHtml(h.slug)}')">${ICONS.plus} Install</button>
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    } catch (e) {
+      if (area) area.innerHTML = `<div style="color:var(--accent-danger);">Search error: ${this.escapeHtml(e.message)}</div>`;
+    }
+  },
+
+  installMod(slug) {
+    this.showConfirmModal(
+      `Install ${slug}`,
+      `Install mod '${slug}' from Modrinth? This will add it to mc.env and recreate the server container.`,
+      async () => {
+        try {
+          const res = await API.request("/api/mods/add", { method: "POST", body: { slug: slug } });
+          alert(res.message);
+          this.switchModsTab("installed");
+        } catch (e) {
+          alert(e.message);
+        }
+      },
+      { danger: false, confirmText: "Install Mod" }
+    );
+  },
+
+  removeMod(slug) {
+    this.showConfirmModal(
+      `Remove ${slug}`,
+      `Remove mod '${slug}' from server? The mod will be removed from mc.env and deleted from mods folder.`,
+      async () => {
+        try {
+          const res = await API.request("/api/mods/remove", { method: "POST", body: { slug: slug } });
+          alert(res.message);
+          this.renderInstalledMods();
+        } catch (e) {
+          alert(e.message);
+        }
+      },
+      { danger: true, confirmText: "Remove Mod" }
+    );
+  },
+
+  /* ------------------- TAB 8: FILES (ATERNOS STYLE) ------------------- */
+  async loadFiles(relPath = "") {
+    this.state.currentFilePath = relPath;
+    const body = document.getElementById("files-table-body");
+    const bc = document.getElementById("files-breadcrumbs");
+
+    if (body) body.innerHTML = `<tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:30px;">Loading files...</td></tr>`;
+
+    try {
+      const data = await API.request(`/api/files/list?path=${encodeURIComponent(relPath)}`);
+      this.state.fileItems = data.items || [];
+      this.state.fileBreadcrumbs = data.breadcrumbs || [];
+
+      // Render breadcrumbs
+      if (bc) {
+        bc.innerHTML = data.breadcrumbs.map((b, idx) => {
+          const isLast = idx === data.breadcrumbs.length - 1;
+          if (isLast) {
+            return `<span class="breadcrumb-current">${this.escapeHtml(b.name)}</span>`;
+          } else {
+            return `
+              <span class="breadcrumb-item" onclick="app.loadFiles('${this.escapeHtml(b.path)}')">${this.escapeHtml(b.name)}</span>
+              <span class="breadcrumb-separator">/</span>
+            `;
+          }
+        }).join("");
+      }
+
+      // Render items
+      if (body) {
+        if (!data.items || data.items.length === 0) {
+          body.innerHTML = `<tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:30px;">This directory is empty.</td></tr>`;
+          return;
+        }
+
+        body.innerHTML = data.items.map(item => {
+          const isDir = item.type === "directory";
+          return `
+            <tr>
+              <td>
+                <div class="file-name-cell" onclick="${isDir ? `app.loadFiles('${this.escapeHtml(item.path)}')` : (item.editable ? `app.openFileEditor('${this.escapeHtml(item.path)}')` : '')}">
+                  <span style="opacity:0.8;">${isDir ? ICONS.folder : ICONS.file}</span>
+                  <span style="font-weight:${isDir ? '600' : '400'};">${this.escapeHtml(item.name)}</span>
+                </div>
+              </td>
+              <td style="color:var(--text-secondary);font-size:12px;">${item.size_formatted}</td>
+              <td style="color:var(--text-muted);font-size:11.5px;">${item.modified}</td>
+              <td style="text-align:right;">
+                <div style="display:inline-flex;gap:6px;">
+                  ${item.editable ? `
+                    <button class="btn btn-secondary btn-sm" onclick="app.openFileEditor('${this.escapeHtml(item.path)}')">${ICONS.edit} Edit</button>
+                  ` : ''}
+                  <a href="/api/files/download?path=${encodeURIComponent(item.path)}" target="_blank" class="btn btn-secondary btn-sm" title="Download">${ICONS.download}</a>
+                  <button class="btn btn-danger btn-sm" onclick="app.deleteFileItem('${this.escapeHtml(item.path)}', '${this.escapeHtml(item.name)}', ${isDir})" title="Delete">${ICONS.trash}</button>
+                </div>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }
+    } catch (e) {
+      if (body) body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-danger);text-align:center;padding:30px;">Failed to load files: ${this.escapeHtml(e.message)}</td></tr>`;
+    }
+  },
+
+  async openFileEditor(path) {
+    const area = document.getElementById("files-browser-area");
+    if (!area) return;
+
+    try {
+      const fileData = await API.request(`/api/files/read?path=${encodeURIComponent(path)}`);
+      this.state.editingFile = fileData;
+
+      area.innerHTML = `
+        <div class="editor-container">
+          <div class="editor-header">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:13px;font-weight:600;color:var(--text-primary);">${this.escapeHtml(fileData.name)}</span>
+              <span style="font-size:11px;color:var(--text-muted);">(${fileData.size_formatted})</span>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-secondary btn-sm" onclick="app.loadFiles(app.state.currentFilePath)">Cancel</button>
+              <button class="btn btn-primary btn-sm" onclick="app.saveFileContent('${this.escapeHtml(path)}')">${ICONS.check || ''} Save File</button>
+            </div>
+          </div>
+          <textarea id="file-editor-content" class="editor-textarea" spellcheck="false">${this.escapeHtml(fileData.content)}</textarea>
+        </div>
+      `;
+    } catch (e) {
+      alert("Error opening file: " + e.message);
+    }
+  },
+
+  async saveFileContent(path) {
+    const textarea = document.getElementById("file-editor-content");
+    if (!textarea) return;
+
+    try {
+      const res = await API.request("/api/files/write", {
+        method: "POST",
+        body: { path: path, content: textarea.value }
+      });
+      alert(res.message);
+      this.loadFiles(this.state.currentFilePath);
+    } catch (e) {
+      alert("Save failed: " + e.message);
+    }
+  },
+
+  deleteFileItem(path, name, isDir) {
+    this.showConfirmModal(
+      `Delete ${isDir ? 'Folder' : 'File'}`,
+      `Are you sure you want to permanently delete '${name}'? This action cannot be undone.`,
+      async () => {
+        try {
+          const res = await API.request(`/api/files/delete`, {
+            method: "DELETE",
+            body: { path: path, confirm: true }
+          });
+          alert(res.message);
+          this.loadFiles(this.state.currentFilePath);
+        } catch (e) {
+          alert(e.message);
+        }
+      },
+      { danger: true, confirmText: `Delete ${name}` }
+    );
+  },
+
+  promptCreateFolder() {
+    const name = prompt("Enter folder name:");
+    if (!name) return;
+    API.request("/api/files/create-folder", {
+      method: "POST",
+      body: { path: this.state.currentFilePath, name: name }
+    }).then(res => {
+      alert(res.message);
+      this.loadFiles(this.state.currentFilePath);
+    }).catch(e => alert(e.message));
+  },
+
+  async uploadFile(input) {
+    if (!input.files || input.files.length === 0) return;
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const url = `/api/files/upload?path=${encodeURIComponent(this.state.currentFilePath)}`;
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          "X-CSRF-Token": API.csrfToken
+        },
+        body: formData,
+        credentials: "include"
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Upload failed");
+      alert(data.message);
+      this.loadFiles(this.state.currentFilePath);
+    } catch (e) {
+      alert("Upload error: " + e.message);
+    }
+  },
+
+  /* ------------------- TAB 9: WORLDS ------------------- */
+  async loadWorlds() {
+    try {
+      const info = await API.request("/api/worlds/info");
+      this.state.worldInfo = info;
+
+      const nameDisplay = document.getElementById("world-name-display");
+      const seedDisplay = document.getElementById("world-seed-display");
+      if (nameDisplay) nameDisplay.innerText = info.world_name;
+      if (seedDisplay) seedDisplay.innerText = info.seed || "Auto-generated";
+
+      const dimContainer = document.getElementById("world-dimensions-container");
+      if (dimContainer) {
+        dimContainer.innerHTML = `
+          <div class="metric-row"><span class="metric-label">Total World Disk Size</span><span class="metric-value">${info.size_formatted}</span></div>
+          <div class="metric-row"><span class="metric-label">level.dat Structure</span><span class="metric-value">${info.has_level_dat ? '<span class="badge" style="color:#22c55e;">Valid</span>' : '<span class="badge" style="color:#ef4444;">Missing</span>'}</span></div>
+          <div class="metric-row"><span class="metric-label">Overworld Region</span><span class="metric-value">${info.has_overworld ? 'Present (region/)' : 'None'}</span></div>
+          <div class="metric-row"><span class="metric-label">The Nether (DIM-1)</span><span class="metric-value">${info.has_nether ? 'Present' : 'Not generated'}</span></div>
+          <div class="metric-row"><span class="metric-label">The End (DIM1)</span><span class="metric-value">${info.has_end ? 'Present' : 'Not generated'}</span></div>
+          <div class="metric-row"><span class="metric-label">Datapacks Installed</span><span class="metric-value">${info.datapacks && info.datapacks.length ? info.datapacks.join(', ') : 'None'}</span></div>
+          <div class="metric-row"><span class="metric-label">Player Profile Data</span><span class="metric-value">${info.player_records || 0} saved records</span></div>
+        `;
+      }
+
+      // Load files list
+      const filesRes = await API.request("/api/worlds/files");
+      const filesList = document.getElementById("world-files-list");
+      if (filesList) {
+        if (!filesRes.files || filesRes.files.length === 0) {
+          filesList.innerHTML = `<div style="color:var(--text-muted);font-size:12px;padding:20px 0;text-align:center;">No files found in world directory.</div>`;
+        } else {
+          filesList.innerHTML = filesRes.files.map(f => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border-subtle);font-size:12.5px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span>${f.type === 'directory' ? ICONS.folder : ICONS.file}</span>
+                <span style="font-weight:600;">${this.escapeHtml(f.name)}</span>
+              </div>
+              <span style="color:var(--text-muted);font-size:11.5px;">${f.size_formatted}</span>
+            </div>
+          `).join("");
+        }
+      }
+    } catch (e) {
+      console.error("Worlds load error:", e);
+    }
+  },
+
+  jumpToWorldInFiles() {
+    const worldName = this.state.worldInfo ? this.state.worldInfo.world_name : "BabaSquadWorld";
+    this.setTab("files");
+    setTimeout(() => this.loadFiles(worldName), 100);
+  },
+
+  showUploadWorldModal() {
+    const overlay = document.getElementById("modal-overlay");
+    const body = document.getElementById("modal-body");
+
+    body.innerHTML = `
+      <div class="modal-header">
+        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Upload & Import World Archive</h3>
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal()">✕</button>
+      </div>
+      <div style="padding:18px 20px;">
+        <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;margin-bottom:16px;">
+          Upload a <strong>.zip</strong> world archive. The archive will be validated to ensure <code>level.dat</code> is present and extracted to the server.
+        </p>
+        <input type="file" id="upload-world-file-input" accept=".zip" class="input" style="width:100%;">
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border-subtle);">
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="app.executeWorldUpload()">${ICONS.upload} Upload & Apply</button>
+      </div>
+    `;
+
+    overlay.style.display = "flex";
+  },
+
+  async executeWorldUpload() {
+    const input = document.getElementById("upload-world-file-input");
+    if (!input || !input.files || input.files.length === 0) {
+      alert("Please select a .zip file to upload.");
+      return;
+    }
+
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/worlds/upload", {
+        method: "POST",
+        headers: { "X-CSRF-Token": API.csrfToken },
+        body: formData,
+        credentials: "include"
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "Upload failed");
+      this.closeModal();
+      alert(data.message);
+      this.loadWorlds();
+    } catch (e) {
+      alert("Error importing world: " + e.message);
+    }
+  },
+
+  showGenerateWorldModal() {
+    const overlay = document.getElementById("modal-overlay");
+    const body = document.getElementById("modal-body");
+
+    body.innerHTML = `
+      <div class="modal-header">
+        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Generate New World</h3>
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal()">✕</button>
+      </div>
+      <div style="padding:18px 20px;display:flex;flex-direction:column;gap:14px;">
+        <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.5;">
+          Configuring a new world updates the LEVEL setting in mc.env. The existing world folder will remain preserved on disk.
+        </p>
+        <div>
+          <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">New World Name</label>
+          <input type="text" id="gen-world-name" class="input" placeholder="e.g. SurvivalWorld2">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">World Seed (Optional)</label>
+          <input type="text" id="gen-world-seed" class="input" placeholder="Leave blank for random seed">
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border-subtle);">
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal()">Cancel</button>
+        <button class="btn btn-danger btn-sm" onclick="app.executeWorldGenerate()">${ICONS.plus} Generate World</button>
+      </div>
+    `;
+
+    overlay.style.display = "flex";
+  },
+
+  async executeWorldGenerate() {
+    const nameInput = document.getElementById("gen-world-name");
+    const seedInput = document.getElementById("gen-world-seed");
+    const name = nameInput ? nameInput.value.trim() : "";
+    const seed = seedInput ? seedInput.value.trim() : "";
+
+    if (!name) {
+      alert("Please provide a world name.");
+      return;
+    }
+
+    try {
+      const res = await API.request("/api/worlds/generate", {
+        method: "POST",
+        body: {
+          world_name: name,
+          seed: seed,
+          confirm: true
+        }
+      });
+      this.closeModal();
+      alert(res.message);
+      this.loadWorlds();
+    } catch (e) {
+      alert("Failed to configure world: " + e.message);
+    }
+  },
+
+  /* ------------------- TAB 10: BACKUPS ------------------- */
+  async loadBackups() {
+    try {
+      const disk = await API.request("/api/backups/disk-usage");
+      this.state.diskUsage = disk;
+
+      const fill = document.getElementById("backup-meter-fill");
+      const usedText = document.getElementById("backup-used-text");
+      const availText = document.getElementById("backup-avail-text");
+
+      if (disk && fill) {
+        fill.style.width = `${disk.percent_used || 25}%`;
+      }
+      if (disk && usedText) {
+        usedText.innerText = `${(disk.used_bytes / (1024*1024*1024)).toFixed(1)} GB (${disk.percent_used || 25}%)`;
+      }
+      if (disk && availText) {
+        availText.innerText = `${(disk.free_bytes / (1024*1024*1024)).toFixed(1)} GB`;
+      }
+    } catch (e) {
+      console.debug("Disk usage fetch error:", e);
+    }
+  },
+
+  /* ------------------- TAB 11: ACCESS ------------------- */
+  loadAccess() {
+    // Static informative matrix
+  },
+
+  /* ------------------- AUTH & MODALS ------------------- */
+  showLoginModal() {
+    const overlay = document.getElementById("modal-overlay");
+    const body = document.getElementById("modal-body");
+
+    body.innerHTML = `
+      <div class="modal-header">
+        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Sign In — Palvi Admin</h3>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">Password</label>
+          <input type="password" id="login-pass-input" class="input" placeholder="Enter admin password..." onkeydown="if(event.key==='Enter') app.login()">
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border-subtle);">
+        <button class="btn btn-primary btn-sm" onclick="app.login()">Sign In</button>
+      </div>
+    `;
+
+    overlay.style.display = "flex";
+    setTimeout(() => {
+      const inp = document.getElementById("login-pass-input");
+      if (inp) inp.focus();
+    }, 100);
+  },
+
+  showSetupModal() {
+    const overlay = document.getElementById("modal-overlay");
+    const body = document.getElementById("modal-body");
+
+    body.innerHTML = `
+      <div class="modal-header">
+        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Initial Admin Setup</h3>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+        <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.5;">
+          Set up the administrator password for mcadmin.palvi.org. This password is hashed with Argon2id.
+        </p>
+        <div>
+          <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">Create Password</label>
+          <input type="password" id="setup-pass-input" class="input" placeholder="Create strong admin password...">
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1px solid var(--border-subtle);">
+        <button class="btn btn-primary btn-sm" onclick="app.setupPassword()">Save Password</button>
+      </div>
+    `;
+
+    overlay.style.display = "flex";
+  },
+
+  async login() {
+    const input = document.getElementById("login-pass-input");
+    const pass = input ? input.value : "";
+    if (!pass) return;
+
+    try {
+      const res = await API.request("/api/auth/login", {
+        method: "POST",
+        body: { password: pass }
+      });
+      API.csrfToken = res.csrf_token;
+      API.sessionToken = res.session_token || null;
+      if (res.session_token) {
+        localStorage.setItem("mcadmin_token", res.session_token);
+      }
+      this.closeModal();
+      this.state.authenticated = true;
+      this.startDashboard();
+    } catch (e) {
+      alert("Sign in failed: " + e.message);
+    }
+  },
+
+  async setupPassword() {
+    const input = document.getElementById("setup-pass-input");
+    const pass = input ? input.value : "";
+    if (!pass) return;
+
+    try {
+      const res = await API.request("/api/auth/setup", {
+        method: "POST",
+        body: { password: pass }
+      });
+      API.csrfToken = res.csrf_token;
+      API.sessionToken = res.session_token || null;
+      if (res.session_token) {
+        localStorage.setItem("mcadmin_token", res.session_token);
+      }
+      this.closeModal();
+      this.state.authenticated = true;
+      this.startDashboard();
+    } catch (e) {
+      alert("Setup failed: " + e.message);
+    }
+  },
+
+  async logout() {
+    try {
+      await API.request("/api/auth/logout", { method: "POST" });
+    } catch (e) {}
+    localStorage.removeItem("mcadmin_token");
+    location.reload();
+  },
+
+  /* ------------------- SHELL RENDER ------------------- */
+  render() {
+    const root = document.getElementById("app-root");
+    root.innerHTML = `
+      <!-- Fixed Left Sidebar (11 Exact Categories) -->
+      <aside id="sidebar">
+        <div id="sidebar-top">
+          <div class="sidebar-brand">
+            <div class="brand-icon">MC</div>
+            <div class="brand-info">
+              <span class="brand-name">PalviServer</span>
+              <span class="brand-sub">mcadmin.palvi.org</span>
+            </div>
+          </div>
+
+          <div class="sidebar-status-pill">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span class="status-indicator-dot" id="sidebar-dot"></span>
+              <span style="font-size:11px;font-weight:600;text-transform:uppercase;" id="sidebar-state-text">Offline</span>
+            </div>
+            <span style="font-size:11px;color:var(--text-muted);" id="sidebar-player-count">0/8</span>
+          </div>
+
+          <!-- 11 CATEGORIES IN EXACT REQUIRED ORDER -->
+          <button class="sidebar-nav-item active" data-tab="server" onclick="app.setTab('server')">
+            ${ICONS.server}
+            <span>1. Server</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="properties" onclick="app.setTab('properties')">
+            ${ICONS.properties}
+            <span>2. Server Properties</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="console" onclick="app.setTab('console')">
+            ${ICONS.console}
+            <span>3. Console</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="log" onclick="app.setTab('log')">
+            ${ICONS.log}
+            <span>4. Log</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="players" onclick="app.setTab('players')">
+            ${ICONS.players}
+            <span>5. Players</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="software" onclick="app.setTab('software')">
+            ${ICONS.software}
+            <span>6. Software</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="mods" onclick="app.setTab('mods')">
+            ${ICONS.mods}
+            <span>7. Mods</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="files" onclick="app.setTab('files')">
+            ${ICONS.files}
+            <span>8. Files</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="worlds" onclick="app.setTab('worlds')">
+            ${ICONS.worlds}
+            <span>9. Worlds</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="backups" onclick="app.setTab('backups')">
+            ${ICONS.backups}
+            <span>10. Backups</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="access" onclick="app.setTab('access')">
+            ${ICONS.access}
+            <span>11. Access</span>
+          </button>
+        </div>
+
+        <div id="sidebar-footer">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="font-size:12px;color:var(--text-secondary);font-weight:500;">admin</span>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="app.logout()">${ICONS.logout} Sign Out</button>
+        </div>
+      </aside>
+
+      <!-- Main Fluid Content Area -->
+      <div id="content-area">
+        <header id="topbar">
+          <div class="topbar-title" id="topbar-view-title">Server Overview</div>
+          <div class="topbar-actions">
+            <div class="live-beacon">
+              <span class="beacon-dot" id="topbar-beacon-dot"></span>
+              <span id="topbar-beacon-text">ONLINE</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-secondary);margin-right:8px;">
+              Standby: <span id="topbar-idle-timer" style="color:var(--text-primary);font-weight:600;">—</span>
+            </div>
+          </div>
+        </header>
+
+        <main id="main-content">
+          <!-- Dynamically injected -->
+        </main>
+      </div>
+
+      <div id="modal-overlay" class="modal-overlay" style="display:none;">
+        <div id="modal-body" class="modal-content"></div>
+      </div>
+    `;
+  },
+
+  /* ------------------- UTILITIES ------------------- */
+  escapeHtml(str) {
+    if (str === null || str === undefined) return "";
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  },
+
+  formatSeconds(sec) {
+    if (sec <= 0) return "Standby";
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 };
 
