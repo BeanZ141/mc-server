@@ -1,0 +1,15 @@
+[Unit]
+Description=Minecraft Container Watcher & Media Stack Coordinator
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+Environment="GRACE=300"
+ExecStart=/usr/local/bin/mc-watch
+Restart=always
+RestartSec=5
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

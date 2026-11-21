@@ -1,0 +1,69 @@
+networks:
+  minecraft-network:
+    external: true
+  mc-panel-net:
+    driver: bridge
+    internal: true
+
+services:
+  docker-socket-proxy:
+    image: tecnativa/docker-socket-proxy:latest
+    container_name: mc-socket-proxy
+    restart: unless-stopped
+    environment:
+      CONTAINERS: "1"
+      POST: "1"
+      ALLOW_START: "1"
+      ALLOW_STOP: "1"
+      ALLOW_RESTARTS: "1"
+      EXEC: "0"
+      IMAGES: "0"
+      VOLUMES: "0"
+      NETWORKS: "0"
+      BUILD: "0"
+      SWARM: "0"
+      SYSTEM: "0"
+      SERVICES: "0"
+      TASKS: "0"
+      INFO: "0"
+      LOG_LEVEL: warning
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - mc-panel-net
+
+  mc-panel:
+    build: .
+    image: mc-panel:latest
+    container_name: mc-panel
+    restart: unless-stopped
+    ports:
+      - "3555:3555"
+    security_opt:
+      - no-new-privileges:true
+    user: "1000:1000"
+    environment:
+      PORT: "3555"
+      DATA_DIR: "/data"
+      MINECRAFT_DATA_DIR: "/server-data"
+      STACKS_DIR: "/stacks"
+      MC_ENV_PATH: "/stacks/mc.env"
+      MC_WATCH_STATE_PATH: "/run/mc-watch/state.json"
+      HELPER_SOCKET_PATH: "/run/mc-admin-helper/helper.sock"
+      BACKUP_DIR: "/backups"
+      DOCKER_HOST: "http://docker-socket-proxy:2375"
+      RCON_HOST: "mc"
+      RCON_PORT: "25575"
+      TZ: "Asia/Kolkata"
+    volumes:
+      - /opt/containers/mc-panel:/data
+      - /programming/minecraft:/server-data:rw
+      - /opt/stacks/minecraft:/stacks:rw
+      - /run/mc-watch:/run/mc-watch:ro
+      - /run/mc-admin-helper:/run/mc-admin-helper:rw
+      - /mnt/media/backups/minecraft:/backups:ro
+    networks:
+      - minecraft-network
+      - mc-panel-net
+    depends_on:
+      - docker-socket-proxy

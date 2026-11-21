@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+# /usr/local/bin/mc-watch
+# Listens to Docker events for mc container.
+# On start: runs media-stop.
+# On die: waits GRACE seconds then runs media-start.
+# Writes current state to /run/mc-watch/state.json for mcadmin panel.
+
+set -euo pipefail
+
+LOG_TAG="mc-watch"
+STATE_DIR="/run/mc-watch"
+STATE_FILE="${STATE_DIR}/state.json"
+GRACE="${GRACE:-300}"
+PENDING_PID_FILE="${STATE_DIR}/pending_timer.pid"
+
+mkdir -p "${STATE_DIR}"
+chmod 0755 "${STATE_DIR}"
+
+log() {
+    local msg="$1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ${msg}"
+    logger -t "${LOG_TAG}" "${msg}"
+}
+
+write_state() {
+    local mc_state="$1"
+    local media_state="$2"
+    local media_start_at="$3"
+    local grace_val="$4"
+
+    local start_at_json="null"
+    if [[ -n "${media_start_at}" && "${media_start_at}" != "null" ]]; then
+        start_at_json="\"${media_start_at}\""
+    fi
+
+    local tmp_file="${STATE_FILE}.tmp.$$"
+    cat <<EOF > "${tmp_file}"
+{
+  "mc": "${mc_state}",
+  "media": "${media_state}",
+  "media_start_at": ${start_at_json},
+  "grace": ${grace_val}
+}
+EOF
+    mv -f "${tmp_file}" "${STATE_FILE}"
+    chmod 0644 "${STATE_FILE}"
+}
+
+cancel_pending_timer() {
+    if [[ -f "${PENDING_PID_FILE}" ]]; then
+        local pid
+        pid=$(cat "${PENDING_PID_FILE}" 2>/dev/null || true)
+        if [[ -n "${pid}" ]] && kill -0 "${pid}" 2>/dev/null; then
+            log "Cancelling pending media-start timer (pid ${pid})"
+            kill "${pid}" 2>/dev/null || true
+        fi
+        rm -f "${PENDING_PID_FILE}"
+    fi
+}
+
+# Initial status detection
+init_state() {
+    local mc_running
+    mc_running=$(docker inspect -f '{{.State.Running}}' mc 2>/dev/null || echo "false")
+    if [[ "${mc_running}" == "true" ]]; then
+        write_state "running" "stopped" "null" "${GRACE}"
+    else
+        write_state "stopped" "running" "null" "${GRACE}"
+    fi
+}
+
+log "mc-watch daemon started with GRACE=${GRACE}s"
+init_state
+
+# Handle mc events in a loop
+docker events --filter 'container=mc' --filter 'event=start' --filter 'event=die' --format '{{.Action}}' | while read -r event; do
+    case "${event}" in
+        start)
+            log "Docker event: mc started"
+            cancel_pending_timer
+            if [[ -x "/usr/local/bin/media-stop" ]]; then
+                log "Executing /usr/local/bin/media-stop"
+                /usr/local/bin/media-stop || true
+            fi
+            write_state "running" "stopped" "null" "${GRACE}"
+            ;;
+        die)
+            log "Docker event: mc stopped/died"
+            cancel_pending_timer
+
+            # Calculate media_start_at timestamp
+            TARGET_SEC=$(( $(date +%s) + GRACE ))
+            MEDIA_START_AT=$(date -d "@${TARGET_SEC}" --iso-8601=seconds 2>/dev/null || date -r "${TARGET_SEC}" '+%Y-%m-%dT%H:%M:%S%z')
+
+            log "Waiting ${GRACE}s grace period until ${MEDIA_START_AT} before starting media"
+            write_state "stopped" "stopped" "${MEDIA_START_AT}" "${GRACE}"
+
+            # Run countdown in background so events loop continues
+            (
+                echo "$$" > "${PENDING_PID_FILE}"
+                sleep "${GRACE}"
+                rm -f "${PENDING_PID_FILE}"
+
+                log "Grace period expired; executing /usr/local/bin/media-start"
+                if [[ -x "/usr/local/bin/media-start" ]]; then
+                    /usr/local/bin/media-start || true
+                fi
+                write_state "stopped" "running" "null" "${GRACE}"
+            ) &
+            ;;
+    esac
+done

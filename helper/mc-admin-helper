@@ -1,0 +1,223 @@
+#!/usr/bin/env bash
+# /usr/local/bin/mc-admin-helper
+# Root-owned privileged helper for mcadmin.palvi.org
+# Strictly accepts only named actions. No arbitrary commands allowed.
+
+set -euo pipefail
+
+LOG_TAG="mc-admin-helper"
+MINECRAFT_STACK_DIR="/opt/stacks/minecraft"
+MINECRAFT_DATA_DIR="/programming/minecraft"
+BACKUP_DIR="/mnt/media/backups/minecraft"
+WORLD_NAME="BabaSquadWorld"
+
+log() {
+    local msg="$1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ${msg}"
+    logger -t "${LOG_TAG}" "${msg}"
+}
+
+error_exit() {
+    local msg="$1"
+    echo "[ERROR] ${msg}" >&2
+    logger -t "${LOG_TAG}" "ERROR: ${msg}"
+    exit 1
+}
+
+# Read command from stdin (single line)
+read -r CMD_LINE || true
+
+if [[ -z "${CMD_LINE:-}" ]]; then
+    error_exit "No command provided on stdin."
+fi
+
+# Split command into action and arguments
+read -r ACTION ARG1 REST <<< "${CMD_LINE} "
+
+case "${ACTION}" in
+    recreate-mc)
+        log "Starting action: recreate-mc"
+        
+        if [[ ! -d "${MINECRAFT_STACK_DIR}" ]]; then
+            error_exit "Minecraft stack directory ${MINECRAFT_STACK_DIR} does not exist."
+        fi
+
+        cd "${MINECRAFT_STACK_DIR}"
+
+        # If mc is currently running, save and stop
+        MC_STATUS=$(docker inspect -f '{{.State.Status}}' mc 2>/dev/null || echo "not_found")
+        if [[ "${MC_STATUS}" == "running" ]]; then
+            log "mc is running; sending save-all flush before recreation"
+            docker exec mc rcon-cli save-all flush 2>/dev/null || true
+            sleep 2
+            log "Stopping mc"
+            docker stop mc || true
+        fi
+
+        log "Step 1/5: docker compose up --no-start mc"
+        docker compose up --no-start mc
+
+        log "Step 2/5: docker start mc"
+        docker start mc
+
+        log "Step 3/5: waiting 5 seconds..."
+        sleep 5
+
+        log "Step 4/5: docker stop mc"
+        docker stop mc
+
+        log "Step 5/5: docker restart lazymc"
+        docker restart lazymc
+
+        log "recreate-mc sequence completed successfully."
+        echo "SUCCESS: recreate-mc completed"
+        ;;
+
+    set-grace)
+        if [[ -z "${ARG1:-}" ]]; then
+            error_exit "set-grace requires an integer argument (seconds)."
+        fi
+
+        # Validate that ARG1 is an integer between 60 and 3600
+        if ! [[ "${ARG1}" =~ ^[0-9]+$ ]]; then
+            error_exit "Invalid grace value: '${ARG1}'. Must be an integer."
+        fi
+
+        GRACE_VAL=$((ARG1))
+        if (( GRACE_VAL < 60 || GRACE_VAL > 3600 )); then
+            error_exit "Grace value must be between 60 and 3600 seconds (got ${GRACE_VAL})."
+        fi
+
+        log "Setting mc-watch grace period to ${GRACE_VAL}s"
+
+        DROPIN_DIR="/etc/systemd/system/mc-watch.service.d"
+        mkdir -p "${DROPIN_DIR}"
+
+        cat <<EOF > "${DROPIN_DIR}/override.conf"
+[Service]
+Environment="GRACE=${GRACE_VAL}"
+EOF
+
+        systemctl daemon-reload
+        systemctl restart mc-watch
+
+        log "mc-watch grace updated to ${GRACE_VAL}s and service restarted."
+        echo "SUCCESS: grace set to ${GRACE_VAL}s"
+        ;;
+
+    start-media)
+        log "Starting action: start-media now"
+        
+        if [[ -x "/usr/local/bin/media-start" ]]; then
+            /usr/local/bin/media-start
+            log "media-start executed."
+            echo "SUCCESS: media-start executed"
+        else
+            error_exit "/usr/local/bin/media-start script not found or not executable."
+        fi
+        ;;
+
+    backup)
+        log "Starting action: backup"
+        
+        mkdir -p "${BACKUP_DIR}"
+
+        TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
+        BACKUP_FILE="${BACKUP_DIR}/world_${TIMESTAMP}.tar.gz"
+
+        MC_STATUS=$(docker inspect -f '{{.State.Status}}' mc 2>/dev/null || echo "not_found")
+        ONLINE=false
+        if [[ "${MC_STATUS}" == "running" ]]; then
+            ONLINE=true
+            log "Server is running: holding world save during backup"
+            docker exec mc rcon-cli save-off || true
+            docker exec mc rcon-cli save-all flush || true
+            sleep 1
+        fi
+
+        log "Creating archive ${BACKUP_FILE} from ${MINECRAFT_DATA_DIR}/${WORLD_NAME}"
+        if [[ ! -d "${MINECRAFT_DATA_DIR}/${WORLD_NAME}" ]]; then
+            if [[ "${ONLINE}" == "true" ]]; then
+                docker exec mc rcon-cli save-on || true
+            fi
+            error_exit "World folder ${MINECRAFT_DATA_DIR}/${WORLD_NAME} not found."
+        fi
+
+        tar -czf "${BACKUP_FILE}" -C "${MINECRAFT_DATA_DIR}" "${WORLD_NAME}"
+
+        if [[ "${ONLINE}" == "true" ]]; then
+            docker exec mc rcon-cli save-on || true
+            log "Server world saving resumed (save-on)."
+        fi
+
+        BACKUP_SIZE=$(du -sh "${BACKUP_FILE}" | cut -f1)
+        log "Backup completed: ${BACKUP_FILE} (${BACKUP_SIZE})"
+
+        # Retain last 7 backups, purge older world_*.tar.gz
+        log "Pruning old backups in ${BACKUP_DIR} (retaining last 7)..."
+        # shellcheck disable=SC2012
+        OLD_BACKUPS=$(ls -1t "${BACKUP_DIR}"/world_*.tar.gz 2>/dev/null | tail -n +8 || true)
+        if [[ -n "${OLD_BACKUPS}" ]]; then
+            echo "${OLD_BACKUPS}" | xargs rm -f
+            log "Pruned old backups."
+        fi
+
+        echo "SUCCESS: backup created world_${TIMESTAMP}.tar.gz (${BACKUP_SIZE})"
+        ;;
+
+    restore)
+        if [[ -z "${ARG1:-}" ]]; then
+            error_exit "restore requires a backup ID argument."
+        fi
+
+        BACKUP_ID="${ARG1}"
+        # Validate backup ID: only letters, numbers, underscores, dashes, and optional .tar.gz
+        if ! [[ "${BACKUP_ID}" =~ ^[a-zA-Z0-9_-]+(\.tar\.gz)?$ ]]; then
+            error_exit "Invalid backup ID: '${BACKUP_ID}'. Must be alphanumeric."
+        fi
+
+        if [[ "${BACKUP_ID}" != *.tar.gz ]]; then
+            BACKUP_FILE="${BACKUP_DIR}/${BACKUP_ID}.tar.gz"
+        else
+            BACKUP_FILE="${BACKUP_DIR}/${BACKUP_ID}"
+        fi
+
+        if [[ ! -f "${BACKUP_FILE}" ]]; then
+            error_exit "Backup file ${BACKUP_FILE} does not exist."
+        fi
+
+        # Minecraft MUST be stopped before restore
+        MC_STATUS=$(docker inspect -f '{{.State.Status}}' mc 2>/dev/null || echo "not_found")
+        if [[ "${MC_STATUS}" == "running" ]]; then
+            error_exit "Cannot restore while Minecraft is running! Stop the server first."
+        fi
+
+        log "Starting restore for ${BACKUP_ID}"
+
+        # Safety backup of current world before replacing
+        SAFETY_TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
+        SAFETY_BACKUP="${BACKUP_DIR}/safety_before_restore_${SAFETY_TIMESTAMP}.tar.gz"
+        if [[ -d "${MINECRAFT_DATA_DIR}/${WORLD_NAME}" ]]; then
+            log "Creating safety backup before restore: ${SAFETY_BACKUP}"
+            tar -czf "${SAFETY_BACKUP}" -C "${MINECRAFT_DATA_DIR}" "${WORLD_NAME}"
+            log "Safety backup created."
+        fi
+
+        # Remove old world folder and extract
+        log "Removing old world folder ${MINECRAFT_DATA_DIR}/${WORLD_NAME}"
+        rm -rf "${MINECRAFT_DATA_DIR:?}/${WORLD_NAME}"
+
+        log "Extracting ${BACKUP_FILE} to ${MINECRAFT_DATA_DIR}"
+        tar -xzf "${BACKUP_FILE}" -C "${MINECRAFT_DATA_DIR}"
+
+        # Fix ownership
+        chown -R 1000:1000 "${MINECRAFT_DATA_DIR}/${WORLD_NAME}" 2>/dev/null || true
+
+        log "Restore completed successfully for ${BACKUP_ID}."
+        echo "SUCCESS: restore completed for ${BACKUP_ID}"
+        ;;
+
+    *)
+        error_exit "Unknown action: '${ACTION}'. Allowed actions: recreate-mc, set-grace, start-media, backup, restore."
+        ;;
+esac

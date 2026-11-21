@@ -1,0 +1,43 @@
+networks:
+  minecraft-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+services:
+  lazymc:
+    image: ghcr.io/joesturge/lazymc-docker-proxy:latest
+    container_name: lazymc
+    restart: unless-stopped
+    networks:
+      minecraft-network:
+        ipv4_address: 172.30.0.2
+    ports:
+      - "26656:25565"
+    volumes:
+      - /programming/minecraft:/server:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  mc:
+    image: itzg/minecraft-server:latest
+    container_name: mc
+    restart: "no"
+    stop_grace_period: 60s
+    networks:
+      minecraft-network:
+        ipv4_address: 172.30.0.3
+    labels:
+      - lazymc.enabled=true
+      - lazymc.group=mc
+      - lazymc.server.address=mc:25565
+      - lazymc.time.sleep_after=300
+      - "lazymc.motd.sleeping=§2PalviServer is asleep\n§7Join to wake it up"
+      - "lazymc.motd.starting=§ePalviServer Waking up...\n§7Takes about 45 seconds"
+      - "lazymc.join.kick.starting=Server is waking up.\nWait about 20 seconds, then click Join again."
+    env_file:
+      - mc.env
+    volumes:
+      - /programming/minecraft:/data
+    stdin_open: true
+    tty: true

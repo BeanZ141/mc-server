@@ -1,0 +1,13 @@
+[Unit]
+Description=Minecraft Admin Helper Socket
+PartOf=mc-admin-helper@.service
+
+[Socket]
+ListenStream=/run/mc-admin-helper/helper.sock
+SocketMode=0660
+SocketUser=root
+SocketGroup=1000
+Accept=yes
+
+[Install]
+WantedBy=sockets.target

@@ -1,0 +1,29 @@
+# SQLite Database & Data directory
+data/*.db
+data/*.db-journal
+data/*.db-shm
+data/*.db-wal
+data/*.sqlite
+
+# Python bytecode & caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Local testing & runtime mock directories
+mock_minecraft/
+mock_mc_watch/
+backups/
+*.log
+
+# Environment variables & local secrets
+.env
+.rcon-cli.env
+
+# Editor & OS artifacts
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

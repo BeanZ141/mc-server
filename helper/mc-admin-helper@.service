@@ -1,0 +1,11 @@
+[Unit]
+Description=Minecraft Admin Helper Instance
+Requires=mc-admin-helper.socket
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/mc-admin-helper
+StandardInput=socket
+StandardOutput=socket
+StandardError=journal
+User=root
