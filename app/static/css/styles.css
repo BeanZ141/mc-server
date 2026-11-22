@@ -929,7 +929,7 @@ tr:hover td {
 }
 
 .keycap:hover {
-  background-color: var(--bg-surface-elevated);
+  background-color: var(--border-high);
   cursor: pointer;
 }
 

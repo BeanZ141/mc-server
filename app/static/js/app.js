@@ -434,15 +434,28 @@ const app = {
 
     if (tab === "server") {
       main.innerHTML = `
-        <div class="card" style="margin-bottom:20px;padding:24px 28px;">
+        <div class="card" style="margin-bottom:20px;padding:22px 28px;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
-            <div style="display:flex;flex-direction:column;gap:6px;">
-              <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);">Minecraft Direct Connect</span>
-              <div style="display:flex;align-items:center;gap:12px;">
+            <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+              <div>
+                <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:6px;">Server Address</span>
                 <span class="copy-pill" id="copy-addr-btn" onclick="app.copyServerAddress()" title="Click to copy">
                   ${ICONS.copy} mc.palvi.org:26656
                 </span>
-                <span style="font-size:12px;color:var(--text-secondary);">Direct Connect Port 26656</span>
+              </div>
+              <div style="border-left:1px solid var(--border-subtle);padding-left:24px;">
+                <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:6px;">Software & Version</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:13.5px;font-weight:600;color:var(--text-primary);" id="server-software-val">-</span>
+                  <span class="badge" id="server-version-val">-</span>
+                </div>
+              </div>
+              <div style="border-left:1px solid var(--border-subtle);padding-left:24px;">
+                <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:6px;">Status</span>
+                <div style="display:flex;align-items:center;gap:8px;" id="server-state-wrapper">
+                  <span class="status-indicator-dot" id="server-state-dot"></span>
+                  <span style="font-size:13px;font-weight:700;text-transform:uppercase;" id="server-state-text">-</span>
+                </div>
               </div>
             </div>
 
@@ -475,44 +488,8 @@ const app = {
 
         <div class="grid-2" style="margin-bottom:20px;">
           <div class="card" style="padding:22px 24px;">
-            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:14px;border-bottom:1px solid var(--border-subtle);">
-              <span class="card-title" style="margin:0;">SERVER CONFIGURATION</span>
-              <span class="badge" id="server-cfg-badge" style="color:#22c55e;">FABRIC 26.3</span>
-            </div>
-            <div style="display:flex;flex-direction:column;gap:12px;">
-              <div class="metric-row">
-                <span class="metric-label">Software Platform</span>
-                <span class="metric-value" id="server-software-val">-</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Minecraft Version</span>
-                <span class="metric-value" id="server-version-val">-</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Server State</span>
-                <div style="display:flex;align-items:center;gap:6px;" id="server-state-wrapper">
-                  <span class="status-indicator-dot" id="server-state-dot"></span>
-                  <span style="font-size:13.5px;font-weight:700;text-transform:uppercase;" id="server-state-text">-</span>
-                </div>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Active World</span>
-                <span class="metric-value" id="server-world-val">BabaSquadWorld</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Host Port / Container</span>
-                <span class="metric-value">26656 / 25565</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Online Mode Auth</span>
-                <span class="metric-value">Disabled (LAN / Offline)</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="card" style="padding:22px 24px;">
             <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span class="progress-header-title">MEMORY ALLOCATION</span>
+              <span class="progress-header-title">MINECRAFT HEAP ALLOCATION</span>
               <span class="badge" id="ram-header-badge">-</span>
             </div>
             
@@ -535,7 +512,7 @@ const app = {
                 <span class="breakdown-box-val" id="ram-box-alloc">-</span>
               </div>
               <div class="breakdown-box">
-                <span class="breakdown-box-label">CPU LOAD</span>
+                <span class="breakdown-box-label">CONTAINER CPU</span>
                 <span class="breakdown-box-val" id="cpu-stat-val">-</span>
               </div>
               <div class="breakdown-box">
@@ -548,12 +525,10 @@ const app = {
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="grid-2" style="margin-bottom:20px;">
           <div class="card" style="padding:22px 24px;">
             <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-              <span class="progress-header-title">HOST STORAGE DISK SPACE</span>
+              <span class="progress-header-title">HOST DISK STORAGE</span>
               <span class="badge" id="disk-header-badge">-</span>
             </div>
 
@@ -561,7 +536,7 @@ const app = {
               <div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div>
             </div>
 
-            <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+            <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;">
               <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
                 USED <strong id="disk-used-strong" style="color:var(--text-primary);margin-left:4px;">-</strong>
               </div>
@@ -570,19 +545,6 @@ const app = {
               </div>
             </div>
 
-            <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border-subtle);padding-top:12px;">
-              <div class="metric-row">
-                <span class="metric-label">Server Data Path</span>
-                <span class="metric-value">/programming/minecraft</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Total Storage Drive</span>
-                <span class="metric-value" id="server-analytics-disk">-</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="card" style="padding:22px 24px;">
             <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span class="progress-header-title">HOST SYSTEM RAM</span>
               <span class="badge" id="host-ram-header-badge">-</span>
@@ -592,7 +554,7 @@ const app = {
               <div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div>
             </div>
 
-            <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+            <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;">
               <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
                 USED <strong id="host-ram-used-strong" style="color:var(--text-primary);margin-left:4px;">-</strong>
               </div>
@@ -600,10 +562,51 @@ const app = {
                 FREE <strong id="host-ram-free-strong" style="color:var(--text-primary);margin-left:4px;">-</strong>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border-subtle);padding-top:12px;">
+        <div class="card" style="padding:22px 24px;">
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:18px;border-bottom:1px solid var(--border-subtle);">
+            <span class="card-title" style="margin:0;">SYSTEM TELEMETRY & WORKLOAD MONITOR</span>
+            <span class="badge" id="telemetry-health-badge">LIVE METRICS</span>
+          </div>
+
+          <div style="margin-bottom:20px;">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">
+              System Load Averages (os.getloadavg)
+            </div>
+            <div class="analytics-kpi-grid" style="margin-bottom:0;">
+              <div class="analytics-kpi-card" style="padding:16px;">
+                <div class="analytics-kpi-label">1-Minute Load</div>
+                <div class="analytics-kpi-value-row">
+                  <span class="analytics-kpi-value" id="load-1m-val">-</span>
+                </div>
+                <div class="analytics-kpi-sub">Immediate processor demand</div>
+              </div>
+              <div class="analytics-kpi-card" style="padding:16px;">
+                <div class="analytics-kpi-label">5-Minute Load</div>
+                <div class="analytics-kpi-value-row">
+                  <span class="analytics-kpi-value" id="load-5m-val">-</span>
+                </div>
+                <div class="analytics-kpi-sub">Medium-term run queue</div>
+              </div>
+              <div class="analytics-kpi-card" style="padding:16px;">
+                <div class="analytics-kpi-label">15-Minute Load</div>
+                <div class="analytics-kpi-value-row">
+                  <span class="analytics-kpi-value" id="load-15m-val">-</span>
+                </div>
+                <div class="analytics-kpi-sub">Sustained system pressure</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="border-top:1px solid var(--border-subtle);padding-top:16px;">
+            <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">
+              Hardware & Environment Diagnostics
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
               <div class="metric-row">
-                <span class="metric-label">CPU Temperature</span>
+                <span class="metric-label">CPU Core Temperature</span>
                 <span class="metric-value" id="server-analytics-temp">-</span>
               </div>
               <div class="metric-row">
@@ -611,83 +614,13 @@ const app = {
                 <span class="metric-value" id="server-analytics-load">-</span>
               </div>
               <div class="metric-row">
-                <span class="metric-label">Host OS & Platform</span>
+                <span class="metric-label">Storage Drive Footprint</span>
+                <span class="metric-value" id="server-analytics-disk">-</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Host Operating System & Kernel</span>
                 <span class="metric-value" id="server-analytics-os">-</span>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card" style="padding:22px 24px;">
-          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:14px;border-bottom:1px solid var(--border-subtle);">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span class="card-title" style="margin:0;">24-HOUR SERVER TELEMETRY & ACTIVITY TIMELINE</span>
-            </div>
-            <span class="badge" id="analytics-timeline-badge" style="color:#22c55e;">100% OPERATIONAL</span>
-          </div>
-
-          <div style="margin-bottom:20px;">
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-              <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);">Hourly State Breakdown</span>
-              <span style="font-size:11px;color:var(--text-secondary);">Last 24 Hours</span>
-            </div>
-            <div style="display:flex;gap:3px;width:100%;height:32px;margin-bottom:6px;">
-              ${Array.from({length: 24}).map((_, i) => `<div class="uptime-block" style="background:#22c55e;" title="Hour ${i + 1}: Online"></div>`).join("")}
-            </div>
-            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);text-transform:uppercase;">
-              <span>24h ago</span>
-              <span>18h ago</span>
-              <span>12h ago</span>
-              <span>6h ago</span>
-              <span>now</span>
-            </div>
-          </div>
-
-          <div class="chart-container" style="height:180px;margin-bottom:20px;display:flex;flex-direction:column;justify-content:flex-end;">
-            <svg viewBox="0 0 800 160" style="width:100%;height:100%;overflow:visible;">
-              <line x1="0" y1="40" x2="800" y2="40" stroke="var(--border-subtle)" stroke-dasharray="3,3" />
-              <line x1="0" y1="80" x2="800" y2="80" stroke="var(--border-subtle)" stroke-dasharray="3,3" />
-              <line x1="0" y1="120" x2="800" y2="120" stroke="var(--border-subtle)" stroke-dasharray="3,3" />
-              <path d="M 0 130 Q 150 110, 300 90 T 500 80 T 650 60 T 800 50" fill="none" stroke="var(--text-primary)" stroke-width="2" />
-              <path d="M 0 150 Q 200 140, 400 130 T 600 120 T 800 110" fill="none" stroke="#22c55e" stroke-width="1.8" />
-              <circle cx="800" cy="50" r="4" fill="var(--text-primary)" />
-              <circle cx="800" cy="110" r="4" fill="#22c55e" />
-            </svg>
-            <div style="display:flex;justify-content:flex-end;gap:18px;margin-top:8px;font-size:11px;">
-              <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;background:var(--text-primary);display:inline-block;"></span> Memory Allocation</span>
-              <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;background:#22c55e;display:inline-block;"></span> Tick Rate Stability</span>
-            </div>
-          </div>
-
-          <div class="analytics-kpi-grid" style="margin-bottom:0;">
-            <div class="analytics-kpi-card" style="padding:16px;">
-              <div class="analytics-kpi-label">Peak Player Concurrency</div>
-              <div class="analytics-kpi-value-row">
-                <span class="analytics-kpi-value" id="analytics-peak-players">8 MAX</span>
-              </div>
-              <div class="analytics-kpi-sub">Standard Slot Limit</div>
-            </div>
-            <div class="analytics-kpi-card" style="padding:16px;">
-              <div class="analytics-kpi-label">Average Tick Rate</div>
-              <div class="analytics-kpi-value-row">
-                <span class="analytics-kpi-value">20.0</span>
-                <span class="analytics-kpi-badge">TPS</span>
-              </div>
-              <div class="analytics-kpi-sub">100% Target Frequency</div>
-            </div>
-            <div class="analytics-kpi-card" style="padding:16px;">
-              <div class="analytics-kpi-label">Inactivity Sleep Timer</div>
-              <div class="analytics-kpi-value-row">
-                <span class="analytics-kpi-value">5 MIN</span>
-              </div>
-              <div class="analytics-kpi-sub">Managed by LazyMC Proxy</div>
-            </div>
-            <div class="analytics-kpi-card" style="padding:16px;">
-              <div class="analytics-kpi-label">Active World Storage</div>
-              <div class="analytics-kpi-value-row">
-                <span class="analytics-kpi-value" id="analytics-world-name">BABA</span>
-              </div>
-              <div class="analytics-kpi-sub">Default Overworld Dimension</div>
             </div>
           </div>
         </div>
@@ -1062,11 +995,61 @@ const app = {
     const loadEl = document.getElementById("server-analytics-load");
     const osEl = document.getElementById("server-analytics-os");
 
+    const l1 = document.getElementById("load-1m-val");
+    const l5 = document.getElementById("load-5m-val");
+    const l15 = document.getElementById("load-15m-val");
+
+    if (host && host.load_average && host.load_average.length >= 3) {
+      if (l1) l1.innerText = host.load_average[0];
+      if (l5) l5.innerText = host.load_average[1];
+      if (l15) l15.innerText = host.load_average[2];
+    } else {
+      if (l1) l1.innerText = "-";
+      if (l5) l5.innerText = "-";
+      if (l15) l15.innerText = "-";
+    }
+
     if (tempEl) tempEl.innerText = (host && host.cpu_temp !== null && host.cpu_temp !== undefined) ? `${host.cpu_temp} °C` : "-";
     if (memEl) memEl.innerText = (host && host.memory) ? `${host.memory.used_mb} MB / ${host.memory.total_mb} MB (${host.memory.percent}%)` : "-";
     if (diskEl) diskEl.innerText = (host && host.disk) ? `${host.disk.used_gb} GB / ${host.disk.total_gb} GB (${host.disk.percent}%)` : "-";
     if (loadEl) loadEl.innerText = (host && host.load_average) ? host.load_average.join(", ") : "-";
     if (osEl) osEl.innerText = (host && host.os_info) ? host.os_info : "-";
+
+    if (host && host.disk) {
+      const diskBadge = document.getElementById("disk-header-badge");
+      if (diskBadge) diskBadge.innerText = `${host.disk.total_gb} GB TOTAL`;
+      const diskUsed = document.getElementById("disk-used-strong");
+      if (diskUsed) diskUsed.innerText = `${host.disk.used_gb} GB (${host.disk.percent}%)`;
+      const diskFree = document.getElementById("disk-free-strong");
+      if (diskFree) diskFree.innerText = `${host.disk.free_gb} GB`;
+      this.updateSquareMeter("disk-meter-track", host.disk.percent, host.disk.percent > 90 ? "crit" : (host.disk.percent > 75 ? "warn" : ""));
+    } else {
+      const diskBadge = document.getElementById("disk-header-badge");
+      if (diskBadge) diskBadge.innerText = "-";
+      const diskUsed = document.getElementById("disk-used-strong");
+      if (diskUsed) diskUsed.innerText = "-";
+      const diskFree = document.getElementById("disk-free-strong");
+      if (diskFree) diskFree.innerText = "-";
+      this.updateSquareMeter("disk-meter-track", 0);
+    }
+
+    if (host && host.memory) {
+      const hostRamBadge = document.getElementById("host-ram-header-badge");
+      if (hostRamBadge) hostRamBadge.innerText = `${(host.memory.total_mb / 1024).toFixed(1)} GB TOTAL`;
+      const hostRamUsed = document.getElementById("host-ram-used-strong");
+      if (hostRamUsed) hostRamUsed.innerText = `${(host.memory.used_mb / 1024).toFixed(1)} GB (${host.memory.percent}%)`;
+      const hostRamFree = document.getElementById("host-ram-free-strong");
+      if (hostRamFree) hostRamFree.innerText = `${(host.memory.free_mb / 1024).toFixed(1)} GB`;
+      this.updateSquareMeter("host-ram-meter-track", host.memory.percent, host.memory.percent > 90 ? "crit" : (host.memory.percent > 75 ? "warn" : ""));
+    } else {
+      const hostRamBadge = document.getElementById("host-ram-header-badge");
+      if (hostRamBadge) hostRamBadge.innerText = "-";
+      const hostRamUsed = document.getElementById("host-ram-used-strong");
+      if (hostRamUsed) hostRamUsed.innerText = "-";
+      const hostRamFree = document.getElementById("host-ram-free-strong");
+      if (hostRamFree) hostRamFree.innerText = "-";
+      this.updateSquareMeter("host-ram-meter-track", 0);
+    }
   },
 
   async loadProperties() {
