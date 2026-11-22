@@ -12,16 +12,18 @@ class ModrinthClient:
     def __init__(self, base_url: str = MODRINTH_API_BASE):
         self.base_url = base_url
 
-    async def search_mods(self, query: str = "", limit: int = 20, offset: int = 0) -> dict:
-        """Searches Modrinth specifically for Fabric mods compatible with Minecraft 26.3"""
-        # Facet query: loader = fabric, game_version = 26.3, project_type = mod
-        facets = '[["categories:fabric"],["versions:26.3"],["project_type:mod"]]'
+    async def search_mods(self, query: str = "", limit: int = 20, offset: int = 0, sort: str = "downloads", category: str | None = None) -> dict:
+        import json
+        facet_list = [["categories:fabric"], ["versions:26.3"], ["project_type:mod"]]
+        if category and category.lower() != "all":
+            facet_list.append([f"categories:{category.lower()}"])
+        facets = json.dumps(facet_list)
         params = {
             "query": query,
             "limit": limit,
             "offset": offset,
             "facets": facets,
-            "index": "relevance"
+            "index": sort
         }
 
         headers = {

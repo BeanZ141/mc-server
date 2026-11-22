@@ -5,6 +5,8 @@ from app.docker_client import docker_client
 from app.rcon_client import rcon_client
 from app.watcher import watcher
 from app.config import MINECRAFT_DATA_DIR
+from app.settings_manager import settings_manager
+from app.system_metrics import get_system_analytics
 
 router = APIRouter(prefix="/api/status", tags=["status"])
 
@@ -111,6 +113,12 @@ async def get_status(session: dict = Depends(get_current_user_and_session)):
         except Exception:
             uptime_seconds = 0
 
+    env_vars = settings_manager.parse_env()
+    sw_type = env_vars.get("TYPE")
+    sw_version = env_vars.get("VERSION")
+    sw_name = sw_type.capitalize() if sw_type else None
+    analytics = get_system_analytics()
+
     return {
         "state": computed_state,
         "exit_code": exit_code,
@@ -119,5 +127,8 @@ async def get_status(session: dict = Depends(get_current_user_and_session)):
         "stats": stats,
         "players": players,
         "performance": performance,
-        "idle": watcher.get_idle_status()
+        "idle": watcher.get_idle_status(),
+        "software": sw_name,
+        "version": sw_version,
+        "host_analytics": analytics
     }

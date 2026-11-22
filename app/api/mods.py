@@ -20,8 +20,15 @@ async def get_installed_mods(session: dict = Depends(get_current_user_and_sessio
     return modrinth_client.scan_installed_mods(modrinth_projects)
 
 @router.get("/search")
-async def search_mods(q: str = "", limit: int = 20, offset: int = 0, session: dict = Depends(get_current_user_and_session)):
-    results = await modrinth_client.search_mods(query=q, limit=limit, offset=offset)
+async def search_mods(
+    q: str = "",
+    limit: int = 20,
+    offset: int = 0,
+    sort: str = "downloads",
+    category: str | None = None,
+    session: dict = Depends(get_current_user_and_session)
+):
+    results = await modrinth_client.search_mods(query=q, limit=limit, offset=offset, sort=sort, category=category)
     return results
 
 @router.get("/check")

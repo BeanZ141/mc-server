@@ -5,19 +5,8 @@ from pathlib import Path
 from app.config import MC_ENV_PATH, get_minecraft_data_dir
 
 class SettingsManager:
-    def __init__(self, env_path: Path | None = None):
-        self._env_path = env_path
-
-    @property
-    def env_path(self) -> Path:
-        if self._env_path is not None:
-            return self._env_path
-        from app.config import BASE_DIR
-        return Path(os.environ.get("MC_ENV_PATH", BASE_DIR / "mc.env"))
-
-    @env_path.setter
-    def env_path(self, val: Path):
-        self._env_path = val
+    def __init__(self, env_path: Path = MC_ENV_PATH):
+        self.env_path = env_path
 
     def read_raw(self) -> str:
         if not self.env_path.exists():

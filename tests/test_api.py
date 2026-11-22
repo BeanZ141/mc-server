@@ -34,6 +34,9 @@ class TestAPIEndpoints(unittest.TestCase):
             "MODRINTH_PROJECTS=fabric-api,lithium,ferrite-core,krypton,spark,chunky\n"
         )
         os.environ["MC_ENV_PATH"] = str(self.mc_env_path)
+        from app.settings_manager import settings_manager
+        self.orig_env_path = settings_manager.env_path
+        settings_manager.env_path = self.mc_env_path
 
         # Create dummy world structure in MINECRAFT_DATA_DIR
         world_dir = Path(self.temp_dir.name) / "BabaSquadWorld"
@@ -52,6 +55,8 @@ class TestAPIEndpoints(unittest.TestCase):
         self.client = TestClient(app, base_url="https://mcadmin.palvi.org")
 
     def tearDown(self):
+        from app.settings_manager import settings_manager
+        settings_manager.env_path = self.orig_env_path
         self.temp_dir.cleanup()
 
     def _setup_and_auth(self):

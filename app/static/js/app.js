@@ -1,6 +1,3 @@
-// mcadmin.palvi.org — Aternos-Inspired Minecraft Dashboard Client
-// Universal Outfit font, Monochrome Dark Aesthetic, 11 Dedicated Categories
-
 const ICONS = {
   server: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><rect x="2" y="3" width="20" height="7"></rect><rect x="2" y="14" width="20" height="7"></rect><line x1="6" y1="6.5" x2="6.01" y2="6.5"></line><line x1="6" y1="17.5" x2="6.01" y2="17.5"></line></svg>`,
   properties: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>`,
@@ -13,8 +10,7 @@ const ICONS = {
   worlds: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>`,
   backups: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>`,
   access: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><rect x="3" y="11" width="18" height="11" rx="0" ry="0"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`,
-  
-  // Action icons
+  menu: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>`,
   start: `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>`,
   restart: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
   stop: `<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16"></rect></svg>`,
@@ -28,7 +24,8 @@ const ICONS = {
   upload: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`,
   refresh: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
   search: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
-  logout: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`
+  logout: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
+  check: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`
 };
 
 const API = {
@@ -74,24 +71,17 @@ const app = {
   state: {
     authenticated: false,
     setupRequired: false,
-    activeTab: "server", // 1. Server, 2. Properties, 3. Console, 4. Log, etc.
+    activeTab: "server",
+    theme: localStorage.getItem("mcadmin_theme") || "dark",
     status: null,
-    idleSecondsRemaining: 300,
-    
-    // Server Properties
+    idleSecondsRemaining: null,
     properties: null,
-    
-    // Console
     consoleHistory: [],
     consoleHistoryIdx: -1,
-    
-    // Logs
     logs: [],
     logFilter: "",
     autoScrollLogs: true,
-    
-    // Players (5 sections)
-    playerSection: "ops", // 'ops', 'banned_players', 'banned_ips', 'whitelisted', 'offline'
+    playerSection: "ops",
     playersData: {
       ops: [],
       banned_players: [],
@@ -100,35 +90,28 @@ const app = {
       offline_players: [],
       online_players: []
     },
-    
-    // Software
     softwareCatalog: [],
     currentSoftware: null,
-    
-    // Mods
     installedMods: { managed: [], manual: [] },
     modSearchResults: [],
     modSearchLoading: false,
     modQuery: "",
-    
-    // Files
+    modSort: "downloads",
+    modCategory: "all",
     currentFilePath: "",
     fileItems: [],
     fileBreadcrumbs: [],
     editingFile: null,
-    
-    // Worlds
     worldInfo: null,
     worldFiles: [],
-    
-    // Backups
-    diskUsage: null,
+    diskUsage: null
   },
 
   sseLogSource: null,
   statusInterval: null,
 
   async init() {
+    this.setTheme(this.state.theme);
     this.render();
     try {
       const me = await API.request("/api/auth/me");
@@ -148,16 +131,38 @@ const app = {
     }
   },
 
+  setTheme(theme) {
+    this.state.theme = theme;
+    localStorage.setItem("mcadmin_theme", theme);
+    document.documentElement.setAttribute("data-theme", theme);
+    document.querySelectorAll(".theme-btn").forEach(btn => {
+      btn.classList.toggle("active", btn.dataset.theme === theme);
+    });
+  },
+
+  toggleMobileSidebar() {
+    const sb = document.getElementById("sidebar");
+    const bd = document.getElementById("sidebar-backdrop");
+    if (sb) sb.classList.toggle("mobile-open");
+    if (bd) bd.classList.toggle("active");
+  },
+
+  closeMobileSidebar() {
+    const sb = document.getElementById("sidebar");
+    const bd = document.getElementById("sidebar-backdrop");
+    if (sb) sb.classList.remove("mobile-open");
+    if (bd) bd.classList.remove("active");
+  },
+
   startDashboard() {
     this.fetchStatus();
     this.statusInterval = setInterval(() => {
       this.fetchStatus();
     }, 3000);
 
-    // 1-second countdown tick for idle
     setInterval(() => {
       if (this.state.status && this.state.status.state === "Online") {
-        if (this.state.idleSecondsRemaining > 0) {
+        if (this.state.idleSecondsRemaining !== null && this.state.idleSecondsRemaining > 0) {
           this.state.idleSecondsRemaining--;
           this.updateIdleBadge();
         }
@@ -182,6 +187,7 @@ const app = {
     } catch (e) {
       console.debug("Status fetch error:", e);
       this.pulseUpdateBeacon("Error");
+      this.updateSidebarState({ state: "Error", players: null });
     }
   },
 
@@ -190,41 +196,69 @@ const app = {
     const bText = document.getElementById("topbar-beacon-text");
     const sDot = document.getElementById("sidebar-dot");
 
-    if (bText) bText.innerText = state.toUpperCase();
+    const isError = (state || "").toLowerCase() === "error";
+
+    if (bText) {
+      if (isError) {
+        bText.innerHTML = `<span class="badge badge-error">ERROR</span>`;
+      } else {
+        bText.innerText = (state || "—").toUpperCase();
+      }
+    }
 
     if (bDot) {
-      bDot.className = "beacon-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
-      bDot.classList.remove("flash");
-      void bDot.offsetWidth;
-      bDot.classList.add("flash");
+      if (isError) {
+        bDot.className = "beacon-dot down flash";
+      } else {
+        bDot.className = "beacon-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
+        bDot.classList.remove("flash");
+        void bDot.offsetWidth;
+        bDot.classList.add("flash");
+      }
     }
 
     if (sDot) {
-      sDot.className = "status-indicator-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
-      sDot.classList.remove("flash");
-      void sDot.offsetWidth;
-      sDot.classList.add("flash");
+      if (isError) {
+        sDot.className = "status-indicator-dot down flash";
+      } else {
+        sDot.className = "status-indicator-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
+        sDot.classList.remove("flash");
+        void sDot.offsetWidth;
+        sDot.classList.add("flash");
+      }
     }
   },
 
   updateSidebarState(data) {
     const sText = document.getElementById("sidebar-state-text");
     const sCount = document.getElementById("sidebar-player-count");
-    if (sText) sText.innerText = data.state || "Offline";
-    if (sCount && data.players) {
-      sCount.innerText = `${data.players.count || 0}/${data.players.max || 8}`;
+
+    if (sText) {
+      const st = data.state || "—";
+      if (st.toLowerCase() === "error") {
+        sText.innerHTML = `<span class="badge badge-error">ERROR</span>`;
+      } else {
+        sText.innerText = st;
+      }
+    }
+
+    if (sCount) {
+      if (data.players && data.players.count !== undefined) {
+        sCount.innerText = `${data.players.count} / ${data.players.max !== undefined ? data.players.max : 8}`;
+      } else {
+        sCount.innerText = "—";
+      }
     }
   },
 
   updateIdleBadge() {
     const idleEl = document.getElementById("topbar-idle-timer");
     const stripIdle = document.getElementById("strip-idle");
-    const formatted = this.formatSeconds(this.state.idleSecondsRemaining);
-    if (idleEl) idleEl.innerText = formatted;
-    if (stripIdle) stripIdle.innerText = formatted;
+    const val = this.state.idleSecondsRemaining !== null ? this.formatSeconds(this.state.idleSecondsRemaining) : "—";
+    if (idleEl) idleEl.innerText = val;
+    if (stripIdle) stripIdle.innerText = val;
   },
 
-  /* ------------------- CONFIRMATION MODAL ------------------- */
   showConfirmModal(title, message, onConfirm, { danger = true, confirmText = "Confirm" } = {}) {
     const overlay = document.getElementById("modal-overlay");
     const body = document.getElementById("modal-body");
@@ -256,7 +290,6 @@ const app = {
     if (overlay) overlay.style.display = "none";
   },
 
-  /* ------------------- ACTIONS: CONTROL ------------------- */
   async startServer() {
     try {
       const res = await API.request("/api/control/start", { method: "POST" });
@@ -315,9 +348,10 @@ const app = {
     });
   },
 
-  /* ------------------- NAVIGATION (11 EXACT CATEGORIES) ------------------- */
   setTab(tab) {
     this.state.activeTab = tab;
+    this.closeMobileSidebar();
+
     document.querySelectorAll(".sidebar-nav-item").forEach(el => {
       el.classList.toggle("active", el.dataset.tab === tab);
     });
@@ -339,7 +373,6 @@ const app = {
     const titleEl = document.getElementById("topbar-view-title");
     if (titleEl) titleEl.innerText = titles[tab] || "Dashboard";
 
-    // Close log SSE if switching away from log
     if (tab !== "log" && this.sseLogSource) {
       this.sseLogSource.close();
       this.sseLogSource = null;
@@ -366,7 +399,6 @@ const app = {
 
     if (tab === "server") {
       main.innerHTML = `
-        <!-- Top Status Banner & Address -->
         <div class="card" style="margin-bottom:20px;padding:20px 24px;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
             <div>
@@ -379,20 +411,20 @@ const app = {
               </div>
             </div>
 
-            <div style="display:flex;align-items:center;gap:24px;">
+            <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
               <div>
                 <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Software</div>
-                <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);">Fabric 26.3</div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);" id="server-software-val">—</div>
               </div>
               <div>
                 <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Version</div>
-                <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);">26.3</div>
+                <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);" id="server-version-val">—</div>
               </div>
               <div>
                 <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">State</div>
-                <div style="display:flex;align-items:center;gap:6px;">
+                <div style="display:flex;align-items:center;gap:6px;" id="server-state-wrapper">
                   <span class="status-indicator-dot" id="server-state-dot"></span>
-                  <span style="font-size:13.5px;font-weight:700;text-transform:uppercase;" id="server-state-text">Offline</span>
+                  <span style="font-size:13.5px;font-weight:700;text-transform:uppercase;" id="server-state-text">—</span>
                 </div>
               </div>
             </div>
@@ -405,7 +437,6 @@ const app = {
           </div>
         </div>
 
-        <!-- Metric Strips -->
         <div class="metric-strip">
           <div class="metric-strip-card">
             <span class="metric-strip-label">Status</span>
@@ -413,11 +444,11 @@ const app = {
           </div>
           <div class="metric-strip-card">
             <span class="metric-strip-label">Players Online</span>
-            <span class="metric-strip-value" id="strip-players">0</span>
+            <span class="metric-strip-value" id="strip-players">—</span>
           </div>
           <div class="metric-strip-card">
             <span class="metric-strip-label">Memory Allocated</span>
-            <span class="metric-strip-value" id="strip-ram">0 MB</span>
+            <span class="metric-strip-value" id="strip-ram">—</span>
           </div>
           <div class="metric-strip-card">
             <span class="metric-strip-label">Standby Idle Timer</span>
@@ -426,52 +457,75 @@ const app = {
         </div>
 
         <div class="grid-2">
-          <!-- Memory & Hardware (Image 2 style) -->
           <div class="progress-card">
             <div class="progress-header">
               <span class="progress-header-title">MEMORY ALLOCATION</span>
-              <span class="progress-header-badge" id="ram-header-badge">3072 MB MAX</span>
+              <span class="progress-header-badge" id="ram-header-badge">—</span>
             </div>
             <div class="meter-track">
               <div class="meter-fill" id="ram-meter-fill" style="width: 0%;"></div>
             </div>
             <div class="meter-substats">
-              <div class="meter-sub-left">USED <strong id="ram-used-strong">0 MB</strong></div>
-              <div class="meter-sub-right neutral">AVAILABLE <strong id="ram-avail-strong">3072 MB</strong></div>
+              <div class="meter-sub-left">USED <strong id="ram-used-strong">—</strong></div>
+              <div class="meter-sub-right neutral">AVAILABLE <strong id="ram-avail-strong">—</strong></div>
             </div>
             <div class="breakdown-grid">
               <div class="breakdown-box">
                 <span class="breakdown-box-label">ALLOCATED</span>
-                <span class="breakdown-box-val" id="ram-box-alloc">3072 MB</span>
+                <span class="breakdown-box-val" id="ram-box-alloc">—</span>
               </div>
               <div class="breakdown-box">
                 <span class="breakdown-box-label">CPU LOAD</span>
-                <span class="breakdown-box-val" id="cpu-stat-val">0.0%</span>
+                <span class="breakdown-box-val" id="cpu-stat-val">—</span>
               </div>
               <div class="breakdown-box">
                 <span class="breakdown-box-label">TICK RATE</span>
-                <span class="breakdown-box-val" id="tps-stat-val">20.0 TPS</span>
+                <span class="breakdown-box-val" id="tps-stat-val">—</span>
               </div>
               <div class="breakdown-box">
                 <span class="breakdown-box-label">DURATION</span>
-                <span class="breakdown-box-val" id="mspt-stat-val">0.0 ms</span>
+                <span class="breakdown-box-val" id="mspt-stat-val">—</span>
               </div>
             </div>
           </div>
 
-          <!-- Quick Player Overview & Server Info -->
           <div class="card">
             <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
-              <span class="card-title">ONLINE PLAYERS</span>
-              <span class="badge" id="server-card-player-count">0 / 8</span>
+              <span class="card-title">SERVER HARDWARE & ANALYTICS</span>
+              <span class="badge" id="server-hardware-badge">HOST METRICS</span>
             </div>
-            <div id="server-online-players-list" style="min-height:140px;padding:12px 0;">
-              <div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:40px 0;">No players currently connected.</div>
+            <div style="padding:14px 20px;display:flex;flex-direction:column;gap:12px;">
+              <div class="metric-row">
+                <span class="metric-label">CPU Temperature</span>
+                <span class="metric-value" id="server-analytics-temp">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Host Memory (RAM)</span>
+                <span class="metric-value" id="server-analytics-mem">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Disk Storage</span>
+                <span class="metric-value" id="server-analytics-disk">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">System Load Averages (1m, 5m, 15m)</span>
+                <span class="metric-value" id="server-analytics-load">—</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Host OS & Platform</span>
+                <span class="metric-value" id="server-analytics-os">—</span>
+              </div>
             </div>
-            <div style="border-top:1px solid var(--border-subtle);padding-top:14px;display:flex;justify-content:space-between;align-items:center;">
-              <span style="font-size:12px;color:var(--text-secondary);">Manage permissions, bans, and whitelist</span>
-              <button class="btn btn-secondary btn-sm" onclick="app.setTab('players')">Open Players</button>
-            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:20px;">
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+            <span class="card-title">CONNECTED PLAYERS</span>
+            <span class="badge" id="server-card-player-count">—</span>
+          </div>
+          <div id="server-online-players-list" style="min-height:100px;padding:12px 0;">
+            <div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:30px 0;">No players currently connected.</div>
           </div>
         </div>
       `;
@@ -488,7 +542,7 @@ const app = {
                 Directly configures mc.env and synchronizes server.properties
               </div>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="app.saveProperties()">${ICONS.check || ''} Save Properties</button>
+            <button class="btn btn-primary btn-sm" onclick="app.saveProperties()">${ICONS.check} Save Properties</button>
           </div>
 
           <div style="padding:20px 24px;display:flex;flex-direction:column;gap:18px;" id="properties-form-container">
@@ -499,7 +553,7 @@ const app = {
     } else if (tab === "console") {
       main.innerHTML = `
         <div class="terminal-container" style="display:flex;flex-direction:column;height:calc(100vh - 120px);">
-          <div class="terminal-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-bottom:none;">
+          <div class="terminal-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-bottom:none;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:12px;">
               <span style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-primary);">RCON Console Terminal</span>
               <span class="badge" id="console-conn-status">Connected</span>
@@ -516,7 +570,6 @@ const app = {
             <div style="color:var(--text-muted);">[Palvi MC Console Initialized. Type a command or click a quick action below.]</div>
           </div>
 
-          <!-- Quick Command Shortcuts -->
           <div style="display:flex;gap:6px;padding:8px 12px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-top:none;border-bottom:none;flex-wrap:wrap;">
             <button class="keycap" onclick="app.injectConsoleCmd('list')">list</button>
             <button class="keycap" onclick="app.injectConsoleCmd('tps')">tps</button>
@@ -539,7 +592,7 @@ const app = {
               <span style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-primary);">latest.log Viewer</span>
               <span style="font-size:11.5px;color:var(--text-muted);">(Preserved across restarts and offline)</span>
             </div>
-            <div style="display:flex;align-items:center;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <div style="position:relative;width:240px;">
                 <input type="text" class="input" id="log-filter-input" placeholder="Filter log entries..." oninput="app.filterLogs(this.value)" style="padding-left:26px;font-size:12px;height:30px;">
                 <span style="position:absolute;left:8px;top:7px;color:var(--text-muted);">${ICONS.search}</span>
@@ -567,9 +620,7 @@ const app = {
           <button class="subnav-btn" data-sub="offline" onclick="app.setPlayerSection('offline')">Offline Players</button>
         </div>
 
-        <div id="player-section-content">
-          <!-- Dynamically injected -->
-        </div>
+        <div id="player-section-content"></div>
       `;
     } else if (tab === "software") {
       main.innerHTML = `
@@ -591,9 +642,7 @@ const app = {
           <button class="subnav-btn" id="mods-tab-browse" onclick="app.switchModsTab('browse')">Search & Install (Modrinth)</button>
         </div>
 
-        <div id="mods-content-view">
-          <!-- Dynamically injected -->
-        </div>
+        <div id="mods-content-view"></div>
       `;
     } else if (tab === "files") {
       main.innerHTML = `
@@ -602,7 +651,7 @@ const app = {
             <span class="breadcrumb-item" onclick="app.loadFiles('')">root</span>
           </div>
 
-          <div style="display:flex;gap:8px;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <button class="btn btn-secondary btn-sm" onclick="app.promptCreateFolder()">${ICONS.plus} New Folder</button>
             <label class="btn btn-secondary btn-sm" style="cursor:pointer;margin-bottom:0;">
               ${ICONS.upload} Upload File
@@ -636,9 +685,9 @@ const app = {
           <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
             <div>
               <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">ACTIVE MINECRAFT WORLD</div>
-              <h2 style="font-size:20px;font-weight:700;color:var(--text-primary);" id="world-name-display">BabaSquadWorld</h2>
+              <h2 style="font-size:20px;font-weight:700;color:var(--text-primary);" id="world-name-display">—</h2>
               <div style="font-size:12.5px;color:var(--text-secondary);margin-top:4px;">
-                Seed: <strong id="world-seed-display" style="color:var(--text-primary);letter-spacing:0.5px;">1807738846518060059</strong>
+                Seed: <strong id="world-seed-display" style="color:var(--text-primary);letter-spacing:0.5px;">—</strong>
               </div>
             </div>
 
@@ -651,7 +700,6 @@ const app = {
         </div>
 
         <div class="grid-2">
-          <!-- World Details Card -->
           <div class="card">
             <div class="card-header">
               <span class="card-title">DIMENSIONS & COMPONENTS</span>
@@ -661,7 +709,6 @@ const app = {
             </div>
           </div>
 
-          <!-- World Files Quick Explorer -->
           <div class="card">
             <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
               <span class="card-title">WORLD DIRECTORY FILES</span>
@@ -686,14 +733,14 @@ const app = {
         <div class="progress-card" style="margin-bottom:20px;">
           <div class="progress-header">
             <span class="progress-header-title">BACKUP STORAGE USAGE</span>
-            <span class="progress-header-badge" id="backup-storage-badge">DISK HEALTHY</span>
+            <span class="progress-header-badge" id="backup-storage-badge">—</span>
           </div>
           <div class="meter-track">
-            <div class="meter-fill" id="backup-meter-fill" style="width: 25%;"></div>
+            <div class="meter-fill" id="backup-meter-fill" style="width: 0%;"></div>
           </div>
           <div class="meter-substats">
-            <div class="meter-sub-left">STORAGE USED <strong id="backup-used-text">14.2 GB</strong></div>
-            <div class="meter-sub-right neutral">AVAILABLE <strong id="backup-avail-text">230.8 GB</strong></div>
+            <div class="meter-sub-left">STORAGE USED <strong id="backup-used-text">—</strong></div>
+            <div class="meter-sub-right neutral">AVAILABLE <strong id="backup-avail-text">—</strong></div>
           </div>
         </div>
 
@@ -726,7 +773,7 @@ const app = {
           </div>
           <div style="padding:16px 20px;">
             <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:16px;">
-              Multi-member permission delegation (Start, Stop, Console, Log, Players, Files, Worlds, Mods, Backups) is planned for future release. Currently, the master admin account has full authorization.
+              Multi-member permission delegation is planned for future release. Currently, the master admin account has full authorization.
             </p>
 
             <table class="file-table" style="opacity:0.75;">
@@ -754,21 +801,39 @@ const app = {
     }
   },
 
-  /* ------------------- TAB 1: SERVER ------------------- */
   updateServerMetrics(data) {
+    const swVal = document.getElementById("server-software-val");
+    const verVal = document.getElementById("server-version-val");
+    if (swVal) swVal.innerText = data.software ? `${data.software}` : "—";
+    if (verVal) verVal.innerText = data.version ? `${data.version}` : "—";
+
     const sDot = document.getElementById("server-state-dot");
     const sText = document.getElementById("server-state-text");
     const stripStatus = document.getElementById("strip-status");
     const stripPlayers = document.getElementById("strip-players");
     const stripRam = document.getElementById("strip-ram");
 
-    const state = data.state || "Offline";
-    if (sDot) sDot.className = "status-indicator-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
-    if (sText) sText.innerText = state;
-    if (stripStatus) stripStatus.innerText = state;
+    const state = data.state || "—";
+    const isError = (state || "").toLowerCase() === "error";
 
-    if (data.players) {
-      const pCount = `${data.players.count || 0} / ${data.players.max || 8}`;
+    if (sDot) sDot.className = "status-indicator-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
+    if (sText) {
+      if (isError) {
+        sText.innerHTML = `<span class="badge badge-error">ERROR</span>`;
+      } else {
+        sText.innerText = state;
+      }
+    }
+    if (stripStatus) {
+      if (isError) {
+        stripStatus.innerHTML = `<span class="badge badge-error">ERROR</span>`;
+      } else {
+        stripStatus.innerText = state;
+      }
+    }
+
+    if (data.players && data.players.count !== undefined) {
+      const pCount = `${data.players.count} / ${data.players.max !== undefined ? data.players.max : 8}`;
       if (stripPlayers) stripPlayers.innerText = pCount;
       const cardCount = document.getElementById("server-card-player-count");
       if (cardCount) cardCount.innerText = pCount;
@@ -776,7 +841,7 @@ const app = {
       const pList = document.getElementById("server-online-players-list");
       if (pList) {
         if (!data.players.players || data.players.players.length === 0) {
-          pList.innerHTML = `<div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:40px 0;">No players currently connected.</div>`;
+          pList.innerHTML = `<div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:30px 0;">No players currently connected.</div>`;
         } else {
           pList.innerHTML = data.players.players.map(p => `
             <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);margin-bottom:6px;">
@@ -789,41 +854,58 @@ const app = {
           `).join("");
         }
       }
+    } else {
+      if (stripPlayers) stripPlayers.innerText = "—";
     }
 
-    if (data.stats) {
+    if (data.stats && data.stats.ram_used_mb !== undefined) {
       const usedMb = Math.round(data.stats.ram_used_mb || 0);
-      const limitMb = Math.round(data.stats.ram_limit_mb || 3072);
+      const limitMb = Math.round(data.stats.ram_limit_mb || 0);
       const pct = limitMb > 0 ? Math.min(100, Math.round((usedMb / limitMb) * 100)) : 0;
 
-      if (stripRam) stripRam.innerText = `${usedMb} MB`;
+      if (stripRam) stripRam.innerText = limitMb > 0 ? `${usedMb} MB` : "—";
 
       const fill = document.getElementById("ram-meter-fill");
-      if (fill) fill.style.width = `${pct}%`;
+      if (fill) fill.style.width = limitMb > 0 ? `${pct}%` : "0%";
+
+      const ramBadge = document.getElementById("ram-header-badge");
+      if (ramBadge) ramBadge.innerText = limitMb > 0 ? `${limitMb} MB MAX` : "—";
 
       const usedStrong = document.getElementById("ram-used-strong");
-      if (usedStrong) usedStrong.innerText = `${usedMb} MB (${pct}%)`;
+      if (usedStrong) usedStrong.innerText = limitMb > 0 ? `${usedMb} MB (${pct}%)` : "—";
 
       const availStrong = document.getElementById("ram-avail-strong");
-      if (availStrong) availStrong.innerText = `${Math.max(0, limitMb - usedMb)} MB`;
+      if (availStrong) availStrong.innerText = limitMb > 0 ? `${Math.max(0, limitMb - usedMb)} MB` : "—";
 
       const boxAlloc = document.getElementById("ram-box-alloc");
-      if (boxAlloc) boxAlloc.innerText = `${limitMb} MB`;
+      if (boxAlloc) boxAlloc.innerText = limitMb > 0 ? `${limitMb} MB` : "—";
 
       const cpuVal = document.getElementById("cpu-stat-val");
-      if (cpuVal) cpuVal.innerText = `${(data.stats.cpu_percent || 0).toFixed(1)}%`;
+      if (cpuVal) cpuVal.innerText = data.stats.cpu_percent !== undefined ? `${data.stats.cpu_percent.toFixed(1)}%` : "—";
     }
 
     if (data.performance) {
       const tpsVal = document.getElementById("tps-stat-val");
-      if (tpsVal) tpsVal.innerText = `${(data.performance.tps || 20.0).toFixed(1)} TPS`;
+      if (tpsVal) tpsVal.innerText = data.performance.tps !== undefined ? `${data.performance.tps.toFixed(1)} TPS` : "—";
 
       const msptVal = document.getElementById("mspt-stat-val");
-      if (msptVal) msptVal.innerText = `${(data.performance.mspt || 0.0).toFixed(1)} ms`;
+      if (msptVal) msptVal.innerText = data.performance.mspt !== undefined ? `${data.performance.mspt.toFixed(1)} ms` : "—";
     }
+
+    const host = data.host_analytics;
+    const tempEl = document.getElementById("server-analytics-temp");
+    const memEl = document.getElementById("server-analytics-mem");
+    const diskEl = document.getElementById("server-analytics-disk");
+    const loadEl = document.getElementById("server-analytics-load");
+    const osEl = document.getElementById("server-analytics-os");
+
+    if (tempEl) tempEl.innerText = (host && host.cpu_temp !== null && host.cpu_temp !== undefined) ? `${host.cpu_temp} °C` : "—";
+    if (memEl) memEl.innerText = (host && host.memory) ? `${host.memory.used_mb} MB / ${host.memory.total_mb} MB (${host.memory.percent}%)` : "—";
+    if (diskEl) diskEl.innerText = (host && host.disk) ? `${host.disk.used_gb} GB / ${host.disk.total_gb} GB (${host.disk.percent}%)` : "—";
+    if (loadEl) loadEl.innerText = (host && host.load_average) ? host.load_average.join(", ") : "—";
+    if (osEl) osEl.innerText = (host && host.os_info) ? host.os_info : "—";
   },
 
-  /* ------------------- TAB 2: SERVER PROPERTIES ------------------- */
   async loadProperties() {
     const container = document.getElementById("properties-form-container");
     if (!container) return;
@@ -834,16 +916,14 @@ const app = {
       
       container.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-          <!-- Maximum Players -->
           <div class="form-group">
             <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
               Maximum Players (Slots)
             </label>
-            <input type="number" id="prop-max-players" class="input" min="1" max="100" value="${props.max_players || 8}">
+            <input type="number" id="prop-max-players" class="input" min="1" max="100" value="${props.max_players !== undefined ? props.max_players : 8}">
             <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Player limit (1 to 100)</div>
           </div>
 
-          <!-- Gamemode -->
           <div class="form-group">
             <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
               Default Gamemode
@@ -857,7 +937,6 @@ const app = {
             <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Game mode for new players</div>
           </div>
 
-          <!-- Difficulty -->
           <div class="form-group">
             <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
               Difficulty
@@ -871,7 +950,6 @@ const app = {
             <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Server combat & mob difficulty</div>
           </div>
 
-          <!-- Spawn Protection -->
           <div class="form-group">
             <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
               Spawn Protection Radius
@@ -882,7 +960,6 @@ const app = {
         </div>
 
         <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;">
-          <!-- Whitelist Toggle -->
           <div class="switch-label" onclick="app.togglePropertySwitch('prop-whitelist')">
             <div>
               <div style="font-size:13px;font-weight:600;">Whitelist</div>
@@ -894,11 +971,10 @@ const app = {
             <input type="hidden" id="prop-whitelist" value="${props.whitelist ? 'true' : 'false'}">
           </div>
 
-          <!-- Allow Flight Toggle -->
           <div class="switch-label" onclick="app.togglePropertySwitch('prop-allow-flight')">
             <div>
               <div style="font-size:13px;font-weight:600;">Allow Flight</div>
-              <div style="font-size:11.5px;color:var(--text-muted);">Permit players to fly in survival mode (useful for mods/elytra)</div>
+              <div style="font-size:11.5px;color:var(--text-muted);">Permit players to fly in survival mode</div>
             </div>
             <div class="switch-toggle-box ${props.allow_flight ? 'active' : ''}" id="prop-allow-flight-box">
               <div class="switch-toggle-thumb"></div>
@@ -908,7 +984,7 @@ const app = {
         </div>
       `;
     } catch (e) {
-      container.innerHTML = `<div style="color:var(--accent-danger);">Failed to load server properties: ${this.escapeHtml(e.message)}</div>`;
+      container.innerHTML = `<span class="badge badge-error">ERROR</span> <span style="margin-left:8px;color:var(--text-secondary);">${this.escapeHtml(e.message)}</span>`;
     }
   },
 
@@ -950,7 +1026,6 @@ const app = {
     }
   },
 
-  /* ------------------- TAB 3: CONSOLE ------------------- */
   initConsole() {
     const output = document.getElementById("console-output");
     if (output && output.children.length <= 1) {
@@ -993,9 +1068,7 @@ const app = {
       if (res.output) {
         this.appendConsoleLine(res.output, "res");
       }
-    } catch (e) {
-      // offline or silent
-    }
+    } catch (e) {}
   },
 
   injectConsoleCmd(cmd) {
@@ -1031,12 +1104,12 @@ const app = {
 
     const line = document.createElement("div");
     if (type === "cmd") {
-      line.style.color = "#ffffff";
+      line.style.color = "var(--text-primary)";
       line.style.fontWeight = "600";
     } else if (type === "err") {
       line.style.color = "#ef4444";
     } else {
-      line.style.color = "#a3a3a3";
+      line.style.color = "var(--text-secondary)";
     }
     line.innerText = text;
     output.appendChild(line);
@@ -1052,7 +1125,6 @@ const app = {
     if (output) output.innerHTML = `<div style="color:var(--text-muted);">[Console cleared]</div>`;
   },
 
-  /* ------------------- TAB 4: LOG ------------------- */
   async initLogs() {
     const output = document.getElementById("log-output");
     if (!output) return;
@@ -1062,7 +1134,6 @@ const app = {
       this.state.logs = res.lines || [];
       this.renderLogs();
 
-      // Start SSE stream if supported
       if (!this.sseLogSource) {
         this.sseLogSource = new EventSource("/api/logs/stream");
         this.sseLogSource.onmessage = (event) => {
@@ -1072,7 +1143,7 @@ const app = {
         };
       }
     } catch (e) {
-      output.innerHTML = `<div style="color:var(--accent-danger);">Failed to load logs: ${this.escapeHtml(e.message)}</div>`;
+      output.innerHTML = `<span class="badge badge-error">ERROR</span> <span style="margin-left:8px;color:var(--text-secondary);">${this.escapeHtml(e.message)}</span>`;
     }
   },
 
@@ -1114,18 +1185,19 @@ const app = {
   },
 
   formatLogLine(line) {
-    let color = "#b0b0b0";
+    let color = "var(--text-secondary)";
+    let isErr = false;
     if (line.includes("/ERROR]") || line.includes("Exception") || line.includes("Error")) {
       color = "#ef4444";
+      isErr = true;
     } else if (line.includes("/WARN]")) {
       color = "#f59e0b";
     } else if (line.includes("/INFO]")) {
-      color = "#d4d4d4";
+      color = "var(--text-primary)";
     }
-    return `<div style="color:${color};font-family:var(--font-universal);white-space:pre-wrap;word-break:break-all;">${this.escapeHtml(line)}</div>`;
+    return `<div style="color:${color};font-family:var(--font-universal);white-space:pre-wrap;word-break:break-all;">${isErr ? '<span class="badge badge-error" style="margin-right:6px;font-size:9.5px;padding:1px 5px;">ERROR</span>' : ''}${this.escapeHtml(line)}</div>`;
   },
 
-  /* ------------------- TAB 5: PLAYERS ------------------- */
   async loadPlayers() {
     try {
       const data = await API.request("/api/players/all");
@@ -1194,7 +1266,7 @@ const app = {
       },
       offline: {
         title: "Offline Players",
-        desc: "Players who have previously joined the server and are currently offline (discovered from usercache.json).",
+        desc: "Players who have previously joined the server and are currently offline.",
         list: data.offline_players || [],
         emptyText: "No offline player history recorded."
       }
@@ -1205,7 +1277,7 @@ const app = {
     let formHtml = "";
     if (sec !== "offline") {
       formHtml = `
-        <div style="display:flex;gap:10px;margin-bottom:18px;">
+        <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
           <input type="text" id="player-action-input" class="input" style="max-width:320px;" placeholder="${cfg.placeholder}">
           <button class="btn btn-primary btn-sm" onclick="${cfg.onAdd}">${ICONS.plus} ${cfg.actionLabel}</button>
         </div>
@@ -1350,7 +1422,6 @@ const app = {
     });
   },
 
-  /* ------------------- TAB 6: SOFTWARE ------------------- */
   async loadSoftware() {
     const container = document.getElementById("software-grid-container");
     if (!container) return;
@@ -1368,7 +1439,7 @@ const app = {
               <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
                 <h3 style="font-size:15px;font-weight:700;">${this.escapeHtml(sw.name)}</h3>
                 <span class="software-badge ${isCurrent ? 'active' : ''}">
-                  ${isCurrent ? 'Active · ' + data.current.version : (sw.supports_mods ? 'Modded' : 'Vanilla')}
+                  ${isCurrent ? 'Active · ' + (data.current.version || '—') : (sw.supports_mods ? 'Modded' : 'Vanilla')}
                 </span>
               </div>
               <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.55;margin-bottom:14px;">
@@ -1390,7 +1461,7 @@ const app = {
         `;
       }).join("");
     } catch (e) {
-      container.innerHTML = `<div style="color:var(--accent-danger);">Failed to load software platforms: ${this.escapeHtml(e.message)}</div>`;
+      container.innerHTML = `<span class="badge badge-error">ERROR</span> <span style="margin-left:8px;color:var(--text-secondary);">${this.escapeHtml(e.message)}</span>`;
     }
   },
 
@@ -1414,7 +1485,6 @@ const app = {
     );
   },
 
-  /* ------------------- TAB 7: MODS (MODRINTH) ------------------- */
   async loadMods() {
     this.switchModsTab("installed");
   },
@@ -1482,7 +1552,7 @@ const app = {
 
       view.innerHTML = `
         <div class="card" style="padding:22px 24px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
             <div>
               <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Installed Fabric 26.3 Mods</h2>
               <div style="font-size:12px;color:var(--text-secondary);">Managed automatically via MODRINTH_PROJECTS in mc.env</div>
@@ -1493,7 +1563,7 @@ const app = {
         </div>
       `;
     } catch (e) {
-      view.innerHTML = `<div style="color:var(--accent-danger);">Failed to load mods: ${this.escapeHtml(e.message)}</div>`;
+      view.innerHTML = `<span class="badge badge-error">ERROR</span> <span style="margin-left:8px;color:var(--text-secondary);">${this.escapeHtml(e.message)}</span>`;
     }
   },
 
@@ -1503,39 +1573,85 @@ const app = {
 
     view.innerHTML = `
       <div class="card" style="padding:22px 24px;margin-bottom:20px;">
-        <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;margin-bottom:6px;">Search Modrinth Repository</h2>
-        <div style="font-size:12.5px;color:var(--text-secondary);margin-bottom:14px;">
-          Exclusively searches mods compatible with Fabric loader and Minecraft 26.3
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+          <div>
+            <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Browse Modrinth Repository</h2>
+            <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">
+              Direct connection to Modrinth API (Fabric 26.3 verified)
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <label style="font-size:11.5px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Sort:</label>
+            <select id="mod-sort-select" class="input" style="width:auto;padding:5px 10px;font-size:12px;" onchange="app.changeModSort(this.value)">
+              <option value="downloads" selected>Most Downloaded</option>
+              <option value="follows">Most Followed</option>
+              <option value="updated">Recently Updated</option>
+              <option value="newest">Newest</option>
+              <option value="relevance">Relevance</option>
+            </select>
+          </div>
         </div>
 
-        <div style="display:flex;gap:10px;">
-          <input type="text" id="mod-search-input" class="input" style="flex:1;" placeholder="Search mods (e.g. lithium, ferrite-core, sodium)..." onkeydown="if(event.key==='Enter') app.searchMods()">
-          <button class="btn btn-primary" onclick="app.searchMods()">${ICONS.search} Search</button>
+        <div style="display:flex;gap:10px;margin-bottom:16px;">
+          <input type="text" id="mod-search-input" class="input" style="flex:1;" placeholder="Search mods (e.g. lithium, ferrite-core, sodium)..." value="${this.escapeHtml(this.state.modQuery)}" onkeydown="if(event.key==='Enter') app.searchMods(this.value)">
+          <button class="btn btn-primary" onclick="app.searchMods(document.getElementById('mod-search-input').value)">${ICONS.search} Search</button>
+        </div>
+
+        <div style="display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border-subtle);padding-top:12px;">
+          <button class="keycap ${this.state.modCategory === 'all' ? 'active' : ''}" onclick="app.changeModCategory('all')">All</button>
+          <button class="keycap ${this.state.modCategory === 'optimization' ? 'active' : ''}" onclick="app.changeModCategory('optimization')">Optimization</button>
+          <button class="keycap ${this.state.modCategory === 'utility' ? 'active' : ''}" onclick="app.changeModCategory('utility')">Utility</button>
+          <button class="keycap ${this.state.modCategory === 'decoration' ? 'active' : ''}" onclick="app.changeModCategory('decoration')">Decoration</button>
+          <button class="keycap ${this.state.modCategory === 'technology' ? 'active' : ''}" onclick="app.changeModCategory('technology')">Technology</button>
+          <button class="keycap ${this.state.modCategory === 'adventure' ? 'active' : ''}" onclick="app.changeModCategory('adventure')">Adventure</button>
+          <button class="keycap ${this.state.modCategory === 'magic' ? 'active' : ''}" onclick="app.changeModCategory('magic')">Magic</button>
+          <button class="keycap ${this.state.modCategory === 'storage' ? 'active' : ''}" onclick="app.changeModCategory('storage')">Storage</button>
         </div>
       </div>
 
       <div id="mod-search-results-area">
-        <div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:40px 0;">
-          Enter keywords above to search for mods on Modrinth.
-        </div>
+        <div style="color:var(--text-muted);font-size:13px;padding:30px 0;text-align:center;">Loading Modrinth repository...</div>
       </div>
     `;
+
+    this.executeModSearch();
   },
 
-  async searchMods() {
-    const input = document.getElementById("mod-search-input");
-    const q = input ? input.value.trim() : "";
-    if (!q) return;
+  changeModSort(val) {
+    this.state.modSort = val;
+    this.executeModSearch();
+  },
 
+  changeModCategory(cat) {
+    this.state.modCategory = cat;
+    document.querySelectorAll("#mods-content-view .keycap").forEach(k => {
+      k.classList.toggle("active", k.innerText.toLowerCase() === cat);
+    });
+    this.executeModSearch();
+  },
+
+  searchMods(query) {
+    this.state.modQuery = (query || "").trim();
+    this.executeModSearch();
+  },
+
+  async executeModSearch() {
     const area = document.getElementById("mod-search-results-area");
-    if (area) area.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding:30px 0;text-align:center;">Searching Modrinth...</div>`;
+    if (!area) return;
+
+    area.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding:30px 0;text-align:center;">Querying Modrinth...</div>`;
+
+    const q = encodeURIComponent(this.state.modQuery || "");
+    const sort = encodeURIComponent(this.state.modSort || "downloads");
+    const cat = this.state.modCategory && this.state.modCategory !== "all" ? `&category=${encodeURIComponent(this.state.modCategory)}` : "";
 
     try {
-      const res = await API.request(`/api/mods/search?q=${encodeURIComponent(q)}&limit=15`);
+      const res = await API.request(`/api/mods/search?q=${q}&sort=${sort}${cat}&limit=20`);
       this.state.modSearchResults = res.hits || [];
       
       if (!res.hits || res.hits.length === 0) {
-        area.innerHTML = `<div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:40px 0;">No mods found matching '${this.escapeHtml(q)}'.</div>`;
+        area.innerHTML = `<div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:40px 0;">No mods found on Modrinth for the selected filters.</div>`;
         return;
       }
 
@@ -1544,14 +1660,14 @@ const app = {
           ${res.hits.map(h => `
             <div class="software-card">
               <div>
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-                  ${h.icon_url ? `<img src="${h.icon_url}" style="width:28px;height:28px;border-radius:0;" alt="">` : ''}
-                  <div>
-                    <h3 style="font-size:14px;font-weight:700;">${this.escapeHtml(h.title)}</h3>
-                    <div style="font-size:11px;color:var(--text-muted);">by ${this.escapeHtml(h.author)}</div>
+                <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;">
+                  ${h.icon_url ? `<img src="${h.icon_url}" style="width:36px;height:36px;object-fit:contain;flex-shrink:0;" alt="">` : `<div style="width:36px;height:36px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${ICONS.mods}</div>`}
+                  <div style="flex:1;min-width:0;">
+                    <h3 style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${this.escapeHtml(h.title)}</h3>
+                    <div style="font-size:11px;color:var(--text-muted);">by ${this.escapeHtml(h.author)} · ${(h.downloads || 0).toLocaleString()} downloads</div>
                   </div>
                 </div>
-                <p style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;">
+                <p style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:54px;">
                   ${this.escapeHtml(h.description)}
                 </p>
               </div>
@@ -1565,7 +1681,7 @@ const app = {
         </div>
       `;
     } catch (e) {
-      if (area) area.innerHTML = `<div style="color:var(--accent-danger);">Search error: ${this.escapeHtml(e.message)}</div>`;
+      if (area) area.innerHTML = `<span class="badge badge-error">ERROR</span> <span style="margin-left:8px;color:var(--text-secondary);">${this.escapeHtml(e.message)}</span>`;
     }
   },
 
@@ -1603,7 +1719,6 @@ const app = {
     );
   },
 
-  /* ------------------- TAB 8: FILES (ATERNOS STYLE) ------------------- */
   async loadFiles(relPath = "") {
     this.state.currentFilePath = relPath;
     const body = document.getElementById("files-table-body");
@@ -1616,7 +1731,6 @@ const app = {
       this.state.fileItems = data.items || [];
       this.state.fileBreadcrumbs = data.breadcrumbs || [];
 
-      // Render breadcrumbs
       if (bc) {
         bc.innerHTML = data.breadcrumbs.map((b, idx) => {
           const isLast = idx === data.breadcrumbs.length - 1;
@@ -1631,7 +1745,6 @@ const app = {
         }).join("");
       }
 
-      // Render items
       if (body) {
         if (!data.items || data.items.length === 0) {
           body.innerHTML = `<tr><td colspan="4" style="color:var(--text-muted);text-align:center;padding:30px;">This directory is empty.</td></tr>`;
@@ -1664,7 +1777,7 @@ const app = {
         }).join("");
       }
     } catch (e) {
-      if (body) body.innerHTML = `<tr><td colspan="4" style="color:var(--accent-danger);text-align:center;padding:30px;">Failed to load files: ${this.escapeHtml(e.message)}</td></tr>`;
+      if (body) body.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:30px;"><span class="badge badge-error">ERROR</span> <span style="margin-left:8px;color:var(--text-secondary);">${this.escapeHtml(e.message)}</span></td></tr>`;
     }
   },
 
@@ -1685,7 +1798,7 @@ const app = {
             </div>
             <div style="display:flex;gap:8px;">
               <button class="btn btn-secondary btn-sm" onclick="app.loadFiles(app.state.currentFilePath)">Cancel</button>
-              <button class="btn btn-primary btn-sm" onclick="app.saveFileContent('${this.escapeHtml(path)}')">${ICONS.check || ''} Save File</button>
+              <button class="btn btn-primary btn-sm" onclick="app.saveFileContent('${this.escapeHtml(path)}')">${ICONS.check} Save File</button>
             </div>
           </div>
           <textarea id="file-editor-content" class="editor-textarea" spellcheck="false">${this.escapeHtml(fileData.content)}</textarea>
@@ -1769,7 +1882,6 @@ const app = {
     }
   },
 
-  /* ------------------- TAB 9: WORLDS ------------------- */
   async loadWorlds() {
     try {
       const info = await API.request("/api/worlds/info");
@@ -1777,23 +1889,22 @@ const app = {
 
       const nameDisplay = document.getElementById("world-name-display");
       const seedDisplay = document.getElementById("world-seed-display");
-      if (nameDisplay) nameDisplay.innerText = info.world_name;
-      if (seedDisplay) seedDisplay.innerText = info.seed || "Auto-generated";
+      if (nameDisplay) nameDisplay.innerText = info.world_name || "—";
+      if (seedDisplay) seedDisplay.innerText = info.seed ? info.seed : "—";
 
       const dimContainer = document.getElementById("world-dimensions-container");
       if (dimContainer) {
         dimContainer.innerHTML = `
-          <div class="metric-row"><span class="metric-label">Total World Disk Size</span><span class="metric-value">${info.size_formatted}</span></div>
-          <div class="metric-row"><span class="metric-label">level.dat Structure</span><span class="metric-value">${info.has_level_dat ? '<span class="badge" style="color:#22c55e;">Valid</span>' : '<span class="badge" style="color:#ef4444;">Missing</span>'}</span></div>
+          <div class="metric-row"><span class="metric-label">Total World Disk Size</span><span class="metric-value">${info.size_formatted || '—'}</span></div>
+          <div class="metric-row"><span class="metric-label">level.dat Structure</span><span class="metric-value">${info.has_level_dat ? '<span class="badge" style="color:#22c55e;">Valid</span>' : '<span class="badge badge-error">MISSING</span>'}</span></div>
           <div class="metric-row"><span class="metric-label">Overworld Region</span><span class="metric-value">${info.has_overworld ? 'Present (region/)' : 'None'}</span></div>
           <div class="metric-row"><span class="metric-label">The Nether (DIM-1)</span><span class="metric-value">${info.has_nether ? 'Present' : 'Not generated'}</span></div>
           <div class="metric-row"><span class="metric-label">The End (DIM1)</span><span class="metric-value">${info.has_end ? 'Present' : 'Not generated'}</span></div>
           <div class="metric-row"><span class="metric-label">Datapacks Installed</span><span class="metric-value">${info.datapacks && info.datapacks.length ? info.datapacks.join(', ') : 'None'}</span></div>
-          <div class="metric-row"><span class="metric-label">Player Profile Data</span><span class="metric-value">${info.player_records || 0} saved records</span></div>
+          <div class="metric-row"><span class="metric-label">Player Profile Data</span><span class="metric-value">${info.player_records !== undefined ? info.player_records : '—'} saved records</span></div>
         `;
       }
 
-      // Load files list
       const filesRes = await API.request("/api/worlds/files");
       const filesList = document.getElementById("world-files-list");
       if (filesList) {
@@ -1817,7 +1928,7 @@ const app = {
   },
 
   jumpToWorldInFiles() {
-    const worldName = this.state.worldInfo ? this.state.worldInfo.world_name : "BabaSquadWorld";
+    const worldName = this.state.worldInfo ? this.state.worldInfo.world_name : "";
     this.setTab("files");
     setTimeout(() => this.loadFiles(worldName), 100);
   },
@@ -1933,36 +2044,34 @@ const app = {
     }
   },
 
-  /* ------------------- TAB 10: BACKUPS ------------------- */
   async loadBackups() {
     try {
       const disk = await API.request("/api/backups/disk-usage");
       this.state.diskUsage = disk;
 
       const fill = document.getElementById("backup-meter-fill");
+      const badge = document.getElementById("backup-storage-badge");
       const usedText = document.getElementById("backup-used-text");
       const availText = document.getElementById("backup-avail-text");
 
-      if (disk && fill) {
-        fill.style.width = `${disk.percent_used || 25}%`;
-      }
-      if (disk && usedText) {
-        usedText.innerText = `${(disk.used_bytes / (1024*1024*1024)).toFixed(1)} GB (${disk.percent_used || 25}%)`;
-      }
-      if (disk && availText) {
-        availText.innerText = `${(disk.free_bytes / (1024*1024*1024)).toFixed(1)} GB`;
+      if (disk && disk.total_bytes) {
+        if (fill) fill.style.width = `${disk.percent_used || 0}%`;
+        if (badge) badge.innerText = `${disk.percent_used || 0}% IN USE`;
+        if (usedText) usedText.innerText = `${(disk.used_bytes / (1024*1024*1024)).toFixed(1)} GB (${disk.percent_used}%)`;
+        if (availText) availText.innerText = `${(disk.free_bytes / (1024*1024*1024)).toFixed(1)} GB`;
+      } else {
+        if (fill) fill.style.width = "0%";
+        if (badge) badge.innerText = "—";
+        if (usedText) usedText.innerText = "—";
+        if (availText) availText.innerText = "—";
       }
     } catch (e) {
       console.debug("Disk usage fetch error:", e);
     }
   },
 
-  /* ------------------- TAB 11: ACCESS ------------------- */
-  loadAccess() {
-    // Static informative matrix
-  },
+  loadAccess() {},
 
-  /* ------------------- AUTH & MODALS ------------------- */
   showLoginModal() {
     const overlay = document.getElementById("modal-overlay");
     const body = document.getElementById("modal-body");
@@ -2068,11 +2177,11 @@ const app = {
     location.reload();
   },
 
-  /* ------------------- SHELL RENDER ------------------- */
   render() {
     const root = document.getElementById("app-root");
     root.innerHTML = `
-      <!-- Fixed Left Sidebar (11 Exact Categories) -->
+      <div id="sidebar-backdrop" onclick="app.closeMobileSidebar()"></div>
+
       <aside id="sidebar">
         <div id="sidebar-top">
           <div class="sidebar-brand">
@@ -2086,12 +2195,11 @@ const app = {
           <div class="sidebar-status-pill">
             <div style="display:flex;align-items:center;gap:8px;">
               <span class="status-indicator-dot" id="sidebar-dot"></span>
-              <span style="font-size:11px;font-weight:600;text-transform:uppercase;" id="sidebar-state-text">Offline</span>
+              <span style="font-size:11px;font-weight:600;text-transform:uppercase;" id="sidebar-state-text">—</span>
             </div>
-            <span style="font-size:11px;color:var(--text-muted);" id="sidebar-player-count">0/8</span>
+            <span style="font-size:11px;color:var(--text-muted);" id="sidebar-player-count">—</span>
           </div>
 
-          <!-- 11 CATEGORIES IN EXACT REQUIRED ORDER -->
           <button class="sidebar-nav-item active" data-tab="server" onclick="app.setTab('server')">
             ${ICONS.server}
             <span>1. Server</span>
@@ -2146,11 +2254,20 @@ const app = {
         </div>
       </aside>
 
-      <!-- Main Fluid Content Area -->
       <div id="content-area">
         <header id="topbar">
-          <div class="topbar-title" id="topbar-view-title">Server Overview</div>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <button id="sidebar-toggle-btn" onclick="app.toggleMobileSidebar()">${ICONS.menu}</button>
+            <div class="topbar-title" id="topbar-view-title">Server Overview</div>
+          </div>
+
           <div class="topbar-actions">
+            <div class="theme-switch-group">
+              <button class="theme-btn ${this.state.theme === 'dark' ? 'active' : ''}" data-theme="dark" onclick="app.setTheme('dark')">Dark</button>
+              <button class="theme-btn ${this.state.theme === 'medium-dark' ? 'active' : ''}" data-theme="medium-dark" onclick="app.setTheme('medium-dark')">Mid</button>
+              <button class="theme-btn ${this.state.theme === 'light' ? 'active' : ''}" data-theme="light" onclick="app.setTheme('light')">Light</button>
+            </div>
+
             <div class="live-beacon">
               <span class="beacon-dot" id="topbar-beacon-dot"></span>
               <span id="topbar-beacon-text">ONLINE</span>
@@ -2161,9 +2278,7 @@ const app = {
           </div>
         </header>
 
-        <main id="main-content">
-          <!-- Dynamically injected -->
-        </main>
+        <main id="main-content"></main>
       </div>
 
       <div id="modal-overlay" class="modal-overlay" style="display:none;">
@@ -2172,7 +2287,6 @@ const app = {
     `;
   },
 
-  /* ------------------- UTILITIES ------------------- */
   escapeHtml(str) {
     if (str === null || str === undefined) return "";
     return String(str)
@@ -2184,6 +2298,7 @@ const app = {
   },
 
   formatSeconds(sec) {
+    if (sec === null || sec === undefined) return "—";
     if (sec <= 0) return "Standby";
     const m = Math.floor(sec / 60);
     const s = sec % 60;
