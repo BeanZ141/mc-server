@@ -26,9 +26,17 @@ async def search_mods(
     offset: int = 0,
     sort: str = "downloads",
     category: str | None = None,
+    environment: str | None = None,
     session: dict = Depends(get_current_user_and_session)
 ):
-    results = await modrinth_client.search_mods(query=q, limit=limit, offset=offset, sort=sort, category=category)
+    results = await modrinth_client.search_mods(
+        query=q,
+        limit=limit,
+        offset=offset,
+        sort=sort,
+        category=category,
+        environment=environment
+    )
     return results
 
 @router.get("/check")

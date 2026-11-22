@@ -98,6 +98,7 @@ const app = {
     modQuery: "",
     modSort: "downloads",
     modCategory: "all",
+    modEnv: "all",
     currentFilePath: "",
     fileItems: [],
     fileBreadcrumbs: [],
@@ -202,7 +203,7 @@ const app = {
       if (isError) {
         bText.innerHTML = `<span class="badge badge-error">ERROR</span>`;
       } else {
-        bText.innerText = (state || "—").toUpperCase();
+        bText.innerText = (state || "-").toUpperCase();
       }
     }
 
@@ -234,7 +235,7 @@ const app = {
     const sCount = document.getElementById("sidebar-player-count");
 
     if (sText) {
-      const st = data.state || "—";
+      const st = data.state || "-";
       if (st.toLowerCase() === "error") {
         sText.innerHTML = `<span class="badge badge-error">ERROR</span>`;
       } else {
@@ -246,7 +247,7 @@ const app = {
       if (data.players && data.players.count !== undefined) {
         sCount.innerText = `${data.players.count} / ${data.players.max !== undefined ? data.players.max : 8}`;
       } else {
-        sCount.innerText = "—";
+        sCount.innerText = "-";
       }
     }
   },
@@ -254,7 +255,7 @@ const app = {
   updateIdleBadge() {
     const idleEl = document.getElementById("topbar-idle-timer");
     const stripIdle = document.getElementById("strip-idle");
-    const val = this.state.idleSecondsRemaining !== null ? this.formatSeconds(this.state.idleSecondsRemaining) : "—";
+    const val = this.state.idleSecondsRemaining !== null ? this.formatSeconds(this.state.idleSecondsRemaining) : "-";
     if (idleEl) idleEl.innerText = val;
     if (stripIdle) stripIdle.innerText = val;
   },
@@ -348,6 +349,40 @@ const app = {
     });
   },
 
+  formatDate(dateStr) {
+    if (!dateStr) return "—";
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+    } catch (e) {
+      return dateStr.split("T")[0] || dateStr;
+    }
+  },
+
+  updateSquareMeter(trackId, percent, statusClass = "") {
+    const track = document.getElementById(trackId);
+    if (!track) return;
+    const totalBlocks = 24;
+    const p = Math.max(0, Math.min(100, Math.round(percent || 0)));
+    const filledBlocks = Math.round((p / 100) * totalBlocks);
+    let blocks = track.querySelectorAll(".meter-block");
+    if (blocks.length !== totalBlocks) {
+      let html = "";
+      for (let i = 0; i < totalBlocks; i++) {
+        html += '<div class="meter-block"></div>';
+      }
+      track.innerHTML = html;
+      blocks = track.querySelectorAll(".meter-block");
+    }
+    blocks.forEach((el, idx) => {
+      if (idx < filledBlocks) {
+        el.className = ("meter-block filled " + (statusClass || "")).trim();
+      } else {
+        el.className = "meter-block";
+      }
+    });
+  },
+
   setTab(tab) {
     this.state.activeTab = tab;
     this.closeMobileSidebar();
@@ -399,7 +434,7 @@ const app = {
 
     if (tab === "server") {
       main.innerHTML = `
-        <div class="card" style="margin-bottom:20px;padding:24px;">
+        <div class="card" style="margin-bottom:20px;padding:24px 44px 24px 22px;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
             <div style="display:flex;flex-direction:column;gap:6px;">
               <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);">Minecraft Direct Connect</span>
@@ -414,16 +449,16 @@ const app = {
             <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
               <div>
                 <span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Software</span>
-                <span style="font-size:14px;font-weight:600;color:var(--text-primary);" id="server-software-val">—</span>
+                <span style="font-size:14px;font-weight:600;color:var(--text-primary);" id="server-software-val">-</span>
               </div>
               <div>
                 <span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Version</span>
-                <span style="font-size:14px;font-weight:600;color:var(--text-primary);" id="server-version-val">—</span>
+                <span style="font-size:14px;font-weight:600;color:var(--text-primary);" id="server-version-val">-</span>
               </div>
               <div>
                 <span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Server State</span>
                 <div style="display:flex;align-items:center;gap:6px;" id="server-state-wrapper">
-                  <span style="font-size:14px;font-weight:700;text-transform:uppercase;" id="server-state-text">—</span>
+                  <span style="font-size:14px;font-weight:700;text-transform:uppercase;" id="server-state-text">-</span>
                 </div>
               </div>
             </div>
@@ -439,19 +474,19 @@ const app = {
         <div class="metric-strip" style="margin-bottom:20px;">
           <div class="metric-strip-card">
             <span class="metric-strip-label">Status</span>
-            <span class="metric-strip-value" id="strip-status">—</span>
+            <span class="metric-strip-value" id="strip-status">-</span>
           </div>
           <div class="metric-strip-card">
             <span class="metric-strip-label">Online Players</span>
-            <span class="metric-strip-value" id="strip-players">—</span>
+            <span class="metric-strip-value" id="strip-players">-</span>
           </div>
           <div class="metric-strip-card">
             <span class="metric-strip-label">Memory Allocated</span>
-            <span class="metric-strip-value" id="strip-ram">—</span>
+            <span class="metric-strip-value" id="strip-ram">-</span>
           </div>
           <div class="metric-strip-card">
             <span class="metric-strip-label">Standby Idle Timer</span>
-            <span class="metric-strip-value" id="strip-idle">—</span>
+            <span class="metric-strip-value" id="strip-idle">-</span>
           </div>
         </div>
 
@@ -459,7 +494,7 @@ const app = {
           <div class="card" style="padding:22px 24px;">
             <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span class="progress-header-title">MEMORY ALLOCATION</span>
-              <span class="badge" id="ram-header-badge">—</span>
+              <span class="badge" id="ram-header-badge">-</span>
             </div>
             
             <div class="meter-track" id="ram-meter-track">
@@ -468,29 +503,29 @@ const app = {
 
             <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;">
               <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
-                USED <strong id="ram-used-strong" style="color:var(--text-primary);margin-left:4px;">—</strong>
+                USED <strong id="ram-used-strong" style="color:var(--text-primary);margin-left:4px;">-</strong>
               </div>
               <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
-                AVAILABLE <strong id="ram-avail-strong" style="color:var(--text-primary);margin-left:4px;">—</strong>
+                AVAILABLE <strong id="ram-avail-strong" style="color:var(--text-primary);margin-left:4px;">-</strong>
               </div>
             </div>
 
             <div class="breakdown-grid">
               <div class="breakdown-box">
                 <span class="breakdown-box-label">ALLOCATED</span>
-                <span class="breakdown-box-val" id="ram-box-alloc">—</span>
+                <span class="breakdown-box-val" id="ram-box-alloc">-</span>
               </div>
               <div class="breakdown-box">
                 <span class="breakdown-box-label">CPU LOAD</span>
-                <span class="breakdown-box-val" id="cpu-stat-val">—</span>
+                <span class="breakdown-box-val" id="cpu-stat-val">-</span>
               </div>
               <div class="breakdown-box">
                 <span class="breakdown-box-label">TICK RATE</span>
-                <span class="breakdown-box-val" id="tps-stat-val">—</span>
+                <span class="breakdown-box-val" id="tps-stat-val">-</span>
               </div>
               <div class="breakdown-box">
                 <span class="breakdown-box-label">DURATION</span>
-                <span class="breakdown-box-val" id="mspt-stat-val">—</span>
+                <span class="breakdown-box-val" id="mspt-stat-val">-</span>
               </div>
             </div>
           </div>
@@ -503,23 +538,23 @@ const app = {
             <div style="display:flex;flex-direction:column;gap:12px;">
               <div class="metric-row">
                 <span class="metric-label">CPU Temperature</span>
-                <span class="metric-value" id="server-analytics-temp">—</span>
+                <span class="metric-value" id="server-analytics-temp">-</span>
               </div>
               <div class="metric-row">
                 <span class="metric-label">Host Memory (RAM)</span>
-                <span class="metric-value" id="server-analytics-mem">—</span>
+                <span class="metric-value" id="server-analytics-mem">-</span>
               </div>
               <div class="metric-row">
                 <span class="metric-label">Disk Storage</span>
-                <span class="metric-value" id="server-analytics-disk">—</span>
+                <span class="metric-value" id="server-analytics-disk">-</span>
               </div>
               <div class="metric-row">
                 <span class="metric-label">System Load Averages (1m, 5m, 15m)</span>
-                <span class="metric-value" id="server-analytics-load">—</span>
+                <span class="metric-value" id="server-analytics-load">-</span>
               </div>
               <div class="metric-row">
                 <span class="metric-label">Host OS & Platform</span>
-                <span class="metric-value" id="server-analytics-os">—</span>
+                <span class="metric-value" id="server-analytics-os">-</span>
               </div>
             </div>
           </div>
@@ -528,7 +563,7 @@ const app = {
         <div class="card" style="padding:22px 24px;">
           <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:12px;border-bottom:1px solid var(--border-subtle);">
             <span class="card-title" style="margin:0;">CONNECTED PLAYERS</span>
-            <span class="badge" id="server-card-player-count">—</span>
+            <span class="badge" id="server-card-player-count">-</span>
           </div>
           <div id="server-online-players-list" style="min-height:70px;padding:8px 0;">
             <div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:24px 0;">No players currently connected.</div>
@@ -558,35 +593,31 @@ const app = {
       `;
     } else if (tab === "console") {
       main.innerHTML = `
-        <div class="terminal-container" style="display:flex;flex-direction:column;height:calc(100vh - 120px);">
-          <div class="terminal-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-bottom:none;flex-wrap:wrap;gap:8px;">
+        <div class="terminal-window" style="display:flex;flex-direction:column;height:calc(100vh - 120px);background:var(--bg-canvas);border:1px solid var(--border-medium);">
+          <div class="terminal-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--bg-surface);border-bottom:1px solid var(--border-medium);flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:12px;">
               <span style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-primary);">RCON Console Terminal</span>
               <span class="badge" id="console-conn-status">Connected</span>
             </div>
             <div style="display:flex;align-items:center;gap:12px;">
-              <label style="font-size:11.5px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <label style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer;">
                 <input type="checkbox" id="console-autoscroll" checked onchange="app.state.autoScrollConsole = this.checked"> Auto-scroll
               </label>
               <button class="btn btn-secondary btn-sm" onclick="app.clearConsole()">Clear</button>
             </div>
           </div>
 
-          <div class="terminal" id="console-output" style="flex:1;overflow-y:auto;background:var(--bg-canvas);border:1px solid var(--border-medium);padding:14px 16px;font-size:12.5px;line-height:1.6;color:var(--text-primary);">
-            <div style="color:var(--text-muted);">[Palvi MC Console Initialized. Type a command or click a quick action below.]</div>
+          <div class="terminal-screen" id="console-scroll-screen" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;background:var(--bg-canvas);">
+            <div style="flex:1;min-height:20px;"></div>
+            <div id="console-output" style="padding:14px 16px;font-size:12.5px;line-height:1.6;color:var(--text-primary);display:flex;flex-direction:column;gap:3px;">
+              <div style="color:var(--text-muted);">[Palvi MC Console Initialized. Type a Minecraft command below.]</div>
+            </div>
           </div>
 
-          <div style="display:flex;gap:6px;padding:8px 12px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-top:none;border-bottom:none;flex-wrap:wrap;">
-            <button class="keycap" onclick="app.injectConsoleCmd('list')">list</button>
-            <button class="keycap" onclick="app.injectConsoleCmd('tps')">tps</button>
-            <button class="keycap" onclick="app.injectConsoleCmd('spark health')">spark health</button>
-            <button class="keycap" onclick="app.injectConsoleCmd('whitelist list')">whitelist list</button>
-            <button class="keycap" onclick="app.injectConsoleCmd('help')">help</button>
-          </div>
-
-          <div class="terminal-input-bar" style="display:flex;gap:8px;padding:12px;background:var(--bg-surface);border:1px solid var(--border-subtle);">
-            <input type="text" id="console-input" class="input" style="flex:1;" placeholder="Enter command (e.g. say hello, time set day)..." onkeydown="app.handleConsoleKey(event)">
-            <button class="btn btn-primary" onclick="app.sendConsoleCommand()">Send</button>
+          <div class="terminal-inline-bar" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg-surface);border-top:1px solid var(--border-medium);">
+            <span style="font-size:14px;font-weight:700;color:var(--text-secondary);user-select:none;">&gt;</span>
+            <input type="text" id="console-input" class="input" style="flex:1;background:transparent !important;border:none !important;box-shadow:none !important;padding:4px 0;font-size:13px;color:var(--text-primary);" placeholder="Type a Minecraft command (e.g. say hello, time set day, list)..." onkeydown="app.handleConsoleKey(event)">
+            <button class="btn btn-primary btn-sm" onclick="app.sendConsoleCommand()">Execute</button>
           </div>
         </div>
       `;
@@ -596,14 +627,14 @@ const app = {
           <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-bottom:none;flex-wrap:wrap;gap:12px;">
             <div style="display:flex;align-items:center;gap:12px;">
               <span style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-primary);">latest.log Viewer</span>
-              <span style="font-size:11.5px;color:var(--text-muted);">(Preserved across restarts and offline)</span>
+              <span style="font-size:13px;color:var(--text-muted);">(Preserved across restarts and offline)</span>
             </div>
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
               <div style="position:relative;width:240px;">
                 <input type="text" class="input" id="log-filter-input" placeholder="Filter log entries..." oninput="app.filterLogs(this.value)" style="padding-left:26px;font-size:12px;height:30px;">
                 <span style="position:absolute;left:8px;top:7px;color:var(--text-muted);">${ICONS.search}</span>
               </div>
-              <label style="font-size:11.5px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer;">
+              <label style="font-size:13px;color:var(--text-secondary);display:flex;align-items:center;gap:6px;cursor:pointer;">
                 <input type="checkbox" id="log-autoscroll" checked onchange="app.state.autoScrollLogs = this.checked"> Auto-scroll
               </label>
               <button class="btn btn-secondary btn-sm" onclick="app.initLogs()">${ICONS.refresh} Refresh</button>
@@ -691,9 +722,9 @@ const app = {
           <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
             <div>
               <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">ACTIVE MINECRAFT WORLD</div>
-              <h2 style="font-size:20px;font-weight:700;color:var(--text-primary);" id="world-name-display">—</h2>
+              <h2 style="font-size:20px;font-weight:700;color:var(--text-primary);" id="world-name-display">-</h2>
               <div style="font-size:12.5px;color:var(--text-secondary);margin-top:4px;">
-                Seed: <strong id="world-seed-display" style="color:var(--text-primary);letter-spacing:0.5px;">—</strong>
+                Seed: <strong id="world-seed-display" style="color:var(--text-primary);letter-spacing:0.5px;">-</strong>
               </div>
             </div>
 
@@ -739,14 +770,14 @@ const app = {
         <div class="progress-card" style="margin-bottom:20px;">
           <div class="progress-header">
             <span class="progress-header-title">BACKUP STORAGE USAGE</span>
-            <span class="progress-header-badge" id="backup-storage-badge">—</span>
+            <span class="progress-header-badge" id="backup-storage-badge">-</span>
           </div>
           <div class="meter-track" id="backup-meter-track">
             <div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div>
           </div>
           <div class="meter-substats">
-            <div class="meter-sub-left">STORAGE USED <strong id="backup-used-text">—</strong></div>
-            <div class="meter-sub-right neutral">AVAILABLE <strong id="backup-avail-text">—</strong></div>
+            <div class="meter-sub-left">STORAGE USED <strong id="backup-used-text">-</strong></div>
+            <div class="meter-sub-right neutral">AVAILABLE <strong id="backup-avail-text">-</strong></div>
           </div>
         </div>
 
@@ -810,8 +841,8 @@ const app = {
   updateServerMetrics(data) {
     const swVal = document.getElementById("server-software-val");
     const verVal = document.getElementById("server-version-val");
-    if (swVal) swVal.innerText = data.software ? `${data.software}` : "—";
-    if (verVal) verVal.innerText = data.version ? `${data.version}` : "—";
+    if (swVal) swVal.innerText = data.software ? `${data.software}` : "-";
+    if (verVal) verVal.innerText = data.version ? `${data.version}` : "-";
 
     const sDot = document.getElementById("server-state-dot");
     const sText = document.getElementById("server-state-text");
@@ -819,7 +850,7 @@ const app = {
     const stripPlayers = document.getElementById("strip-players");
     const stripRam = document.getElementById("strip-ram");
 
-    const state = data.state || "—";
+    const state = data.state || "-";
     const isError = (state || "").toLowerCase() === "error";
 
     if (sDot) sDot.className = "status-indicator-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
@@ -855,51 +886,51 @@ const app = {
                 <span class="status-indicator-dot"></span>
                 <span style="font-weight:600;font-size:13px;">${this.escapeHtml(p)}</span>
               </div>
-              <span style="font-size:11.5px;color:var(--text-secondary);">Online</span>
+              <span style="font-size:13px;color:var(--text-secondary);">Online</span>
             </div>
           `).join("");
         }
       }
     } else {
-      if (stripPlayers) stripPlayers.innerText = "—";
+      if (stripPlayers) stripPlayers.innerText = "-";
     }
 
     if (data.stats && data.stats.ram_used_mb !== undefined) {
       const usedMb = Math.round(data.stats.ram_used_mb || 0);
       const limitMb = Math.round(data.stats.ram_limit_mb || 0);
       const pct = limitMb > 0 ? Math.min(100, Math.round((usedMb / limitMb) * 100)) : 0;
-      if (stripRam) stripRam.innerText = limitMb > 0 ? `${usedMb} MB` : "—";
+      if (stripRam) stripRam.innerText = limitMb > 0 ? `${usedMb} MB` : "-";
       this.updateSquareMeter("ram-meter-track", pct, pct > 90 ? "crit" : (pct > 75 ? "warn" : ""));
       const ramBadge = document.getElementById("ram-header-badge");
-      if (ramBadge) ramBadge.innerText = limitMb > 0 ? `${limitMb} MB MAX` : "—";
+      if (ramBadge) ramBadge.innerText = limitMb > 0 ? `${limitMb} MB MAX` : "-";
       const usedStrong = document.getElementById("ram-used-strong");
-      if (usedStrong) usedStrong.innerText = limitMb > 0 ? `${usedMb} MB (${pct}%)` : "—";
+      if (usedStrong) usedStrong.innerText = limitMb > 0 ? `${usedMb} MB (${pct}%)` : "-";
       const availStrong = document.getElementById("ram-avail-strong");
-      if (availStrong) availStrong.innerText = limitMb > 0 ? `${Math.max(0, limitMb - usedMb)} MB` : "—";
+      if (availStrong) availStrong.innerText = limitMb > 0 ? `${Math.max(0, limitMb - usedMb)} MB` : "-";
       const boxAlloc = document.getElementById("ram-box-alloc");
-      if (boxAlloc) boxAlloc.innerText = limitMb > 0 ? `${(limitMb / 1024).toFixed(1)} GB` : "—";
+      if (boxAlloc) boxAlloc.innerText = limitMb > 0 ? `${(limitMb / 1024).toFixed(1)} GB` : "-";
       const cpuVal = document.getElementById("cpu-stat-val");
-      if (cpuVal) cpuVal.innerText = data.stats.cpu_percent !== undefined ? `${data.stats.cpu_percent.toFixed(1)}%` : "—";
+      if (cpuVal) cpuVal.innerText = data.stats.cpu_percent !== undefined ? `${data.stats.cpu_percent.toFixed(1)}%` : "-";
       const tpsVal = document.getElementById("tps-stat-val");
-      if (tpsVal) tpsVal.innerText = data.stats.tps !== undefined ? `${data.stats.tps.toFixed(1)}` : "—";
+      if (tpsVal) tpsVal.innerText = data.stats.tps !== undefined ? `${data.stats.tps.toFixed(1)}` : "-";
       const msptVal = document.getElementById("mspt-stat-val");
-      if (msptVal) msptVal.innerText = data.stats.mspt !== undefined ? `${data.stats.mspt.toFixed(1)} ms` : "—";
+      if (msptVal) msptVal.innerText = data.stats.mspt !== undefined ? `${data.stats.mspt.toFixed(1)} ms` : "-";
     } else {
       this.updateSquareMeter("ram-meter-track", 0);
       const ramBadge = document.getElementById("ram-header-badge");
-      if (ramBadge) ramBadge.innerText = data.env && data.env.MEMORY ? `${data.env.MEMORY} MAX` : "—";
+      if (ramBadge) ramBadge.innerText = data.env && data.env.MEMORY ? `${data.env.MEMORY} MAX` : "-";
       const boxAlloc = document.getElementById("ram-box-alloc");
-      if (boxAlloc) boxAlloc.innerText = data.env && data.env.MEMORY ? `${data.env.MEMORY}` : "—";
+      if (boxAlloc) boxAlloc.innerText = data.env && data.env.MEMORY ? `${data.env.MEMORY}` : "-";
       const usedStrong = document.getElementById("ram-used-strong");
-      if (usedStrong) usedStrong.innerText = "—";
+      if (usedStrong) usedStrong.innerText = "-";
       const availStrong = document.getElementById("ram-avail-strong");
-      if (availStrong) availStrong.innerText = "—";
+      if (availStrong) availStrong.innerText = "-";
       const cpuVal = document.getElementById("cpu-stat-val");
-      if (cpuVal) cpuVal.innerText = "—";
+      if (cpuVal) cpuVal.innerText = "-";
       const tpsVal = document.getElementById("tps-stat-val");
-      if (tpsVal) tpsVal.innerText = "—";
+      if (tpsVal) tpsVal.innerText = "-";
       const msptVal = document.getElementById("mspt-stat-val");
-      if (msptVal) msptVal.innerText = "—";
+      if (msptVal) msptVal.innerText = "-";
     }
 
     const host = data.host_analytics;
@@ -909,11 +940,11 @@ const app = {
     const loadEl = document.getElementById("server-analytics-load");
     const osEl = document.getElementById("server-analytics-os");
 
-    if (tempEl) tempEl.innerText = (host && host.cpu_temp !== null && host.cpu_temp !== undefined) ? `${host.cpu_temp} °C` : "—";
-    if (memEl) memEl.innerText = (host && host.memory) ? `${host.memory.used_mb} MB / ${host.memory.total_mb} MB (${host.memory.percent}%)` : "—";
-    if (diskEl) diskEl.innerText = (host && host.disk) ? `${host.disk.used_gb} GB / ${host.disk.total_gb} GB (${host.disk.percent}%)` : "—";
-    if (loadEl) loadEl.innerText = (host && host.load_average) ? host.load_average.join(", ") : "—";
-    if (osEl) osEl.innerText = (host && host.os_info) ? host.os_info : "—";
+    if (tempEl) tempEl.innerText = (host && host.cpu_temp !== null && host.cpu_temp !== undefined) ? `${host.cpu_temp} °C` : "-";
+    if (memEl) memEl.innerText = (host && host.memory) ? `${host.memory.used_mb} MB / ${host.memory.total_mb} MB (${host.memory.percent}%)` : "-";
+    if (diskEl) diskEl.innerText = (host && host.disk) ? `${host.disk.used_gb} GB / ${host.disk.total_gb} GB (${host.disk.percent}%)` : "-";
+    if (loadEl) loadEl.innerText = (host && host.load_average) ? host.load_average.join(", ") : "-";
+    if (osEl) osEl.innerText = (host && host.os_info) ? host.os_info : "-";
   },
 
   async loadProperties() {
@@ -927,15 +958,15 @@ const app = {
       container.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
           <div class="form-group">
-            <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+            <label class="form-label" style="font-size:13px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
               Maximum Players (Slots)
             </label>
             <input type="number" id="prop-max-players" class="input" min="1" max="100" value="${props.max_players !== undefined ? props.max_players : 8}">
-            <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Player limit (1 to 100)</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Player limit (1 to 100)</div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+            <label class="form-label" style="font-size:13px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
               Default Gamemode
             </label>
             <select id="prop-gamemode" class="input">
@@ -944,11 +975,11 @@ const app = {
               <option value="adventure" ${props.gamemode === 'adventure' ? 'selected' : ''}>Adventure</option>
               <option value="spectator" ${props.gamemode === 'spectator' ? 'selected' : ''}>Spectator</option>
             </select>
-            <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Game mode for new players</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Game mode for new players</div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+            <label class="form-label" style="font-size:13px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
               Difficulty
             </label>
             <select id="prop-difficulty" class="input">
@@ -957,15 +988,15 @@ const app = {
               <option value="normal" ${props.difficulty === 'normal' ? 'selected' : ''}>Normal</option>
               <option value="hard" ${props.difficulty === 'hard' ? 'selected' : ''}>Hard</option>
             </select>
-            <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Server combat & mob difficulty</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Server combat & mob difficulty</div>
           </div>
 
           <div class="form-group">
-            <label class="form-label" style="font-size:11.5px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+            <label class="form-label" style="font-size:13px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
               Spawn Protection Radius
             </label>
             <input type="number" id="prop-spawn-protection" class="input" min="0" max="1000" value="${props.spawn_protection !== undefined ? props.spawn_protection : 16}">
-            <div style="font-size:11.5px;color:var(--text-muted);margin-top:4px;">Blocks around world spawn (0 to disable)</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Blocks around world spawn (0 to disable)</div>
           </div>
         </div>
 
@@ -973,7 +1004,7 @@ const app = {
           <div class="switch-label" onclick="app.togglePropertySwitch('prop-whitelist')">
             <div>
               <div style="font-size:13px;font-weight:600;">Whitelist</div>
-              <div style="font-size:11.5px;color:var(--text-muted);">Only allow players registered on whitelist.json to connect</div>
+              <div style="font-size:13px;color:var(--text-muted);">Only allow players registered on whitelist.json to connect</div>
             </div>
             <div class="switch-toggle-box ${props.whitelist ? 'active' : ''}" id="prop-whitelist-box">
               <div class="switch-toggle-thumb"></div>
@@ -984,7 +1015,7 @@ const app = {
           <div class="switch-label" onclick="app.togglePropertySwitch('prop-allow-flight')">
             <div>
               <div style="font-size:13px;font-weight:600;">Allow Flight</div>
-              <div style="font-size:11.5px;color:var(--text-muted);">Permit players to fly in survival mode</div>
+              <div style="font-size:13px;color:var(--text-muted);">Permit players to fly in survival mode</div>
             </div>
             <div class="switch-toggle-box ${props.allow_flight ? 'active' : ''}" id="prop-allow-flight-box">
               <div class="switch-toggle-thumb"></div>
@@ -1081,14 +1112,6 @@ const app = {
     } catch (e) { }
   },
 
-  injectConsoleCmd(cmd) {
-    const input = document.getElementById("console-input");
-    if (input) {
-      input.value = cmd;
-      this.sendConsoleCommand();
-    }
-  },
-
   handleConsoleKey(e) {
     if (e.key === "Enter") {
       this.sendConsoleCommand();
@@ -1125,8 +1148,9 @@ const app = {
     output.appendChild(line);
 
     const autoScroll = document.getElementById("console-autoscroll");
+    const screen = document.getElementById("console-scroll-screen") || output;
     if (!autoScroll || autoScroll.checked) {
-      output.scrollTop = output.scrollHeight;
+      screen.scrollTop = screen.scrollHeight;
     }
   },
 
@@ -1449,7 +1473,7 @@ const app = {
               <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
                 <h3 style="font-size:15px;font-weight:700;">${this.escapeHtml(sw.name)}</h3>
                 <span class="software-badge ${isCurrent ? 'active' : ''}">
-                  ${isCurrent ? 'Active · ' + (data.current.version || '—') : (sw.supports_mods ? 'Modded' : 'Vanilla')}
+                  ${isCurrent ? 'Active · ' + (data.current.version || '-') : (sw.supports_mods ? 'Modded' : 'Vanilla')}
                 </span>
               </div>
               <p style="font-size:12.5px;color:var(--text-secondary);line-height:1.55;margin-bottom:14px;">
@@ -1458,7 +1482,7 @@ const app = {
             </div>
 
             <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-subtle);padding-top:12px;margin-top:12px;">
-              <span style="font-size:11.5px;color:var(--text-muted);">
+              <span style="font-size:13px;color:var(--text-muted);">
                 ${sw.supports_mods ? 'Supports Mods' : (sw.supports_plugins ? 'Supports Plugins' : 'Standard')}
               </span>
               ${isCurrent ? `
@@ -1587,57 +1611,82 @@ const app = {
           <div>
             <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Browse Modrinth Repository</h2>
             <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">
-              Direct connection to Modrinth API (Fabric 26.3 verified)
+              Direct Modrinth API catalog · Fabric 26.3 verified
             </div>
           </div>
 
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <label style="font-size:11.5px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Sort:</label>
+            <label style="font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;">Sort:</label>
             <select id="mod-sort-select" class="input" style="width:auto;padding:5px 10px;font-size:12px;" onchange="app.changeModSort(this.value)">
-              <option value="downloads" selected>Most Downloaded</option>
-              <option value="follows">Most Followed</option>
-              <option value="updated">Recently Updated</option>
-              <option value="newest">Newest</option>
-              <option value="relevance">Relevance</option>
+              <option value="downloads" ${this.state.modSort === 'downloads' ? 'selected' : ''}>Most Downloaded</option>
+              <option value="follows" ${this.state.modSort === 'follows' ? 'selected' : ''}>Most Followed</option>
+              <option value="updated" ${this.state.modSort === 'updated' ? 'selected' : ''}>Recently Updated</option>
+              <option value="newest" ${this.state.modSort === 'newest' ? 'selected' : ''}>Newest</option>
+              <option value="relevance" ${this.state.modSort === 'relevance' ? 'selected' : ''}>Relevance</option>
             </select>
           </div>
         </div>
 
         <div style="display:flex;gap:10px;margin-bottom:16px;">
-          <input type="text" id="mod-search-input" class="input" style="flex:1;" placeholder="Search mods (e.g. lithium, ferrite-core, sodium)..." value="${this.escapeHtml(this.state.modQuery)}" onkeydown="if(event.key==='Enter') app.searchMods(this.value)">
+          <input type="text" id="mod-search-input" class="input" style="flex:1;" placeholder="Search mods (e.g. lithium, ferrite-core, sodium)..." value="${this.escapeHtml(this.state.modQuery || '')}" onkeydown="if(event.key==='Enter') app.searchMods(this.value)">
           <button class="btn btn-primary" onclick="app.searchMods(document.getElementById('mod-search-input').value)">${ICONS.search} Search</button>
         </div>
 
-        <div style="display:flex;gap:6px;flex-wrap:wrap;border-top:1px solid var(--border-subtle);padding-top:12px;">
-          <button class="keycap ${this.state.modCategory === 'all' ? 'active' : ''}" onclick="app.changeModCategory('all')">All</button>
-          <button class="keycap ${this.state.modCategory === 'optimization' ? 'active' : ''}" onclick="app.changeModCategory('optimization')">Optimization</button>
-          <button class="keycap ${this.state.modCategory === 'utility' ? 'active' : ''}" onclick="app.changeModCategory('utility')">Utility</button>
-          <button class="keycap ${this.state.modCategory === 'decoration' ? 'active' : ''}" onclick="app.changeModCategory('decoration')">Decoration</button>
-          <button class="keycap ${this.state.modCategory === 'technology' ? 'active' : ''}" onclick="app.changeModCategory('technology')">Technology</button>
-          <button class="keycap ${this.state.modCategory === 'adventure' ? 'active' : ''}" onclick="app.changeModCategory('adventure')">Adventure</button>
-          <button class="keycap ${this.state.modCategory === 'magic' ? 'active' : ''}" onclick="app.changeModCategory('magic')">Magic</button>
-          <button class="keycap ${this.state.modCategory === 'storage' ? 'active' : ''}" onclick="app.changeModCategory('storage')">Storage</button>
+        <div style="display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--border-subtle);padding-top:14px;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);min-width:90px;">Environment:</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;" id="mod-env-filters">
+              <button class="keycap ${this.state.modEnv === 'all' ? 'active' : ''}" onclick="app.changeModEnv('all')">All</button>
+              <button class="keycap ${this.state.modEnv === 'client' ? 'active' : ''}" onclick="app.changeModEnv('client')">Client</button>
+              <button class="keycap ${this.state.modEnv === 'server' ? 'active' : ''}" onclick="app.changeModEnv('server')">Server</button>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);min-width:90px;">Categories:</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;" id="mod-cat-filters">
+              <button class="keycap ${this.state.modCategory === 'all' ? 'active' : ''}" onclick="app.changeModCategory('all')">All</button>
+              <button class="keycap ${this.state.modCategory === 'optimization' ? 'active' : ''}" onclick="app.changeModCategory('optimization')">Optimization</button>
+              <button class="keycap ${this.state.modCategory === 'utility' ? 'active' : ''}" onclick="app.changeModCategory('utility')">Utility</button>
+              <button class="keycap ${this.state.modCategory === 'decoration' ? 'active' : ''}" onclick="app.changeModCategory('decoration')">Decoration</button>
+              <button class="keycap ${this.state.modCategory === 'technology' ? 'active' : ''}" onclick="app.changeModCategory('technology')">Technology</button>
+              <button class="keycap ${this.state.modCategory === 'adventure' ? 'active' : ''}" onclick="app.changeModCategory('adventure')">Adventure</button>
+              <button class="keycap ${this.state.modCategory === 'magic' ? 'active' : ''}" onclick="app.changeModCategory('magic')">Magic</button>
+              <button class="keycap ${this.state.modCategory === 'storage' ? 'active' : ''}" onclick="app.changeModCategory('storage')">Storage</button>
+            </div>
+          </div>
         </div>
       </div>
 
       <div id="mod-search-results-area">
-        <div style="color:var(--text-muted);font-size:13px;padding:30px 0;text-align:center;">Loading Modrinth repository...</div>
+        <div style="display:flex;flex-direction:column;gap:10px;padding:30px 0;align-items:center;">
+          <div class="loading-skeleton" style="width:200px;height:14px;"></div>
+          <span style="color:var(--text-muted);font-size:12px;">Connecting to Modrinth catalog...</span>
+        </div>
       </div>
     `;
 
     this.executeModSearch();
   },
 
-  changeModSort(val) {
-    this.state.modSort = val;
+  changeModEnv(env) {
+    this.state.modEnv = env;
+    document.querySelectorAll("#mod-env-filters .keycap").forEach(k => {
+      k.classList.toggle("active", k.innerText.toLowerCase() === env.toLowerCase());
+    });
     this.executeModSearch();
   },
 
   changeModCategory(cat) {
     this.state.modCategory = cat;
-    document.querySelectorAll("#mods-content-view .keycap").forEach(k => {
-      k.classList.toggle("active", k.innerText.toLowerCase() === cat);
+    document.querySelectorAll("#mod-cat-filters .keycap").forEach(k => {
+      k.classList.toggle("active", k.innerText.toLowerCase() === cat.toLowerCase());
     });
+    this.executeModSearch();
+  },
+
+  changeModSort(val) {
+    this.state.modSort = val;
     this.executeModSearch();
   },
 
@@ -1650,14 +1699,20 @@ const app = {
     const area = document.getElementById("mod-search-results-area");
     if (!area) return;
 
-    area.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding:30px 0;text-align:center;">Querying Modrinth...</div>`;
+    area.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:10px;padding:30px 0;align-items:center;">
+        <div class="loading-skeleton" style="width:240px;height:16px;"></div>
+        <span style="color:var(--text-muted);font-size:12px;">Querying Modrinth...</span>
+      </div>
+    `;
 
     const q = encodeURIComponent(this.state.modQuery || "");
     const sort = encodeURIComponent(this.state.modSort || "downloads");
     const cat = this.state.modCategory && this.state.modCategory !== "all" ? `&category=${encodeURIComponent(this.state.modCategory)}` : "";
+    const env = this.state.modEnv && this.state.modEnv !== "all" ? `&environment=${encodeURIComponent(this.state.modEnv)}` : "";
 
     try {
-      const res = await API.request(`/api/mods/search?q=${q}&sort=${sort}${cat}&limit=20`);
+      const res = await API.request(`/api/mods/search?q=${q}&sort=${sort}${cat}${env}&limit=20`);
       this.state.modSearchResults = res.hits || [];
 
       if (!res.hits || res.hits.length === 0) {
@@ -1670,13 +1725,24 @@ const app = {
           ${res.hits.map(h => `
             <div class="software-card">
               <div>
-                <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:8px;">
-                  ${h.icon_url ? `<img src="${h.icon_url}" style="width:36px;height:36px;object-fit:contain;flex-shrink:0;" alt="">` : `<div style="width:36px;height:36px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${ICONS.mods}</div>`}
+                <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
+                  ${h.icon_url ? `<img src="${h.icon_url}" style="width:52px;height:52px;object-fit:contain;flex-shrink:0;" alt="">` : `<div style="width:52px;height:52px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:center;flex-shrink:0;">${ICONS.mods}</div>`}
                   <div style="flex:1;min-width:0;">
-                    <h3 style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${this.escapeHtml(h.title)}</h3>
-                    <div style="font-size:11px;color:var(--text-muted);">by ${this.escapeHtml(h.author)} · ${(h.downloads || 0).toLocaleString()} downloads</div>
+                    <h3 style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;">${this.escapeHtml(h.title)}</h3>
+                    <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">by ${this.escapeHtml(h.author)}</div>
+                    <div style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--text-secondary);">
+                      <span>${(h.downloads || 0).toLocaleString()} dl</span>
+                      <span>·</span>
+                      <span>Updated ${app.formatDate(h.date_modified)}</span>
+                    </div>
                   </div>
                 </div>
+
+                <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+                  <span class="badge" style="font-size:10px;padding:2px 6px;">Client: ${h.client_side || 'optional'}</span>
+                  <span class="badge" style="font-size:10px;padding:2px 6px;">Server: ${h.server_side || 'optional'}</span>
+                </div>
+
                 <p style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:54px;">
                   ${this.escapeHtml(h.description)}
                 </p>
@@ -1772,7 +1838,7 @@ const app = {
                 </div>
               </td>
               <td style="color:var(--text-secondary);font-size:12px;">${item.size_formatted}</td>
-              <td style="color:var(--text-muted);font-size:11.5px;">${item.modified}</td>
+              <td style="color:var(--text-muted);font-size:13px;">${item.modified}</td>
               <td style="text-align:right;">
                 <div style="display:inline-flex;gap:6px;">
                   ${item.editable ? `
@@ -1899,19 +1965,19 @@ const app = {
 
       const nameDisplay = document.getElementById("world-name-display");
       const seedDisplay = document.getElementById("world-seed-display");
-      if (nameDisplay) nameDisplay.innerText = info.world_name || "—";
-      if (seedDisplay) seedDisplay.innerText = info.seed ? info.seed : "—";
+      if (nameDisplay) nameDisplay.innerText = info.world_name || "-";
+      if (seedDisplay) seedDisplay.innerText = info.seed ? info.seed : "-";
 
       const dimContainer = document.getElementById("world-dimensions-container");
       if (dimContainer) {
         dimContainer.innerHTML = `
-          <div class="metric-row"><span class="metric-label">Total World Disk Size</span><span class="metric-value">${info.size_formatted || '—'}</span></div>
+          <div class="metric-row"><span class="metric-label">Total World Disk Size</span><span class="metric-value">${info.size_formatted || '-'}</span></div>
           <div class="metric-row"><span class="metric-label">level.dat Structure</span><span class="metric-value">${info.has_level_dat ? '<span class="badge" style="color:#22c55e;">Valid</span>' : '<span class="badge badge-error">MISSING</span>'}</span></div>
           <div class="metric-row"><span class="metric-label">Overworld Region</span><span class="metric-value">${info.has_overworld ? 'Present (region/)' : 'None'}</span></div>
           <div class="metric-row"><span class="metric-label">The Nether (DIM-1)</span><span class="metric-value">${info.has_nether ? 'Present' : 'Not generated'}</span></div>
           <div class="metric-row"><span class="metric-label">The End (DIM1)</span><span class="metric-value">${info.has_end ? 'Present' : 'Not generated'}</span></div>
           <div class="metric-row"><span class="metric-label">Datapacks Installed</span><span class="metric-value">${info.datapacks && info.datapacks.length ? info.datapacks.join(', ') : 'None'}</span></div>
-          <div class="metric-row"><span class="metric-label">Player Profile Data</span><span class="metric-value">${info.player_records !== undefined ? info.player_records : '—'} saved records</span></div>
+          <div class="metric-row"><span class="metric-label">Player Profile Data</span><span class="metric-value">${info.player_records !== undefined ? info.player_records : '-'} saved records</span></div>
         `;
       }
 
@@ -1927,7 +1993,7 @@ const app = {
                 <span>${f.type === 'directory' ? ICONS.folder : ICONS.file}</span>
                 <span style="font-weight:600;">${this.escapeHtml(f.name)}</span>
               </div>
-              <span style="color:var(--text-muted);font-size:11.5px;">${f.size_formatted}</span>
+              <span style="color:var(--text-muted);font-size:13px;">${f.size_formatted}</span>
             </div>
           `).join("");
         }
@@ -2074,9 +2140,9 @@ const app = {
       } else {
         this.updateSquareMeter("backup-meter-track", 0);
         if (fill) fill.style.width = "0%";
-        if (badge) badge.innerText = "—";
-        if (usedText) usedText.innerText = "—";
-        if (availText) availText.innerText = "—";
+        if (badge) badge.innerText = "-";
+        if (usedText) usedText.innerText = "-";
+        if (availText) availText.innerText = "-";
       }
     } catch (e) {
       console.debug("Disk usage fetch error:", e);
@@ -2091,7 +2157,7 @@ const app = {
 
     body.innerHTML = `
       <div class="modal-header">
-        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Sign In — Palvi Admin</h3>
+        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Sign In - Palvi Admin</h3>
       </div>
       <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
         <div>
@@ -2207,10 +2273,9 @@ const app = {
 
           <div class="sidebar-status-pill">
             <div style="display:flex;align-items:center;gap:8px;">
-              <span class="status-indicator-dot" id="sidebar-dot"></span>
-              <span style="font-size:11px;font-weight:600;text-transform:uppercase;" id="sidebar-state-text">—</span>
+              <span style="font-size:11px;font-weight:600;text-transform:uppercase;" id="sidebar-state-text">-</span>
             </div>
-            <span style="font-size:11px;color:var(--text-muted);" id="sidebar-player-count">—</span>
+            <span style="font-size:11px;color:var(--text-muted);" id="sidebar-player-count">-</span>
           </div>
 
           <button class="sidebar-nav-item active" data-tab="server" onclick="app.setTab('server')">
@@ -2282,11 +2347,10 @@ const app = {
             </div>
 
             <div class="live-beacon">
-              <span class="beacon-dot" id="topbar-beacon-dot"></span>
-              <span id="topbar-beacon-text">ONLINE</span>
+              <span id="topbar-beacon-text">CHECKING</span>
             </div>
             <div style="font-size:12px;color:var(--text-secondary);margin-right:8px;">
-              Standby: <span id="topbar-idle-timer" style="color:var(--text-primary);font-weight:600;">—</span>
+              Standby: <span id="topbar-idle-timer" style="color:var(--text-primary);font-weight:600;">-</span>
             </div>
           </div>
         </header>
@@ -2311,7 +2375,7 @@ const app = {
   },
 
   formatSeconds(sec) {
-    if (sec === null || sec === undefined) return "—";
+    if (sec === null || sec === undefined) return "-";
     if (sec <= 0) return "Standby";
     const m = Math.floor(sec / 60);
     const s = sec % 60;
