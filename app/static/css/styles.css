@@ -87,7 +87,8 @@ button,
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-    letter-spacing: 0 !important;
+  border-radius: 0 !important;
+  letter-spacing: 0 !important;
   font-family: var(--font-universal) !important;
 }
 
@@ -151,7 +152,7 @@ body {
   font-size: 11px;
   font-weight: 700;
 
-  }
+}
 
 .brand-info {
   display: flex;
@@ -178,7 +179,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  
+
 }
 
 .status-indicator-dot {
@@ -308,7 +309,7 @@ main {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  
+
 }
 
 .metric-strip-label {
@@ -344,7 +345,7 @@ main {
   padding: 24px;
   display: flex;
   flex-direction: column;
-  
+
 }
 
 .card-title {
@@ -417,7 +418,6 @@ main {
   color: var(--text-primary);
   border-color: var(--border-medium);
 
-  
 }
 
 .btn-secondary:hover {
@@ -779,7 +779,7 @@ tr:hover td {
   padding: 24px;
   display: flex;
   flex-direction: column;
-  
+
 }
 
 .progress-header {
@@ -807,61 +807,7 @@ tr:hover td {
   padding: 3px 8px;
   background: var(--bg-surface-elevated);
   color: var(--text-primary);
-  
-}
 
-.meter-track {
-  display: flex;
-  gap: 3px;
-  width: 100%;
-  height: 14px;
-  background: transparent;
-  margin-bottom: 8px;
-  box-sizing: border-box;
-}
-
-.meter-block {
-  flex: 1;
-  height: 100%;
-  background-color: var(--bg-surface-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: 2px;
-  corner-shape: bevel;
-  -webkit-corner-shape: bevel;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-
-.meter-block.filled {
-  background-color: var(--text-primary);
-  border-color: var(--text-primary);
-}
-
-.meter-block.filled.warn {
-  background-color: #f59e0b;
-  border-color: #f59e0b;
-}
-
-.meter-block.filled.crit {
-  background-color: #ef4444;
-  border-color: #ef4444;
-}
-
-.meter-fill {
-  height: 100%;
-  background-color: var(--text-primary);
-  border-radius: 2px;
-  corner-shape: bevel;
-  -webkit-corner-shape: bevel;
-}
-
-.meter-fill {
-  height: 100%;
-  background-color: #ffffff;
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.meter-fill-warn {
-  background-color: #e5e5e5;
 }
 
 .meter-substats {
@@ -915,7 +861,7 @@ tr:hover td {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  
+
 }
 
 .breakdown-box-label {
@@ -1317,7 +1263,7 @@ tr:hover td {
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  
+
 }
 
 .software-card:hover {
@@ -1344,7 +1290,6 @@ tr:hover td {
   background-color: var(--bg-surface-elevated);
   color: #ffffff;
 
-  
 }
 
 .software-badge.active {
@@ -1466,4 +1411,40 @@ textarea:focus,
   background: var(--text-primary);
   color: var(--bg-canvas);
   font-weight: 700;
+}
+
+.meter-track {
+  display: flex;
+  gap: 3px;
+  width: 100%;
+  height: 18px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-medium);
+  padding: 3px;
+  margin: 12px 0 12px 0;
+  box-sizing: border-box;
+}
+
+.meter-block {
+  flex: 1;
+  height: 100%;
+  background-color: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.meter-block.filled {
+  background-color: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+.meter-block.filled.warn {
+  background-color: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.meter-block.filled.crit {
+  background-color: #ef4444;
+  border-color: #ef4444;
 }

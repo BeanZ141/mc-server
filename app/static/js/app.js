@@ -262,7 +262,7 @@ const app = {
   showConfirmModal(title, message, onConfirm, { danger = true, confirmText = "Confirm" } = {}) {
     const overlay = document.getElementById("modal-overlay");
     const body = document.getElementById("modal-body");
-    
+
     body.innerHTML = `
       <div class="modal-header">
         <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">${this.escapeHtml(title)}</h3>
@@ -399,32 +399,31 @@ const app = {
 
     if (tab === "server") {
       main.innerHTML = `
-        <div class="card" style="margin-bottom:20px;padding:20px 24px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
-            <div>
-              <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Server Address</div>
-              <div style="display:flex;align-items:center;gap:10px;">
+        <div class="card" style="margin-bottom:20px;padding:24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
+            <div style="display:flex;flex-direction:column;gap:6px;">
+              <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);">Minecraft Direct Connect</span>
+              <div style="display:flex;align-items:center;gap:12px;">
                 <span class="copy-pill" id="copy-addr-btn" onclick="app.copyServerAddress()" title="Click to copy">
                   ${ICONS.copy} mc.palvi.org:26656
                 </span>
-                <span style="font-size:12px;color:var(--text-secondary);">Direct Connect</span>
+                <span style="font-size:12px;color:var(--text-secondary);">Direct Port 26656</span>
               </div>
             </div>
 
-            <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
               <div>
-                <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Software</div>
-                <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);" id="server-software-val">—</div>
+                <span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Software</span>
+                <span style="font-size:14px;font-weight:600;color:var(--text-primary);" id="server-software-val">—</span>
               </div>
               <div>
-                <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">Version</div>
-                <div style="font-size:13.5px;font-weight:600;color:var(--text-primary);" id="server-version-val">—</div>
+                <span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Version</span>
+                <span style="font-size:14px;font-weight:600;color:var(--text-primary);" id="server-version-val">—</span>
               </div>
               <div>
-                <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">State</div>
+                <span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Server State</span>
                 <div style="display:flex;align-items:center;gap:6px;" id="server-state-wrapper">
-                  <span class="status-indicator-dot" id="server-state-dot"></span>
-                  <span style="font-size:13.5px;font-weight:700;text-transform:uppercase;" id="server-state-text">—</span>
+                  <span style="font-size:14px;font-weight:700;text-transform:uppercase;" id="server-state-text">—</span>
                 </div>
               </div>
             </div>
@@ -437,13 +436,13 @@ const app = {
           </div>
         </div>
 
-        <div class="metric-strip">
+        <div class="metric-strip" style="margin-bottom:20px;">
           <div class="metric-strip-card">
             <span class="metric-strip-label">Status</span>
             <span class="metric-strip-value" id="strip-status">—</span>
           </div>
           <div class="metric-strip-card">
-            <span class="metric-strip-label">Players Online</span>
+            <span class="metric-strip-label">Online Players</span>
             <span class="metric-strip-value" id="strip-players">—</span>
           </div>
           <div class="metric-strip-card">
@@ -456,19 +455,26 @@ const app = {
           </div>
         </div>
 
-        <div class="grid-2">
-          <div class="progress-card">
-            <div class="progress-header">
+        <div class="grid-2" style="margin-bottom:20px;">
+          <div class="card" style="padding:22px 24px;">
+            <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span class="progress-header-title">MEMORY ALLOCATION</span>
-              <span class="progress-header-badge" id="ram-header-badge">—</span>
+              <span class="badge" id="ram-header-badge">—</span>
             </div>
+            
             <div class="meter-track" id="ram-meter-track">
-              <div class="meter-fill" id="ram-meter-fill" style="width: 0%;"></div>
+              <div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div>
             </div>
-            <div class="meter-substats">
-              <div class="meter-sub-left">USED <strong id="ram-used-strong">—</strong></div>
-              <div class="meter-sub-right neutral">AVAILABLE <strong id="ram-avail-strong">—</strong></div>
+
+            <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;">
+              <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
+                USED <strong id="ram-used-strong" style="color:var(--text-primary);margin-left:4px;">—</strong>
+              </div>
+              <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
+                AVAILABLE <strong id="ram-avail-strong" style="color:var(--text-primary);margin-left:4px;">—</strong>
+              </div>
             </div>
+
             <div class="breakdown-grid">
               <div class="breakdown-box">
                 <span class="breakdown-box-label">ALLOCATED</span>
@@ -489,12 +495,12 @@ const app = {
             </div>
           </div>
 
-          <div class="card">
-            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
-              <span class="card-title">SERVER HARDWARE & ANALYTICS</span>
+          <div class="card" style="padding:22px 24px;">
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:14px;border-bottom:1px solid var(--border-subtle);">
+              <span class="card-title" style="margin:0;">SERVER HARDWARE & ANALYTICS</span>
               <span class="badge" id="server-hardware-badge">HOST METRICS</span>
             </div>
-            <div style="padding:14px 20px;display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;flex-direction:column;gap:12px;">
               <div class="metric-row">
                 <span class="metric-label">CPU Temperature</span>
                 <span class="metric-value" id="server-analytics-temp">—</span>
@@ -519,13 +525,13 @@ const app = {
           </div>
         </div>
 
-        <div class="card" style="margin-top:20px;">
-          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
-            <span class="card-title">CONNECTED PLAYERS</span>
+        <div class="card" style="padding:22px 24px;">
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:12px;border-bottom:1px solid var(--border-subtle);">
+            <span class="card-title" style="margin:0;">CONNECTED PLAYERS</span>
             <span class="badge" id="server-card-player-count">—</span>
           </div>
-          <div id="server-online-players-list" style="min-height:100px;padding:12px 0;">
-            <div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:30px 0;">No players currently connected.</div>
+          <div id="server-online-players-list" style="min-height:70px;padding:8px 0;">
+            <div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:24px 0;">No players currently connected.</div>
           </div>
         </div>
       `;
@@ -736,7 +742,7 @@ const app = {
             <span class="progress-header-badge" id="backup-storage-badge">—</span>
           </div>
           <div class="meter-track" id="backup-meter-track">
-            <div class="meter-fill" id="backup-meter-fill" style="width: 0%;"></div>
+            <div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div>
           </div>
           <div class="meter-substats">
             <div class="meter-sub-left">STORAGE USED <strong id="backup-used-text">—</strong></div>
@@ -862,35 +868,38 @@ const app = {
       const usedMb = Math.round(data.stats.ram_used_mb || 0);
       const limitMb = Math.round(data.stats.ram_limit_mb || 0);
       const pct = limitMb > 0 ? Math.min(100, Math.round((usedMb / limitMb) * 100)) : 0;
-
       if (stripRam) stripRam.innerText = limitMb > 0 ? `${usedMb} MB` : "—";
-
       this.updateSquareMeter("ram-meter-track", pct, pct > 90 ? "crit" : (pct > 75 ? "warn" : ""));
-      const fill = document.getElementById("ram-meter-fill");
-      if (fill) fill.style.width = limitMb > 0 ? `${pct}%` : "0%";
-
       const ramBadge = document.getElementById("ram-header-badge");
       if (ramBadge) ramBadge.innerText = limitMb > 0 ? `${limitMb} MB MAX` : "—";
-
       const usedStrong = document.getElementById("ram-used-strong");
       if (usedStrong) usedStrong.innerText = limitMb > 0 ? `${usedMb} MB (${pct}%)` : "—";
-
       const availStrong = document.getElementById("ram-avail-strong");
       if (availStrong) availStrong.innerText = limitMb > 0 ? `${Math.max(0, limitMb - usedMb)} MB` : "—";
-
       const boxAlloc = document.getElementById("ram-box-alloc");
-      if (boxAlloc) boxAlloc.innerText = limitMb > 0 ? `${limitMb} MB` : "—";
-
+      if (boxAlloc) boxAlloc.innerText = limitMb > 0 ? `${(limitMb / 1024).toFixed(1)} GB` : "—";
       const cpuVal = document.getElementById("cpu-stat-val");
       if (cpuVal) cpuVal.innerText = data.stats.cpu_percent !== undefined ? `${data.stats.cpu_percent.toFixed(1)}%` : "—";
-    }
-
-    if (data.performance) {
       const tpsVal = document.getElementById("tps-stat-val");
-      if (tpsVal) tpsVal.innerText = data.performance.tps !== undefined ? `${data.performance.tps.toFixed(1)} TPS` : "—";
-
+      if (tpsVal) tpsVal.innerText = data.stats.tps !== undefined ? `${data.stats.tps.toFixed(1)}` : "—";
       const msptVal = document.getElementById("mspt-stat-val");
-      if (msptVal) msptVal.innerText = data.performance.mspt !== undefined ? `${data.performance.mspt.toFixed(1)} ms` : "—";
+      if (msptVal) msptVal.innerText = data.stats.mspt !== undefined ? `${data.stats.mspt.toFixed(1)} ms` : "—";
+    } else {
+      this.updateSquareMeter("ram-meter-track", 0);
+      const ramBadge = document.getElementById("ram-header-badge");
+      if (ramBadge) ramBadge.innerText = data.env && data.env.MEMORY ? `${data.env.MEMORY} MAX` : "—";
+      const boxAlloc = document.getElementById("ram-box-alloc");
+      if (boxAlloc) boxAlloc.innerText = data.env && data.env.MEMORY ? `${data.env.MEMORY}` : "—";
+      const usedStrong = document.getElementById("ram-used-strong");
+      if (usedStrong) usedStrong.innerText = "—";
+      const availStrong = document.getElementById("ram-avail-strong");
+      if (availStrong) availStrong.innerText = "—";
+      const cpuVal = document.getElementById("cpu-stat-val");
+      if (cpuVal) cpuVal.innerText = "—";
+      const tpsVal = document.getElementById("tps-stat-val");
+      if (tpsVal) tpsVal.innerText = "—";
+      const msptVal = document.getElementById("mspt-stat-val");
+      if (msptVal) msptVal.innerText = "—";
     }
 
     const host = data.host_analytics;
@@ -914,7 +923,7 @@ const app = {
     try {
       const props = await API.request("/api/settings/properties");
       this.state.properties = props;
-      
+
       container.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
           <div class="form-group">
@@ -1069,7 +1078,7 @@ const app = {
       if (res.output) {
         this.appendConsoleLine(res.output, "res");
       }
-    } catch (e) {}
+    } catch (e) { }
   },
 
   injectConsoleCmd(cmd) {
@@ -1650,7 +1659,7 @@ const app = {
     try {
       const res = await API.request(`/api/mods/search?q=${q}&sort=${sort}${cat}&limit=20`);
       this.state.modSearchResults = res.hits || [];
-      
+
       if (!res.hits || res.hits.length === 0) {
         area.innerHTML = `<div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:40px 0;">No mods found on Modrinth for the selected filters.</div>`;
         return;
@@ -2060,8 +2069,8 @@ const app = {
         this.updateSquareMeter("backup-meter-track", bpct, bpct > 90 ? "crit" : (bpct > 80 ? "warn" : ""));
         if (fill) fill.style.width = `${bpct}%`;
         if (badge) badge.innerText = `${disk.percent_used || 0}% IN USE`;
-        if (usedText) usedText.innerText = `${(disk.used_bytes / (1024*1024*1024)).toFixed(1)} GB (${disk.percent_used}%)`;
-        if (availText) availText.innerText = `${(disk.free_bytes / (1024*1024*1024)).toFixed(1)} GB`;
+        if (usedText) usedText.innerText = `${(disk.used_bytes / (1024 * 1024 * 1024)).toFixed(1)} GB (${disk.percent_used}%)`;
+        if (availText) availText.innerText = `${(disk.free_bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
       } else {
         this.updateSquareMeter("backup-meter-track", 0);
         if (fill) fill.style.width = "0%";
@@ -2074,7 +2083,7 @@ const app = {
     }
   },
 
-  loadAccess() {},
+  loadAccess() { },
 
   showLoginModal() {
     const overlay = document.getElementById("modal-overlay");
@@ -2176,7 +2185,7 @@ const app = {
   async logout() {
     try {
       await API.request("/api/auth/logout", { method: "POST" });
-    } catch (e) {}
+    } catch (e) { }
     localStorage.removeItem("mcadmin_token");
     location.reload();
   },
