@@ -928,6 +928,11 @@ tr:hover td {
   color: var(--text-primary);
 }
 
+.keycap:hover {
+  background-color: var(--bg-surface-elevated);
+  cursor: pointer;
+}
+
 .keycap:active {
   background-color: var(--badge-text);
 }
@@ -1504,9 +1509,6 @@ textarea:focus,
   border-color: #ef4444;
 }
 
-/* Corner cut */
-
-/* 25px */
 .breakdown-box,
 .metric-strip-card,
 .software-card,
@@ -1515,14 +1517,12 @@ textarea:focus,
   border-radius: 0 25px 0 0 !important;
 }
 
-/* 15px */
 .sidebar-status-pill,
 .switch-label {
   corner-shape: bevel;
   border-radius: 0 15px 0 0 !important;
 }
 
-/* 8px */
 .badge,
 .btn-sm {
   corner-shape: bevel;

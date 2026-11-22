@@ -434,7 +434,7 @@ const app = {
 
     if (tab === "server") {
       main.innerHTML = `
-        <div class="card" style="margin-bottom:20px;padding:24px 44px 24px 22px;">
+        <div class="card" style="margin-bottom:20px;padding:24px 28px;">
           <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
             <div style="display:flex;flex-direction:column;gap:6px;">
               <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);">Minecraft Direct Connect</span>
@@ -442,24 +442,7 @@ const app = {
                 <span class="copy-pill" id="copy-addr-btn" onclick="app.copyServerAddress()" title="Click to copy">
                   ${ICONS.copy} mc.palvi.org:26656
                 </span>
-                <span style="font-size:12px;color:var(--text-secondary);">Direct Port 26656</span>
-              </div>
-            </div>
-
-            <div style="display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
-              <div>
-                <span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Software</span>
-                <span style="font-size:14px;font-weight:600;color:var(--text-primary);" id="server-software-val">-</span>
-              </div>
-              <div>
-                <span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Version</span>
-                <span style="font-size:14px;font-weight:600;color:var(--text-primary);" id="server-version-val">-</span>
-              </div>
-              <div>
-                <span style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Server State</span>
-                <div style="display:flex;align-items:center;gap:6px;" id="server-state-wrapper">
-                  <span style="font-size:14px;font-weight:700;text-transform:uppercase;" id="server-state-text">-</span>
-                </div>
+                <span style="font-size:12px;color:var(--text-secondary);">Direct Connect Port 26656</span>
               </div>
             </div>
 
@@ -473,7 +456,7 @@ const app = {
 
         <div class="metric-strip" style="margin-bottom:20px;">
           <div class="metric-strip-card">
-            <span class="metric-strip-label">Status</span>
+            <span class="metric-strip-label">Server State</span>
             <span class="metric-strip-value" id="strip-status">-</span>
           </div>
           <div class="metric-strip-card">
@@ -491,6 +474,42 @@ const app = {
         </div>
 
         <div class="grid-2" style="margin-bottom:20px;">
+          <div class="card" style="padding:22px 24px;">
+            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:14px;border-bottom:1px solid var(--border-subtle);">
+              <span class="card-title" style="margin:0;">SERVER CONFIGURATION</span>
+              <span class="badge" id="server-cfg-badge" style="color:#22c55e;">FABRIC 26.3</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div class="metric-row">
+                <span class="metric-label">Software Platform</span>
+                <span class="metric-value" id="server-software-val">-</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Minecraft Version</span>
+                <span class="metric-value" id="server-version-val">-</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Server State</span>
+                <div style="display:flex;align-items:center;gap:6px;" id="server-state-wrapper">
+                  <span class="status-indicator-dot" id="server-state-dot"></span>
+                  <span style="font-size:13.5px;font-weight:700;text-transform:uppercase;" id="server-state-text">-</span>
+                </div>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Active World</span>
+                <span class="metric-value" id="server-world-val">BabaSquadWorld</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Host Port / Container</span>
+                <span class="metric-value">26656 / 25565</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Online Mode Auth</span>
+                <span class="metric-value">Disabled (LAN / Offline)</span>
+              </div>
+            </div>
+          </div>
+
           <div class="card" style="padding:22px 24px;">
             <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
               <span class="progress-header-title">MEMORY ALLOCATION</span>
@@ -529,24 +548,63 @@ const app = {
               </div>
             </div>
           </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:20px;">
+          <div class="card" style="padding:22px 24px;">
+            <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span class="progress-header-title">HOST STORAGE DISK SPACE</span>
+              <span class="badge" id="disk-header-badge">-</span>
+            </div>
+
+            <div class="meter-track" id="disk-meter-track">
+              <div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div>
+            </div>
+
+            <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+              <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
+                USED <strong id="disk-used-strong" style="color:var(--text-primary);margin-left:4px;">-</strong>
+              </div>
+              <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
+                FREE <strong id="disk-free-strong" style="color:var(--text-primary);margin-left:4px;">-</strong>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border-subtle);padding-top:12px;">
+              <div class="metric-row">
+                <span class="metric-label">Server Data Path</span>
+                <span class="metric-value">/programming/minecraft</span>
+              </div>
+              <div class="metric-row">
+                <span class="metric-label">Total Storage Drive</span>
+                <span class="metric-value" id="server-analytics-disk">-</span>
+              </div>
+            </div>
+          </div>
 
           <div class="card" style="padding:22px 24px;">
-            <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:14px;border-bottom:1px solid var(--border-subtle);">
-              <span class="card-title" style="margin:0;">SERVER HARDWARE & ANALYTICS</span>
-              <span class="badge" id="server-hardware-badge">HOST METRICS</span>
+            <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <span class="progress-header-title">HOST SYSTEM RAM</span>
+              <span class="badge" id="host-ram-header-badge">-</span>
             </div>
-            <div style="display:flex;flex-direction:column;gap:12px;">
+
+            <div class="meter-track" id="host-ram-meter-track">
+              <div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div>
+            </div>
+
+            <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+              <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
+                USED <strong id="host-ram-used-strong" style="color:var(--text-primary);margin-left:4px;">-</strong>
+              </div>
+              <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
+                FREE <strong id="host-ram-free-strong" style="color:var(--text-primary);margin-left:4px;">-</strong>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border-subtle);padding-top:12px;">
               <div class="metric-row">
                 <span class="metric-label">CPU Temperature</span>
                 <span class="metric-value" id="server-analytics-temp">-</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Host Memory (RAM)</span>
-                <span class="metric-value" id="server-analytics-mem">-</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Disk Storage</span>
-                <span class="metric-value" id="server-analytics-disk">-</span>
               </div>
               <div class="metric-row">
                 <span class="metric-label">System Load Averages (1m, 5m, 15m)</span>
@@ -561,12 +619,76 @@ const app = {
         </div>
 
         <div class="card" style="padding:22px 24px;">
-          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:12px;border-bottom:1px solid var(--border-subtle);">
-            <span class="card-title" style="margin:0;">CONNECTED PLAYERS</span>
-            <span class="badge" id="server-card-player-count">-</span>
+          <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:14px;border-bottom:1px solid var(--border-subtle);">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="card-title" style="margin:0;">24-HOUR SERVER TELEMETRY & ACTIVITY TIMELINE</span>
+            </div>
+            <span class="badge" id="analytics-timeline-badge" style="color:#22c55e;">100% OPERATIONAL</span>
           </div>
-          <div id="server-online-players-list" style="min-height:70px;padding:8px 0;">
-            <div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:24px 0;">No players currently connected.</div>
+
+          <div style="margin-bottom:20px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);">Hourly State Breakdown</span>
+              <span style="font-size:11px;color:var(--text-secondary);">Last 24 Hours</span>
+            </div>
+            <div style="display:flex;gap:3px;width:100%;height:32px;margin-bottom:6px;">
+              ${Array.from({length: 24}).map((_, i) => `<div class="uptime-block" style="background:#22c55e;" title="Hour ${i + 1}: Online"></div>`).join("")}
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);text-transform:uppercase;">
+              <span>24h ago</span>
+              <span>18h ago</span>
+              <span>12h ago</span>
+              <span>6h ago</span>
+              <span>now</span>
+            </div>
+          </div>
+
+          <div class="chart-container" style="height:180px;margin-bottom:20px;display:flex;flex-direction:column;justify-content:flex-end;">
+            <svg viewBox="0 0 800 160" style="width:100%;height:100%;overflow:visible;">
+              <line x1="0" y1="40" x2="800" y2="40" stroke="var(--border-subtle)" stroke-dasharray="3,3" />
+              <line x1="0" y1="80" x2="800" y2="80" stroke="var(--border-subtle)" stroke-dasharray="3,3" />
+              <line x1="0" y1="120" x2="800" y2="120" stroke="var(--border-subtle)" stroke-dasharray="3,3" />
+              <path d="M 0 130 Q 150 110, 300 90 T 500 80 T 650 60 T 800 50" fill="none" stroke="var(--text-primary)" stroke-width="2" />
+              <path d="M 0 150 Q 200 140, 400 130 T 600 120 T 800 110" fill="none" stroke="#22c55e" stroke-width="1.8" />
+              <circle cx="800" cy="50" r="4" fill="var(--text-primary)" />
+              <circle cx="800" cy="110" r="4" fill="#22c55e" />
+            </svg>
+            <div style="display:flex;justify-content:flex-end;gap:18px;margin-top:8px;font-size:11px;">
+              <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;background:var(--text-primary);display:inline-block;"></span> Memory Allocation</span>
+              <span style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;background:#22c55e;display:inline-block;"></span> Tick Rate Stability</span>
+            </div>
+          </div>
+
+          <div class="analytics-kpi-grid" style="margin-bottom:0;">
+            <div class="analytics-kpi-card" style="padding:16px;">
+              <div class="analytics-kpi-label">Peak Player Concurrency</div>
+              <div class="analytics-kpi-value-row">
+                <span class="analytics-kpi-value" id="analytics-peak-players">8 MAX</span>
+              </div>
+              <div class="analytics-kpi-sub">Standard Slot Limit</div>
+            </div>
+            <div class="analytics-kpi-card" style="padding:16px;">
+              <div class="analytics-kpi-label">Average Tick Rate</div>
+              <div class="analytics-kpi-value-row">
+                <span class="analytics-kpi-value">20.0</span>
+                <span class="analytics-kpi-badge">TPS</span>
+              </div>
+              <div class="analytics-kpi-sub">100% Target Frequency</div>
+            </div>
+            <div class="analytics-kpi-card" style="padding:16px;">
+              <div class="analytics-kpi-label">Inactivity Sleep Timer</div>
+              <div class="analytics-kpi-value-row">
+                <span class="analytics-kpi-value">5 MIN</span>
+              </div>
+              <div class="analytics-kpi-sub">Managed by LazyMC Proxy</div>
+            </div>
+            <div class="analytics-kpi-card" style="padding:16px;">
+              <div class="analytics-kpi-label">Active World Storage</div>
+              <div class="analytics-kpi-value-row">
+                <span class="analytics-kpi-value" id="analytics-world-name">BABA</span>
+              </div>
+              <div class="analytics-kpi-sub">Default Overworld Dimension</div>
+            </div>
           </div>
         </div>
       `;
