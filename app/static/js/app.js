@@ -462,7 +462,7 @@ const app = {
               <span class="progress-header-title">MEMORY ALLOCATION</span>
               <span class="progress-header-badge" id="ram-header-badge">—</span>
             </div>
-            <div class="meter-track">
+            <div class="meter-track" id="ram-meter-track">
               <div class="meter-fill" id="ram-meter-fill" style="width: 0%;"></div>
             </div>
             <div class="meter-substats">
@@ -566,7 +566,7 @@ const app = {
             </div>
           </div>
 
-          <div class="terminal" id="console-output" style="flex:1;overflow-y:auto;background:#050505;border:1px solid var(--border-subtle);padding:14px 16px;font-size:12.5px;line-height:1.6;color:#e0e0e0;">
+          <div class="terminal" id="console-output" style="flex:1;overflow-y:auto;background:var(--bg-canvas);border:1px solid var(--border-medium);padding:14px 16px;font-size:12.5px;line-height:1.6;color:var(--text-primary);">
             <div style="color:var(--text-muted);">[Palvi MC Console Initialized. Type a command or click a quick action below.]</div>
           </div>
 
@@ -605,7 +605,7 @@ const app = {
             </div>
           </div>
 
-          <div class="terminal" id="log-output" style="flex:1;overflow-y:auto;background:#050505;border:1px solid var(--border-subtle);padding:14px 16px;font-size:12px;line-height:1.55;color:#d4d4d4;">
+          <div class="terminal" id="log-output" style="flex:1;overflow-y:auto;background:var(--bg-canvas);border:1px solid var(--border-medium);padding:14px 16px;font-size:12px;line-height:1.55;color:var(--text-primary);">
             <div style="color:var(--text-muted);">Loading server log...</div>
           </div>
         </div>
@@ -735,7 +735,7 @@ const app = {
             <span class="progress-header-title">BACKUP STORAGE USAGE</span>
             <span class="progress-header-badge" id="backup-storage-badge">—</span>
           </div>
-          <div class="meter-track">
+          <div class="meter-track" id="backup-meter-track">
             <div class="meter-fill" id="backup-meter-fill" style="width: 0%;"></div>
           </div>
           <div class="meter-substats">
@@ -865,6 +865,7 @@ const app = {
 
       if (stripRam) stripRam.innerText = limitMb > 0 ? `${usedMb} MB` : "—";
 
+      this.updateSquareMeter("ram-meter-track", pct, pct > 90 ? "crit" : (pct > 75 ? "warn" : ""));
       const fill = document.getElementById("ram-meter-fill");
       if (fill) fill.style.width = limitMb > 0 ? `${pct}%` : "0%";
 
@@ -2055,11 +2056,14 @@ const app = {
       const availText = document.getElementById("backup-avail-text");
 
       if (disk && disk.total_bytes) {
-        if (fill) fill.style.width = `${disk.percent_used || 0}%`;
+        const bpct = Math.round(disk.percent_used || 0);
+        this.updateSquareMeter("backup-meter-track", bpct, bpct > 90 ? "crit" : (bpct > 80 ? "warn" : ""));
+        if (fill) fill.style.width = `${bpct}%`;
         if (badge) badge.innerText = `${disk.percent_used || 0}% IN USE`;
         if (usedText) usedText.innerText = `${(disk.used_bytes / (1024*1024*1024)).toFixed(1)} GB (${disk.percent_used}%)`;
         if (availText) availText.innerText = `${(disk.free_bytes / (1024*1024*1024)).toFixed(1)} GB`;
       } else {
+        this.updateSquareMeter("backup-meter-track", 0);
         if (fill) fill.style.width = "0%";
         if (badge) badge.innerText = "—";
         if (usedText) usedText.innerText = "—";
@@ -2202,47 +2206,47 @@ const app = {
 
           <button class="sidebar-nav-item active" data-tab="server" onclick="app.setTab('server')">
             ${ICONS.server}
-            <span>1. Server</span>
+            <span>Server</span>
           </button>
           <button class="sidebar-nav-item" data-tab="properties" onclick="app.setTab('properties')">
             ${ICONS.properties}
-            <span>2. Server Properties</span>
+            <span>Server Properties</span>
           </button>
           <button class="sidebar-nav-item" data-tab="console" onclick="app.setTab('console')">
             ${ICONS.console}
-            <span>3. Console</span>
+            <span>Console</span>
           </button>
           <button class="sidebar-nav-item" data-tab="log" onclick="app.setTab('log')">
             ${ICONS.log}
-            <span>4. Log</span>
+            <span>Log</span>
           </button>
           <button class="sidebar-nav-item" data-tab="players" onclick="app.setTab('players')">
             ${ICONS.players}
-            <span>5. Players</span>
+            <span>Players</span>
           </button>
           <button class="sidebar-nav-item" data-tab="software" onclick="app.setTab('software')">
             ${ICONS.software}
-            <span>6. Software</span>
+            <span>Software</span>
           </button>
           <button class="sidebar-nav-item" data-tab="mods" onclick="app.setTab('mods')">
             ${ICONS.mods}
-            <span>7. Mods</span>
+            <span>Mods</span>
           </button>
           <button class="sidebar-nav-item" data-tab="files" onclick="app.setTab('files')">
             ${ICONS.files}
-            <span>8. Files</span>
+            <span>Files</span>
           </button>
           <button class="sidebar-nav-item" data-tab="worlds" onclick="app.setTab('worlds')">
             ${ICONS.worlds}
-            <span>9. Worlds</span>
+            <span>Worlds</span>
           </button>
           <button class="sidebar-nav-item" data-tab="backups" onclick="app.setTab('backups')">
             ${ICONS.backups}
-            <span>10. Backups</span>
+            <span>Backups</span>
           </button>
           <button class="sidebar-nav-item" data-tab="access" onclick="app.setTab('access')">
             ${ICONS.access}
-            <span>11. Access</span>
+            <span>Access</span>
           </button>
         </div>
 

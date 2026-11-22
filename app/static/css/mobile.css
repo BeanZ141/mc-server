@@ -5,6 +5,9 @@
   color: var(--text-primary);
   padding: 6px 10px;
   cursor: pointer;
+  border-radius: 4px;
+  corner-shape: bevel;
+  -webkit-corner-shape: bevel;
 }
 
 #sidebar-backdrop {
