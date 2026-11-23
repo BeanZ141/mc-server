@@ -1,8 +1,12 @@
 import os
 import asyncio
 import logging
+import base64
+import socket
+import datetime
+from pathlib import Path
 from typing import AsyncGenerator
-from app.config import HELPER_SOCKET_PATH
+from app.config import HELPER_SOCKET_PATH, MC_ENV_PATH
 
 logger = logging.getLogger("helper_client")
 
@@ -61,5 +65,48 @@ class HelperClient:
 
         full_output = "".join(output_lines)
         return success, full_output
+
+    async def write_env(self, content: str) -> tuple[bool, str]:
+        """Encodes content to base64 and writes mc.env via helper write-env action."""
+        encoded = base64.b64encode(content.encode("utf-8")).decode("ascii")
+        return await self.execute_and_collect("write-env", encoded)
+
+    def write_env_sync(self, content: str, target_path: Path | None = None) -> tuple[bool, str]:
+        """Synchronously encodes content to base64 and sends write-env via helper Unix socket."""
+        encoded = base64.b64encode(content.encode("utf-8")).decode("ascii")
+        cmd = f"write-env {encoded}\n"
+
+        target = Path(target_path) if target_path else MC_ENV_PATH
+
+        if not os.path.exists(self.socket_path) or not hasattr(socket, "AF_UNIX"):
+            logger.warning(f"Helper socket {self.socket_path} not found or AF_UNIX unavailable. Running in fallback mode.")
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup_path = target.parent / f"{target.name}.bak-{timestamp}"
+            try:
+                if target.exists():
+                    backup_path.write_text(target.read_text(encoding="utf-8"), encoding="utf-8")
+                target.write_text(content, encoding="utf-8")
+            except Exception as e:
+                logger.error(f"Fallback write failed: {e}")
+                return False, str(e)
+            return True, str(backup_path)
+
+        try:
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+                s.settimeout(10.0)
+                s.connect(self.socket_path)
+                s.sendall(cmd.encode("utf-8"))
+                s.shutdown(socket.SHUT_WR)
+                output = ""
+                while True:
+                    chunk = s.recv(4096)
+                    if not chunk:
+                        break
+                    output += chunk.decode("utf-8", errors="replace")
+                success = "SUCCESS:" in output
+                return success, output
+        except Exception as e:
+            logger.error(f"Failed to call helper write-env: {e}")
+            return False, str(e)
 
 helper_client = HelperClient()

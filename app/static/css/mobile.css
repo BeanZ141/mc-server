@@ -15,7 +15,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--overlay-backdrop);
   z-index: 99;
 }
 
@@ -44,7 +44,7 @@
     transform: translateX(-100%);
     transition: transform 0.25s ease;
     z-index: 1000;
-    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.5);
+    box-shadow: 2px 0 12px var(--border-medium);
   }
 
   #sidebar.mobile-open {
@@ -87,7 +87,9 @@
   .grid-2,
   .grid-3,
   .software-grid,
-  .analytics-kpi-grid {
+  .analytics-kpi-grid,
+  .analytics-grid-2x2,
+  .settings-grid-compact {
     grid-template-columns: 1fr;
     gap: 14px;
   }
@@ -132,5 +134,9 @@
 
   .btn-group {
     flex-wrap: wrap;
+  }
+
+  .font-selection-grid {
+    grid-template-columns: 1fr;
   }
 }

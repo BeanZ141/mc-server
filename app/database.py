@@ -11,12 +11,16 @@ def get_db_path() -> Path:
 def get_db_connection() -> sqlite3.Connection:
     db_path = get_db_path()
     db_path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect(db_path, timeout=5.0)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=5000;")
     return conn
 
 def init_db():
     conn = get_db_connection()
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=5000;")
     cursor = conn.cursor()
 
     # Admin auth table
@@ -125,43 +129,28 @@ def get_analytics_data(hours: int = 24) -> dict:
     )
     rows = cursor.fetchall()
 
-    # Also check restarts in audit_log
     cursor.execute(
         "SELECT COUNT(*) FROM audit_log WHERE action IN ('restart_server', 'start_server', 'recreate-mc') AND timestamp >= ?",
         (cutoff,)
     )
     restarts_count = cursor.fetchone()[0]
-
     conn.close()
 
     if not rows:
-        # Default baseline if no metrics recorded yet
-        now = datetime.datetime.now()
-        hourly_blocks = []
-        for i in range(24):
-            h_time = now - datetime.timedelta(hours=23 - i)
-            hourly_blocks.append({
-                "hour": h_time.strftime("%H:00"),
-                "status": "online",
-                "uptime": 100
-            })
         return {
-            "uptime_pct_24h": 99.8,
-            "uptime_pct_7d": 99.4,
-            "avg_tps": 20.0,
-            "avg_mspt": 8.5,
+            "uptime_pct_24h": 0.0,
+            "uptime_pct_7d": 0.0,
+            "avg_tps": 0.0,
+            "avg_mspt": 0.0,
             "peak_players": 0,
             "total_restarts": restarts_count,
             "samples_count": 0,
-            "hourly_blocks": hourly_blocks,
-            "tps_timeline": [
-                {"time": (now - datetime.timedelta(minutes=i*10)).strftime("%H:%M"), "tps": 20.0, "mspt": 8.0, "players": 0}
-                for i in range(12, 0, -1)
-            ],
+            "hourly_blocks": [],
+            "tps_timeline": [],
             "breakdown": {
-                "online_pct": 78.5,
-                "asleep_pct": 21.0,
-                "maintenance_pct": 0.5,
+                "online_pct": 0.0,
+                "asleep_pct": 0.0,
+                "maintenance_pct": 0.0,
                 "downtime_pct": 0.0
             }
         }
@@ -172,16 +161,16 @@ def get_analytics_data(hours: int = 24) -> dict:
     error_count = sum(1 for r in rows if r["state"] == "Error")
 
     uptime_count = online_count + asleep_count
-    uptime_pct = round((uptime_count / total_samples) * 100.0, 1) if total_samples > 0 else 100.0
+    uptime_pct = round((uptime_count / total_samples) * 100.0, 1) if total_samples > 0 else 0.0
     online_pct = round((online_count / total_samples) * 100.0, 1) if total_samples > 0 else 0.0
     asleep_pct = round((asleep_count / total_samples) * 100.0, 1) if total_samples > 0 else 0.0
     downtime_pct = round((error_count / total_samples) * 100.0, 1) if total_samples > 0 else 0.0
 
     valid_tps = [r["tps"] for r in rows if r["tps"] and r["tps"] > 0]
-    avg_tps = round(sum(valid_tps) / len(valid_tps), 1) if valid_tps else 20.0
+    avg_tps = round(sum(valid_tps) / len(valid_tps), 1) if valid_tps else 0.0
 
     valid_mspt = [r["mspt"] for r in rows if r["mspt"] and r["mspt"] > 0]
-    avg_mspt = round(sum(valid_mspt) / len(valid_mspt), 1) if valid_mspt else 8.0
+    avg_mspt = round(sum(valid_mspt) / len(valid_mspt), 1) if valid_mspt else 0.0
 
     peak_players = max((r["players_count"] for r in rows), default=0)
 
@@ -195,8 +184,8 @@ def get_analytics_data(hours: int = 24) -> dict:
         if not slot_rows:
             hourly_blocks.append({
                 "hour": slot_start.strftime("%H:00"),
-                "status": "online",
-                "uptime": 100
+                "status": "down",
+                "uptime": 0
             })
         else:
             good = sum(1 for r in slot_rows if r["state"] in ("Online", "Asleep"))
@@ -208,7 +197,6 @@ def get_analytics_data(hours: int = 24) -> dict:
                 "uptime": pct
             })
 
-    # Timeline of last 30 samples for chart
     step = max(1, total_samples // 30)
     timeline_rows = rows[::step][-30:]
     tps_timeline = [
@@ -223,7 +211,7 @@ def get_analytics_data(hours: int = 24) -> dict:
 
     return {
         "uptime_pct_24h": uptime_pct,
-        "uptime_pct_7d": max(98.5, uptime_pct - 0.3),
+        "uptime_pct_7d": uptime_pct,
         "avg_tps": avg_tps,
         "avg_mspt": avg_mspt,
         "peak_players": peak_players,

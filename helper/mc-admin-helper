@@ -9,7 +9,6 @@ LOG_TAG="mc-admin-helper"
 MINECRAFT_STACK_DIR="/opt/stacks/minecraft"
 MINECRAFT_DATA_DIR="/programming/minecraft"
 BACKUP_DIR="/mnt/media/backups/minecraft"
-WORLD_NAME="BabaSquadWorld"
 
 log() {
     local msg="$1"
@@ -24,6 +23,20 @@ error_exit() {
     exit 1
 }
 
+# Resolve WORLD_NAME dynamically from mc.env LEVEL=, fallback BabaSquadWorld
+get_world_name() {
+    local world="BabaSquadWorld"
+    local env_file="${MINECRAFT_STACK_DIR}/mc.env"
+    if [[ -f "${env_file}" ]]; then
+        local extracted
+        extracted=$(grep -E '^[[:space:]]*LEVEL=' "${env_file}" 2>/dev/null | tail -n 1 | cut -d'=' -f2- | tr -d '\r\n"' | xargs || true)
+        if [[ -n "${extracted}" && "${extracted}" =~ ^[a-zA-Z0-9_-]+$ ]]; then
+            world="${extracted}"
+        fi
+    fi
+    echo "${world}"
+}
+
 # Read command from stdin (single line)
 read -r CMD_LINE || true
 
@@ -33,9 +46,14 @@ fi
 
 # Split command into action and arguments
 read -r ACTION ARG1 REST <<< "${CMD_LINE} "
+REST=$(echo "${REST:-}" | xargs)
 
 case "${ACTION}" in
     recreate-mc)
+        if [[ -n "${ARG1:-}" || -n "${REST}" ]]; then
+            error_exit "recreate-mc accepts no arguments."
+        fi
+
         log "Starting action: recreate-mc"
         
         if [[ ! -d "${MINECRAFT_STACK_DIR}" ]]; then
@@ -73,9 +91,68 @@ case "${ACTION}" in
         echo "SUCCESS: recreate-mc completed"
         ;;
 
+    write-env)
+        if [[ -z "${ARG1:-}" || -n "${REST}" ]]; then
+            error_exit "write-env requires exactly one argument (base64 string)."
+        fi
+
+        log "Starting action: write-env"
+        b64_payload="${ARG1}"
+
+        # Cap base64 string length to avoid processing oversized payloads (~64 KB limit)
+        if (( ${#b64_payload} > 90000 )); then
+            error_exit "Payload exceeds maximum allowed size (64 KB)."
+        fi
+
+        tmp_file=$(mktemp "${MINECRAFT_STACK_DIR}/mc.env.tmp.XXXXXX")
+
+        # Decode base64
+        if ! echo "${b64_payload}" | base64 -d > "${tmp_file}" 2>/dev/null; then
+            rm -f "${tmp_file}"
+            error_exit "Failed to decode base64 payload."
+        fi
+
+        # Check decoded file size <= 65536 bytes
+        file_size=$(wc -c < "${tmp_file}")
+        if (( file_size > 65536 )); then
+            rm -f "${tmp_file}"
+            error_exit "Decoded mc.env size (${file_size} bytes) exceeds 64 KB limit."
+        fi
+
+        # Validate line by line: every non-empty, non-comment line must match ^[A-Z0-9_]+=[^\r\n]*$
+        line_num=0
+        while IFS= read -r line || [[ -n "${line}" ]]; do
+            ((line_num++))
+            line="${line%$'\r'}"
+            if [[ -z "${line}" || "${line}" =~ ^[[:space:]]*# ]]; then
+                continue
+            fi
+            if ! [[ "${line}" =~ ^[A-Z0-9_]+=[^$'\r'$'\n']*$ ]]; then
+                rm -f "${tmp_file}"
+                error_exit "Line ${line_num} violates mc.env syntax: invalid key or illegal characters."
+            fi
+        done < "${tmp_file}"
+
+        chmod 0644 "${tmp_file}"
+        chown 1000:1000 "${tmp_file}" 2>/dev/null || true
+
+        # Write timestamped backup of current mc.env
+        target_env="${MINECRAFT_STACK_DIR}/mc.env"
+        timestamp=$(date '+%Y%m%d_%H%M%S')
+        if [[ -f "${target_env}" ]]; then
+            cp -p "${target_env}" "${MINECRAFT_STACK_DIR}/mc.env.bak-${timestamp}"
+            log "Created backup: mc.env.bak-${timestamp}"
+        fi
+
+        # Atomically replace mc.env
+        mv -f "${tmp_file}" "${target_env}"
+        log "mc.env successfully updated."
+        echo "SUCCESS: mc.env updated (backup: mc.env.bak-${timestamp})"
+        ;;
+
     set-grace)
-        if [[ -z "${ARG1:-}" ]]; then
-            error_exit "set-grace requires an integer argument (seconds)."
+        if [[ -z "${ARG1:-}" || -n "${REST}" ]]; then
+            error_exit "set-grace requires exactly one argument (integer seconds)."
         fi
 
         # Validate that ARG1 is an integer between 60 and 3600
@@ -106,20 +183,30 @@ EOF
         ;;
 
     start-media)
+        if [[ -n "${ARG1:-}" || -n "${REST}" ]]; then
+            error_exit "start-media accepts no arguments."
+        fi
+
         log "Starting action: start-media now"
         
         if [[ -x "/usr/local/bin/media-start" ]]; then
             /usr/local/bin/media-start
-            log "media-start executed."
-            echo "SUCCESS: media-start executed"
+            log "media-start executed. Restarting mc-watch to cancel any pending grace timer and refresh state."
+            systemctl restart mc-watch
+            log "mc-watch restarted."
+            echo "SUCCESS: media-start executed and mc-watch restarted"
         else
             error_exit "/usr/local/bin/media-start script not found or not executable."
         fi
         ;;
 
     backup)
+        if [[ -n "${ARG1:-}" || -n "${REST}" ]]; then
+            error_exit "backup accepts no arguments."
+        fi
+
         log "Starting action: backup"
-        
+        WORLD_NAME=$(get_world_name)
         mkdir -p "${BACKUP_DIR}"
 
         TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
@@ -131,21 +218,20 @@ EOF
             ONLINE=true
             log "Server is running: holding world save during backup"
             docker exec mc rcon-cli save-off || true
+            trap 'docker exec mc rcon-cli save-on || true' EXIT
             docker exec mc rcon-cli save-all flush || true
             sleep 1
         fi
 
         log "Creating archive ${BACKUP_FILE} from ${MINECRAFT_DATA_DIR}/${WORLD_NAME}"
         if [[ ! -d "${MINECRAFT_DATA_DIR}/${WORLD_NAME}" ]]; then
-            if [[ "${ONLINE}" == "true" ]]; then
-                docker exec mc rcon-cli save-on || true
-            fi
             error_exit "World folder ${MINECRAFT_DATA_DIR}/${WORLD_NAME} not found."
         fi
 
         tar -czf "${BACKUP_FILE}" -C "${MINECRAFT_DATA_DIR}" "${WORLD_NAME}"
 
         if [[ "${ONLINE}" == "true" ]]; then
+            trap - EXIT
             docker exec mc rcon-cli save-on || true
             log "Server world saving resumed (save-on)."
         fi
@@ -166,8 +252,8 @@ EOF
         ;;
 
     restore)
-        if [[ -z "${ARG1:-}" ]]; then
-            error_exit "restore requires a backup ID argument."
+        if [[ -z "${ARG1:-}" || -n "${REST}" ]]; then
+            error_exit "restore requires exactly one argument (backup ID)."
         fi
 
         BACKUP_ID="${ARG1}"
@@ -193,6 +279,7 @@ EOF
         fi
 
         log "Starting restore for ${BACKUP_ID}"
+        WORLD_NAME=$(get_world_name)
 
         # Safety backup of current world before replacing
         SAFETY_TIMESTAMP=$(date '+%Y%m%d_%H%M%S')
@@ -218,6 +305,6 @@ EOF
         ;;
 
     *)
-        error_exit "Unknown action: '${ACTION}'. Allowed actions: recreate-mc, set-grace, start-media, backup, restore."
+        error_exit "Unknown action: '${ACTION}'. Allowed actions: recreate-mc, write-env, set-grace, start-media, backup, restore."
         ;;
 esac

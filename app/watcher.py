@@ -1,3 +1,4 @@
+import os
 import asyncio
 import logging
 import datetime
@@ -15,6 +16,7 @@ class IdleAndScheduleWatcher:
         self.is_running = False
         self._task: asyncio.Task | None = None
         self._last_backup_date: str | None = None
+        self._last_state: str | None = None
 
     def start(self):
         if not self.is_running:
@@ -34,6 +36,19 @@ class IdleAndScheduleWatcher:
             "timeout_seconds": self.idle_timeout,
             "remaining_seconds": remaining
         }
+
+    def _record_state_transition(self, new_state: str):
+        from app.database import log_audit
+        if self._last_state is not None and self._last_state != new_state:
+            log_audit(
+                user="system",
+                action="state_transition",
+                target="mc",
+                details=f"Server state transitioned from {self._last_state} to {new_state}",
+                result="SUCCESS" if new_state != "Error" else "FAILURE",
+                ip_address="127.0.0.1"
+            )
+        self._last_state = new_state
 
     async def _loop(self):
         while self.is_running:
@@ -55,6 +70,7 @@ class IdleAndScheduleWatcher:
         mc_info = await docker_client.get_container("mc")
         if not mc_info:
             self.idle_seconds = 0
+            self._record_state_transition("Error")
             record_server_metric(state="Error", players_count=0)
             return
 
@@ -64,10 +80,12 @@ class IdleAndScheduleWatcher:
         if status_str != "running":
             # Server is asleep or exited - do NOT poll RCON
             self.idle_seconds = 0
+            self._record_state_transition("Asleep")
             record_server_metric(state="Asleep", players_count=0)
             return
 
         # 2. Server is running - check player count and performance via RCON
+        self._record_state_transition("Online")
         player_count = 0
         perf = {"tps": 20.0, "mspt": 5.0}
         try:
@@ -91,29 +109,35 @@ class IdleAndScheduleWatcher:
         except Exception:
             pass
 
+        enable_idle_watcher = os.environ.get("ENABLE_IDLE_WATCHER", "false").lower() in ("true", "1", "yes")
+
         try:
             if player_count == 0:
                 self.idle_seconds += 30
-                logger.info(f"mc empty: idle for {self.idle_seconds}s / {self.idle_timeout}s")
-                if self.idle_seconds >= self.idle_timeout:
-                    logger.info("Idle timeout elapsed with 0 players! Stopping mc safely...")
-                    try:
-                        await rcon_client.save_all_flush()
-                    except Exception as e:
-                        logger.warning(f"Failed to flush save before idle stop: {e}")
+                if enable_idle_watcher:
+                    logger.info(f"mc empty: idle for {self.idle_seconds}s / {self.idle_timeout}s")
+                    if self.idle_seconds >= self.idle_timeout:
+                        logger.info("Idle timeout elapsed with 0 players! Stopping mc safely (ENABLE_IDLE_WATCHER=true)...")
+                        try:
+                            await rcon_client.save_all_flush()
+                        except Exception as e:
+                            logger.warning(f"Failed to flush save before idle stop: {e}")
 
-                    # Stop container via proxy
-                    stopped = await docker_client.stop_container("mc", timeout=60)
-                    if stopped:
-                        logger.info("mc container stopped due to idle timeout.")
-                    else:
-                        logger.error("Failed to stop mc container after idle timeout.")
+                        # Stop container via proxy
+                        stopped = await docker_client.stop_container("mc", timeout=60)
+                        if stopped:
+                            logger.info("mc container stopped due to idle timeout.")
+                        else:
+                            logger.error("Failed to stop mc container after idle timeout.")
 
-                    self.idle_seconds = 0
+                        self.idle_seconds = 0
+                else:
+                    if self.idle_seconds >= self.idle_timeout:
+                        self.idle_seconds = self.idle_timeout
             else:
                 # Players are online; reset idle counter
                 if self.idle_seconds > 0:
-                    logger.info(f"Player activity detected ({player_count} online); resetting idle timer.")
+                    logger.debug(f"Player activity detected ({player_count} online); resetting idle timer.")
                 self.idle_seconds = 0
 
         except Exception as e:

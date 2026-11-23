@@ -62,14 +62,24 @@ cancel_pending_timer() {
 init_state() {
     local mc_running
     mc_running=$(docker inspect -f '{{.State.Running}}' mc 2>/dev/null || echo "false")
+    local media_running
+    media_running=$(docker inspect -f '{{.State.Running}}' jellyfin 2>/dev/null || echo "false")
+
+    local mc_val="stopped"
     if [[ "${mc_running}" == "true" ]]; then
-        write_state "running" "stopped" "null" "${GRACE}"
-    else
-        write_state "stopped" "running" "null" "${GRACE}"
+        mc_val="running"
     fi
+
+    local media_val="stopped"
+    if [[ "${media_running}" == "true" ]]; then
+        media_val="running"
+    fi
+
+    write_state "${mc_val}" "${media_val}" "null" "${GRACE}"
 }
 
 log "mc-watch daemon started with GRACE=${GRACE}s"
+cancel_pending_timer
 init_state
 
 # Handle mc events in a loop
@@ -97,8 +107,10 @@ docker events --filter 'container=mc' --filter 'event=start' --filter 'event=die
 
             # Run countdown in background so events loop continues
             (
-                echo "$$" > "${PENDING_PID_FILE}"
-                sleep "${GRACE}"
+                sleep "${GRACE}" &
+                SLEEP_PID=$!
+                trap 'kill "${SLEEP_PID}" 2>/dev/null || true; exit 0' TERM
+                wait "${SLEEP_PID}"
                 rm -f "${PENDING_PID_FILE}"
 
                 log "Grace period expired; executing /usr/local/bin/media-start"
@@ -107,6 +119,7 @@ docker events --filter 'container=mc' --filter 'event=start' --filter 'event=die
                 fi
                 write_state "stopped" "running" "null" "${GRACE}"
             ) &
+            echo "$!" > "${PENDING_PID_FILE}"
             ;;
     esac
 done

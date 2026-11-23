@@ -161,17 +161,12 @@ class SettingsManager:
         return "".join(diff)
 
     def save_with_backup(self, new_content: str) -> str:
-        """Saves new content and writes a timestamped backup copy. Returns backup path."""
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_path = self.env_path.parent / f"mc.env.bak-{timestamp}"
-
-        # 1. Write backup if original exists
-        if self.env_path.exists():
-            backup_path.write_text(self.read_raw(), encoding="utf-8")
-
-        # 2. Write new content
-        self.env_path.write_text(new_content, encoding="utf-8")
-        return str(backup_path)
+        """Saves new content via root helper write-env action instead of direct host write."""
+        from app.helper_client import helper_client
+        success, out = helper_client.write_env_sync(new_content, target_path=self.env_path)
+        if not success:
+            raise RuntimeError(f"Failed to write mc.env via helper: {out}")
+        return out.strip()
 
     def update_mod_projects(self, slug: str, action: str) -> str:
         """Adds or removes a slug from MODRINTH_PROJECTS, writes backup, and saves mc.env"""

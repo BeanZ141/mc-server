@@ -12,7 +12,7 @@ services:
     restart: unless-stopped
     environment:
       CONTAINERS: "1"
-      POST: "1"
+      POST: "0"
       ALLOW_START: "1"
       ALLOW_STOP: "1"
       ALLOW_RESTARTS: "1"
@@ -42,8 +42,12 @@ services:
     security_opt:
       - no-new-privileges:true
     user: "1000:1000"
+    read_only: true
+    tmpfs:
+      - "/tmp"
     environment:
       PORT: "3555"
+      ENABLE_IDLE_WATCHER: "false"
       DATA_DIR: "/data"
       MINECRAFT_DATA_DIR: "/server-data"
       STACKS_DIR: "/stacks"
@@ -58,7 +62,7 @@ services:
     volumes:
       - /opt/containers/mc-panel:/data
       - /programming/minecraft:/server-data:rw
-      - /opt/stacks/minecraft:/stacks:rw
+      - /opt/stacks/minecraft/mc.env:/stacks/mc.env:ro
       - /run/mc-watch:/run/mc-watch:ro
       - /run/mc-admin-helper:/run/mc-admin-helper:rw
       - /mnt/media/backups/minecraft:/backups:ro

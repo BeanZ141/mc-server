@@ -189,6 +189,50 @@ class TestAPIEndpoints(unittest.TestCase):
         traversal_resp = self.client.get("/api/files/list?path=../../etc")
         self.assertEqual(traversal_resp.status_code, 403)
 
+    def test_files_download_zip_excludes_sensitive_files(self):
+        import io
+        import zipfile
+        csrf = self._setup_and_auth()
+        base_path = Path(self.temp_dir.name)
+
+        # 1. Create sensitive and allowed files in root
+        (base_path / ".rcon-cli.env").write_text("RCON_PASSWORD=SuperSecretPass123\n")
+        (base_path / "secret.env").write_text("API_KEY=Secret12345\n")
+        (base_path / ".hidden_dotfile").write_text("hidden\n")
+        (base_path / "safe_notes.txt").write_text("Public server notes\n")
+
+        # 2. Create subfolder with mixed files
+        sub = base_path / "public_folder"
+        sub.mkdir(parents=True, exist_ok=True)
+        (sub / "nested_safe.json").write_text('{"status": "ok"}\n')
+        (sub / "nested_leak.env").write_text("LEAK=true\n")
+        (sub / ".nested_hidden").write_text("hidden nested\n")
+
+        # 3. Request zip download of root
+        dl_resp = self.client.get("/api/files/download?path=")
+        self.assertEqual(dl_resp.status_code, 200)
+        self.assertEqual(dl_resp.headers["content-type"], "application/zip")
+
+        # 4. Inspect zip contents
+        with zipfile.ZipFile(io.BytesIO(dl_resp.content)) as z:
+            names = z.namelist()
+            # Allowed files must be present
+            self.assertIn("safe_notes.txt", names)
+            self.assertIn("public_folder/nested_safe.json", names)
+
+            # Sensitive / blocked files must NOT be present
+            self.assertNotIn(".rcon-cli.env", names)
+            self.assertNotIn("secret.env", names)
+            self.assertNotIn(".hidden_dotfile", names)
+            self.assertNotIn("public_folder/nested_leak.env", names)
+            self.assertNotIn("public_folder/.nested_hidden", names)
+
+            for name in names:
+                parts = name.split("/")
+                for part in parts:
+                    self.assertFalse(part.startswith("."), f"Found dotfile {part} in zip archive: {name}")
+                    self.assertFalse(part.lower().endswith(".env"), f"Found .env file {part} in zip archive: {name}")
+
     def test_worlds_endpoints(self):
         csrf = self._setup_and_auth()
 

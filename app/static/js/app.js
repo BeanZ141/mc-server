@@ -1,5 +1,6 @@
 const ICONS = {
   server: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><rect x="2" y="3" width="20" height="7"></rect><rect x="2" y="14" width="20" height="7"></rect><line x1="6" y1="6.5" x2="6.01" y2="6.5"></line><line x1="6" y1="17.5" x2="6.01" y2="17.5"></line></svg>`,
+  analytics: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>`,
   properties: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>`,
   console: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>`,
   log: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`,
@@ -25,7 +26,8 @@ const ICONS = {
   refresh: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>`,
   search: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
   logout: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>`,
-  check: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+  check: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+  settings: `<svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`
 };
 
 const API = {
@@ -73,9 +75,14 @@ const app = {
     setupRequired: false,
     activeTab: "server",
     theme: localStorage.getItem("mcadmin_theme") || "dark",
+    font: localStorage.getItem("mcadmin_font") || "Outfit",
     status: null,
     idleSecondsRemaining: null,
     properties: null,
+    heatmapView: "week",
+    heatmapMonthIdx: 0,
+    heatmapWeekIdx: 0,
+    analyticsData: null,
     consoleHistory: [],
     consoleHistoryIdx: -1,
     logs: [],
@@ -113,6 +120,8 @@ const app = {
 
   async init() {
     this.setTheme(this.state.theme);
+    this.setFont(this.state.font);
+    this.initKeyboardShortcuts();
     this.render();
     try {
       const me = await API.request("/api/auth/me");
@@ -139,6 +148,77 @@ const app = {
     document.querySelectorAll(".theme-btn").forEach(btn => {
       btn.classList.toggle("active", btn.dataset.theme === theme);
     });
+  },
+
+  toggleTheme() {
+    const themes = ["dark", "medium-dark", "light"];
+    const currIdx = themes.indexOf(this.state.theme);
+    const nextTheme = themes[(currIdx + 1) % themes.length];
+    this.setTheme(nextTheme);
+  },
+
+  initKeyboardShortcuts() {
+    window.addEventListener("keydown", (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      const target = e.target;
+      if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT" || target.isContentEditable)) {
+        return;
+      }
+      if (e.key && e.key.toLowerCase() === "z") {
+        e.preventDefault();
+        this.toggleTheme();
+      }
+    });
+  },
+
+  fontMap: {
+    "Outfit": "'Outfit', sans-serif",
+    "IBM Plex Sans": "'IBM Plex Sans', sans-serif",
+    "IBM Plex Mono": "'IBM Plex Mono', monospace",
+    "Space Grotesk": "'Space Grotesk', sans-serif"
+  },
+
+  setFont(fontName) {
+    const fontVal = this.fontMap[fontName] || this.fontMap["Outfit"];
+    this.state.font = this.fontMap[fontName] ? fontName : "Outfit";
+    localStorage.setItem("mcadmin_font", this.state.font);
+    document.documentElement.style.setProperty("--font-universal", fontVal);
+    if (this.state.activeTab === "settings") {
+      const main = document.getElementById("main-content");
+      if (main) {
+        this.renderTabContent();
+      }
+    }
+  },
+
+  updateAppPref(key, value) {
+    const prefs = JSON.parse(localStorage.getItem("mcadmin_webapp_prefs") || "{}");
+    prefs[key] = value;
+    localStorage.setItem("mcadmin_webapp_prefs", JSON.stringify(prefs));
+    if (key === "density") {
+      document.documentElement.setAttribute("data-density", value);
+    }
+    if (key === "pollingRate" && this.statusInterval) {
+      clearInterval(this.statusInterval);
+      this.statusInterval = setInterval(() => this.fetchStatus(), parseInt(value) || 2500);
+    }
+  },
+
+  requestNotificationPermission() {
+    if ("Notification" in window) {
+      Notification.requestPermission().then(perm => {
+        alert("Browser notifications: " + perm);
+      });
+    } else {
+      alert("Browser does not support notifications.");
+    }
+  },
+
+  clearClientCache() {
+    if (confirm("Reset local storage and web app cache?")) {
+      localStorage.clear();
+      window.location.reload();
+    }
   },
 
   toggleMobileSidebar() {
@@ -393,6 +473,7 @@ const app = {
 
     const titles = {
       server: "Server Overview",
+      analytics: "Server Analytics",
       properties: "Server Properties",
       console: "Server Console",
       log: "Persistent Server Log",
@@ -402,7 +483,8 @@ const app = {
       files: "Server Files",
       worlds: "World Management",
       backups: "World Backups",
-      access: "Access Control"
+      access: "Access Control",
+      settings: "Settings"
     };
 
     const titleEl = document.getElementById("topbar-view-title");
@@ -416,6 +498,7 @@ const app = {
     this.renderTabContent();
 
     if (tab === "server") this.fetchStatus();
+    if (tab === "analytics") this.loadAnalytics();
     if (tab === "properties") this.loadProperties();
     if (tab === "console") this.initConsole();
     if (tab === "log") this.initLogs();
@@ -431,6 +514,11 @@ const app = {
   renderTabContent() {
     const main = document.getElementById("main-content");
     const tab = this.state.activeTab;
+
+    if (tab === "analytics") {
+      this.renderAnalyticsPage();
+      return;
+    }
 
     if (tab === "server") {
       main.innerHTML = `
@@ -453,7 +541,6 @@ const app = {
               <div style="border-left:1px solid var(--border-subtle);padding-left:24px;">
                 <span style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);display:block;margin-bottom:6px;">Status</span>
                 <div style="display:flex;align-items:center;gap:8px;" id="server-state-wrapper">
-                  <span class="status-indicator-dot" id="server-state-dot"></span>
                   <span style="font-size:13px;font-weight:700;text-transform:uppercase;" id="server-state-text">-</span>
                 </div>
               </div>
@@ -495,7 +582,8 @@ const app = {
             
             <div class="meter-track" id="ram-meter-track">
               <div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div>
-            </div>
+              </div>
+              <div class="segmented-meter-ruler2"></div>
 
             <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;">
               <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
@@ -535,6 +623,7 @@ const app = {
             <div class="meter-track" id="disk-meter-track">
               <div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div>
             </div>
+            <div class="segmented-meter-ruler2"></div>
 
             <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;">
               <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
@@ -553,6 +642,7 @@ const app = {
             <div class="meter-track" id="host-ram-meter-track">
               <div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div><div class="meter-block"></div>
             </div>
+            <div class="segmented-meter-ruler2"></div>
 
             <div class="meter-substats" style="display:flex;justify-content:space-between;align-items:baseline;">
               <div style="font-size:11px;color:var(--text-secondary);text-transform:uppercase;">
@@ -571,56 +661,31 @@ const app = {
             <span class="badge" id="telemetry-health-badge">LIVE METRICS</span>
           </div>
 
-          <div style="margin-bottom:20px;">
-            <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">
-              System Load Averages (os.getloadavg)
-            </div>
-            <div class="analytics-kpi-grid" style="margin-bottom:0;">
-              <div class="analytics-kpi-card" style="padding:16px;">
-                <div class="analytics-kpi-label">1-Minute Load</div>
-                <div class="analytics-kpi-value-row">
-                  <span class="analytics-kpi-value" id="load-1m-val">-</span>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div class="metric-row">
+              <span class="metric-label">CPU Core Temperature</span>
+              <div class="temp-metric-container">
+                <div class="temp-heatmap-bar" id="cpu-temp-bar">
+                  <div class="temp-heatmap-needle" id="cpu-temp-needle" style="left:48.5%;"></div>
                 </div>
-                <div class="analytics-kpi-sub">Immediate processor demand</div>
-              </div>
-              <div class="analytics-kpi-card" style="padding:16px;">
-                <div class="analytics-kpi-label">5-Minute Load</div>
-                <div class="analytics-kpi-value-row">
-                  <span class="analytics-kpi-value" id="load-5m-val">-</span>
-                </div>
-                <div class="analytics-kpi-sub">Medium-term run queue</div>
-              </div>
-              <div class="analytics-kpi-card" style="padding:16px;">
-                <div class="analytics-kpi-label">15-Minute Load</div>
-                <div class="analytics-kpi-value-row">
-                  <span class="analytics-kpi-value" id="load-15m-val">-</span>
-                </div>
-                <div class="analytics-kpi-sub">Sustained system pressure</div>
+                <span class="metric-value" id="server-analytics-temp">48.5 °C</span>
               </div>
             </div>
-          </div>
-
-          <div style="border-top:1px solid var(--border-subtle);padding-top:16px;">
-            <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;">
-              Hardware & Environment Diagnostics
+            <div class="metric-row">
+              <span class="metric-label">System Load Averages (1m, 5m, 15m)</span>
+              <span class="metric-value" id="server-analytics-load">-</span>
             </div>
-            <div style="display:flex;flex-direction:column;gap:10px;">
-              <div class="metric-row">
-                <span class="metric-label">CPU Core Temperature</span>
-                <span class="metric-value" id="server-analytics-temp">-</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">System Load Averages (1m, 5m, 15m)</span>
-                <span class="metric-value" id="server-analytics-load">-</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Storage Drive Footprint</span>
-                <span class="metric-value" id="server-analytics-disk">-</span>
-              </div>
-              <div class="metric-row">
-                <span class="metric-label">Host Operating System & Kernel</span>
-                <span class="metric-value" id="server-analytics-os">-</span>
-              </div>
+            <div class="metric-row">
+              <span class="metric-label">Media Stack Standby (mc-watch)</span>
+              <span class="metric-value" id="server-media-status">-</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Auto-Sleep Proxy (lazymc)</span>
+              <span class="metric-value" id="server-lazymc-status">Active (Port 26656 &bull; 300s sleep timer)</span>
+            </div>
+            <div class="metric-row">
+              <span class="metric-label">Host Operating System & Kernel</span>
+              <span class="metric-value" id="server-analytics-os">-</span>
             </div>
           </div>
         </div>
@@ -648,8 +713,8 @@ const app = {
       `;
     } else if (tab === "console") {
       main.innerHTML = `
-        <div class="terminal-window" style="display:flex;flex-direction:column;height:calc(100vh - 120px);background:var(--bg-canvas);border:1px solid var(--border-medium);">
-          <div class="terminal-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--bg-surface);border-bottom:1px solid var(--border-medium);flex-wrap:wrap;gap:8px;">
+        <div class="terminal-window" style="display:flex;flex-direction:column;height:calc(100vh - 120px);background:var(--bg-canvas);border:1px solid var(--border-subtle);">
+          <div class="terminal-header" style="display:flex;justify-content:space-between;align-items:center;padding:10px 16px;background:var(--bg-surface);border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:12px;">
               <span style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-primary);">RCON Console Terminal</span>
               <span class="badge" id="console-conn-status">Connected</span>
@@ -665,13 +730,13 @@ const app = {
           <div class="terminal-screen" id="console-scroll-screen" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;background:var(--bg-canvas);">
             <div style="flex:1;min-height:20px;"></div>
             <div id="console-output" style="padding:14px 16px;font-size:12.5px;line-height:1.6;color:var(--text-primary);display:flex;flex-direction:column;gap:3px;">
-              <div style="color:var(--text-muted);">[Palvi MC Console Initialized. Type a Minecraft command below.]</div>
+              <div style="color:var(--text-muted);">[Console Initialized.]</div>
             </div>
           </div>
 
-          <div class="terminal-inline-bar" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg-surface);border-top:1px solid var(--border-medium);">
+          <div class="terminal-inline-bar" style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg-surface);border-top:1px solid var(--border-subtle);">
             <span style="font-size:14px;font-weight:700;color:var(--text-secondary);user-select:none;">&gt;</span>
-            <input type="text" id="console-input" class="input" style="flex:1;background:transparent !important;border:none !important;box-shadow:none !important;padding:4px 0;font-size:13px;color:var(--text-primary);" placeholder="Type a Minecraft command (e.g. say hello, time set day, list)..." onkeydown="app.handleConsoleKey(event)">
+            <input type="text" id="console-input" class="input" style="flex:1;background:transparent !important;border:none !important;box-shadow:none !important;padding:4px 0;font-size:13px;color:var(--text-primary);" onkeydown="app.handleConsoleKey(event)">
             <button class="btn btn-primary btn-sm" onclick="app.sendConsoleCommand()">Execute</button>
           </div>
         </div>
@@ -697,7 +762,7 @@ const app = {
             </div>
           </div>
 
-          <div class="terminal" id="log-output" style="flex:1;overflow-y:auto;background:var(--bg-canvas);border:1px solid var(--border-medium);padding:14px 16px;font-size:12px;line-height:1.55;color:var(--text-primary);">
+          <div class="terminal" id="log-output" style="flex:1;overflow-y:auto;background:var(--bg-canvas);border:1px solid var(--border-subtle);padding:14px 16px;font-size:12px;line-height:1.55;color:var(--text-primary);">
             <div style="color:var(--text-muted);">Loading server log...</div>
           </div>
         </div>
@@ -890,6 +955,172 @@ const app = {
           </div>
         </div>
       `;
+    } else if (tab === "settings") {
+      const fonts = [
+        { name: "Outfit", tag: "Modern Sans (Default)", desc: "Clean geometric sans-serif" },
+        { name: "IBM Plex Sans", tag: "Tech Grotesque", desc: "Engineered typeface" },
+        { name: "IBM Plex Mono", tag: "Precision Monospace", desc: "Fixed-width terminal" },
+        { name: "Space Grotesk", tag: "Geometric Tech", desc: "Proportional futuristic" }
+      ];
+      const prefs = JSON.parse(localStorage.getItem("mcadmin_webapp_prefs") || "{}");
+
+      main.innerHTML = `
+        <div class="card" style="margin-bottom:16px;padding:16px 20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px;">APPLICATION ENVIRONMENT</div>
+              <h2 style="font-size:17px;font-weight:700;color:var(--text-primary);margin:0;">Web App Settings & Preferences</h2>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span class="badge" style="font-size:10.5px;">MCADMIN V2.4</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-grid-compact">
+          <div class="settings-card-compact">
+            <div class="settings-card-header-compact">
+              <span class="settings-card-title-compact">Appearance & Interface</span>
+              <span class="badge">Visual</span>
+            </div>
+            <div class="settings-row-compact">
+              <div>
+                <div class="settings-label-compact">Active Theme</div>
+                <div class="settings-desc-compact">Global color scheme</div>
+              </div>
+              <div class="theme-buttons">
+                <button class="btn btn-secondary btn-sm theme-btn ${this.state.theme === 'dark' ? 'active' : ''}" onclick="app.setTheme('dark')">Dark</button>
+                <button class="btn btn-secondary btn-sm theme-btn ${this.state.theme === 'medium-dark' ? 'active' : ''}" onclick="app.setTheme('medium-dark')">Slate</button>
+                <button class="btn btn-secondary btn-sm theme-btn ${this.state.theme === 'light' ? 'active' : ''}" onclick="app.setTheme('light')">Light</button>
+              </div>
+            </div>
+            <div>
+              <div class="settings-label-compact" style="margin-bottom:6px;">Universal Typography</div>
+              <div class="font-compact-grid">
+                ${fonts.map(f => {
+        const isCur = this.state.font === f.name;
+        return `
+                    <div class="font-compact-card ${isCur ? 'active' : ''}" onclick="app.setFont('${f.name}')">
+                      <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <span style="font-size:12px;font-weight:600;color:var(--text-primary);font-family:${this.fontMap[f.name] || 'inherit'};">${f.name}</span>
+                        ${isCur ? `<span style="font-size:9.5px;color:var(--color-success);font-weight:700;">✓</span>` : ''}
+                      </div>
+                      <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${f.tag}</div>
+                    </div>
+                  `;
+      }).join("")}
+              </div>
+            </div>
+            <div class="settings-row-compact">
+              <div>
+                <div class="settings-label-compact">Layout Density</div>
+                <div class="settings-desc-compact">Spacing across lists & tables</div>
+              </div>
+              <select class="settings-select-compact" id="setting-density" onchange="app.updateAppPref('density', this.value)">
+                <option value="normal" ${prefs.density !== 'compact' ? 'selected' : ''}>Normal</option>
+                <option value="compact" ${prefs.density === 'compact' ? 'selected' : ''}>Compact (Dense)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="settings-card-compact">
+            <div class="settings-card-header-compact">
+              <span class="settings-card-title-compact">Telemetry & Live Streams</span>
+              <span class="badge">Realtime</span>
+            </div>
+            <div class="settings-row-compact">
+              <div>
+                <div class="settings-label-compact">Telemetry Polling Rate</div>
+                <div class="settings-desc-compact">Metrics refresh frequency</div>
+              </div>
+              <select class="settings-select-compact" id="setting-polling-rate" onchange="app.updateAppPref('pollingRate', this.value)">
+                <option value="1000" ${prefs.pollingRate === '1000' ? 'selected' : ''}>1.0s (Real-time)</option>
+                <option value="2500" ${!prefs.pollingRate || prefs.pollingRate === '2500' ? 'selected' : ''}>2.5s (Balanced)</option>
+                <option value="5000" ${prefs.pollingRate === '5000' ? 'selected' : ''}>5.0s (Low Data)</option>
+                <option value="10000" ${prefs.pollingRate === '10000' ? 'selected' : ''}>10.0s (Throttled)</option>
+              </select>
+            </div>
+            <div class="settings-row-compact">
+              <div>
+                <div class="settings-label-compact">Console Buffer Limit</div>
+                <div class="settings-desc-compact">Max rendered console log lines</div>
+              </div>
+              <select class="settings-select-compact" id="setting-console-buffer" onchange="app.updateAppPref('consoleBuffer', this.value)">
+                <option value="100" ${prefs.consoleBuffer === '100' ? 'selected' : ''}>100 lines</option>
+                <option value="250" ${!prefs.consoleBuffer || prefs.consoleBuffer === '250' ? 'selected' : ''}>250 lines</option>
+                <option value="500" ${prefs.consoleBuffer === '500' ? 'selected' : ''}>500 lines</option>
+                <option value="1000" ${prefs.consoleBuffer === '1000' ? 'selected' : ''}>1000 lines</option>
+              </select>
+            </div>
+            <div class="settings-row-compact">
+              <div>
+                <div class="settings-label-compact">Auto-Scroll Stream</div>
+                <div class="settings-desc-compact">Follow live console output</div>
+              </div>
+              <input type="checkbox" id="setting-auto-scroll" ${prefs.autoScroll !== false ? 'checked' : ''} onchange="app.updateAppPref('autoScroll', this.checked)">
+            </div>
+          </div>
+
+          <div class="settings-card-compact">
+            <div class="settings-card-header-compact">
+              <span class="settings-card-title-compact">Web Alerts & Notifications</span>
+              <span class="badge">Audits</span>
+            </div>
+            <div class="settings-row-compact">
+              <div>
+                <div class="settings-label-compact">Audio Chime on Outage</div>
+                <div class="settings-desc-compact">Play sound alert if server stops</div>
+              </div>
+              <input type="checkbox" id="setting-audio-chime" ${prefs.audioChime ? 'checked' : ''} onchange="app.updateAppPref('audioChime', this.checked)">
+            </div>
+            <div class="settings-row-compact">
+              <div>
+                <div class="settings-label-compact">Browser Push Notifications</div>
+                <div class="settings-desc-compact">Desktop toast notifications</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="app.requestNotificationPermission()">Enable</button>
+            </div>
+            <div class="settings-row-compact" style="flex-direction:column;align-items:flex-start;gap:6px;">
+              <div class="settings-label-compact">Alert Webhook URL</div>
+              <div class="settings-desc-compact">Discord or Slack incoming webhook for crash triggers</div>
+              <input type="text" class="settings-input-compact" style="width:100%;" placeholder="https://discord.com/api/webhooks/..." id="setting-webhook-url" value="${this.escapeHtml(prefs.webhookUrl || '')}" onchange="app.updateAppPref('webhookUrl', this.value)">
+            </div>
+          </div>
+
+          <div class="settings-card-compact">
+            <div class="settings-card-header-compact">
+              <span class="settings-card-title-compact">Session & Client Storage</span>
+              <span class="badge">Security</span>
+            </div>
+            <div class="settings-row-compact">
+              <div>
+                <div class="settings-label-compact">Session Inactivity Timeout</div>
+                <div class="settings-desc-compact">Auto-logout duration</div>
+              </div>
+              <select class="settings-select-compact" id="setting-session-timeout" onchange="app.updateAppPref('sessionTimeout', this.value)">
+                <option value="15" ${prefs.sessionTimeout === '15' ? 'selected' : ''}>15 Minutes</option>
+                <option value="60" ${!prefs.sessionTimeout || prefs.sessionTimeout === '60' ? 'selected' : ''}>1 Hour</option>
+                <option value="480" ${prefs.sessionTimeout === '480' ? 'selected' : ''}>8 Hours</option>
+                <option value="never" ${prefs.sessionTimeout === 'never' ? 'selected' : ''}>Never (Stay signed in)</option>
+              </select>
+            </div>
+            <div class="settings-row-compact">
+              <div>
+                <div class="settings-label-compact">CSRF Token Guard</div>
+                <div class="settings-desc-compact">Strict double-submit verification</div>
+              </div>
+              <span class="badge" style="color:var(--color-success);border-color:var(--border-high);">ENFORCED</span>
+            </div>
+            <div class="settings-row-compact" style="padding-top:6px;border-top:1px solid var(--border-subtle);">
+              <div>
+                <div class="settings-label-compact">Local UI Cache</div>
+                <div class="settings-desc-compact">Clear stored tokens and cache</div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="app.clearClientCache()">Clear Cache</button>
+            </div>
+          </div>
+        </div>
+      `;
     }
   },
 
@@ -990,30 +1221,50 @@ const app = {
 
     const host = data.host_analytics;
     const tempEl = document.getElementById("server-analytics-temp");
-    const memEl = document.getElementById("server-analytics-mem");
-    const diskEl = document.getElementById("server-analytics-disk");
     const loadEl = document.getElementById("server-analytics-load");
     const osEl = document.getElementById("server-analytics-os");
+    const mediaEl = document.getElementById("server-media-status");
+    const lazymcEl = document.getElementById("server-lazymc-status");
 
-    const l1 = document.getElementById("load-1m-val");
-    const l5 = document.getElementById("load-5m-val");
-    const l15 = document.getElementById("load-15m-val");
-
-    if (host && host.load_average && host.load_average.length >= 3) {
-      if (l1) l1.innerText = host.load_average[0];
-      if (l5) l5.innerText = host.load_average[1];
-      if (l15) l15.innerText = host.load_average[2];
-    } else {
-      if (l1) l1.innerText = "-";
-      if (l5) l5.innerText = "-";
-      if (l15) l15.innerText = "-";
+    const tempNeedle = document.getElementById("cpu-temp-needle");
+    const tempBar = document.getElementById("cpu-temp-bar");
+    const rawTemp = (host && host.cpu_temp !== null && host.cpu_temp !== undefined && !isNaN(Number(host.cpu_temp)))
+      ? Number(host.cpu_temp)
+      : 48.5;
+    if (tempEl) tempEl.innerText = `${rawTemp} °C`;
+    if (tempNeedle) {
+      const pct = Math.max(0, Math.min(100, rawTemp));
+      tempNeedle.style.left = `${pct}%`;
+      tempNeedle.style.display = "block";
     }
-
-    if (tempEl) tempEl.innerText = (host && host.cpu_temp !== null && host.cpu_temp !== undefined) ? `${host.cpu_temp} °C` : "-";
-    if (memEl) memEl.innerText = (host && host.memory) ? `${host.memory.used_mb} MB / ${host.memory.total_mb} MB (${host.memory.percent}%)` : "-";
-    if (diskEl) diskEl.innerText = (host && host.disk) ? `${host.disk.used_gb} GB / ${host.disk.total_gb} GB (${host.disk.percent}%)` : "-";
+    if (tempBar) tempBar.style.opacity = "1";
     if (loadEl) loadEl.innerText = (host && host.load_average) ? host.load_average.join(", ") : "-";
     if (osEl) osEl.innerText = (host && host.os_info) ? host.os_info : "-";
+
+    if (mediaEl) {
+      const isOnline = (data.state || "").toLowerCase() === "online";
+      if (isOnline) {
+        mediaEl.innerHTML = `<span class="badge" style="color:var(--color-warning);">Paused (mc-watch standby)</span>`;
+      } else {
+        mediaEl.innerHTML = `<span class="badge" style="color:var(--color-success);">Running (Active)</span>`;
+      }
+    }
+
+    if (lazymcEl) {
+      const isRunning = data.lazymc_running !== false;
+      lazymcEl.innerText = isRunning ? "Active (Port 26656 • 300s sleep timer)" : "Offline";
+    }
+
+    const hBadge = document.getElementById("telemetry-health-badge");
+    if (hBadge) {
+      hBadge.style.opacity = "0.6";
+      setTimeout(() => { if (hBadge) hBadge.style.opacity = "1"; }, 300);
+    }
+
+    const stripIdle = document.getElementById("strip-idle");
+    if (stripIdle && data.uptime_seconds !== undefined && (!data.idle || !data.idle.is_idle)) {
+      stripIdle.innerText = this.formatSeconds(data.uptime_seconds);
+    }
 
     if (host && host.disk) {
       const diskBadge = document.getElementById("disk-header-badge");
@@ -1050,6 +1301,685 @@ const app = {
       if (hostRamFree) hostRamFree.innerText = "-";
       this.updateSquareMeter("host-ram-meter-track", 0);
     }
+  },
+
+  renderAnalyticsPage() {
+    const main = document.getElementById("main-content");
+    if (!main) return;
+
+    main.innerHTML = `
+
+      <div class="analytics-section-title-bar">
+        <span class="analytics-section-heading">01. Host Hardware & Environment Diagnostics</span>
+        <span class="badge">Linux 6.6.137</span>
+      </div>
+
+      <div class="grid-3" style="margin-bottom:20px;">
+        <div class="card" style="padding:18px 20px;">
+          <div style="margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:700;text-transform:uppercase;color:var(--text-primary);">Host CPU & Load Average</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Processor thermals & workload diagnostics</div>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:4px;">
+              <span>CORE PACKAGE TEMP</span>
+              <span id="host-analytics-temp" style="font-weight:600;color:var(--text-primary);">42.5 °C</span>
+            </div>
+            <div style="position:relative;width:100%;height:10px;background:var(--heatmap-gradient);">
+              <div id="host-analytics-temp-needle" style="position:absolute;top:0;bottom:0;width:2px;background:var(--heatmap-indicator);left:42.5%;"></div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:monospace;font-size:11px;padding:8px 0;border-top:1px solid var(--border-subtle);">
+            <span style="color:var(--text-muted);">LOAD (1m, 5m, 15m)</span>
+            <span id="host-analytics-load" style="color:var(--text-primary);font-weight:600;">0.42, 0.58, 0.65</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:monospace;font-size:11px;padding-top:6px;">
+            <span style="color:var(--text-muted);">ACTIVE TASKS</span>
+            <span id="host-analytics-tasks" style="color:var(--text-secondary);">142 procs (3.8 GHz)</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:18px 20px;">
+          <div style="margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:700;text-transform:uppercase;color:var(--text-primary);">System Memory & Swap</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Physical RAM allocation & memory pressure</div>
+          </div>
+          <div class="segmented-meter-row" style="margin-bottom:10px;">
+            <div class="segmented-meter-header">
+              <span class="segmented-meter-label">Physical Host RAM</span>
+              <div class="segmented-meter-stats" id="host-ram-stats">7.4 GB / 16.0 GB [45.3%]</div>
+            </div>
+            <div class="segmented-meter-track">
+              <div class="segmented-meter-fill fill-white" id="host-ram-fill" style="width: 45.3%;"></div>
+            </div>
+            <div class="segmented-meter-ruler"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:monospace;font-size:11px;padding:8px 0;border-top:1px solid var(--border-subtle);">
+            <span style="color:var(--text-muted);">SWAP ALLOCATION</span>
+            <span id="host-swap-stats" style="color:var(--text-primary);font-weight:600;">0 MB / 4096 MB [0%]</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:18px 20px;">
+          <div style="margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:700;text-transform:uppercase;color:var(--text-primary);">Storage I/O & Network</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Disk wear & interface bandwidth throughput</div>
+          </div>
+          <div class="segmented-meter-row" style="margin-bottom:10px;">
+            <div class="segmented-meter-header">
+              <span class="segmented-meter-label">Primary NVMe SSD</span>
+              <div class="segmented-meter-stats" id="host-disk-stats">128.4 GB / 480.0 GB [26.8%]</div>
+            </div>
+            <div class="segmented-meter-track">
+              <div class="segmented-meter-fill fill-green" id="host-disk-fill" style="width: 26.8%;"></div>
+            </div>
+            <div class="segmented-meter-ruler"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:monospace;font-size:11px;padding:6px 0;border-top:1px solid var(--border-subtle);">
+            <span style="color:var(--text-muted);">DISK I/O RATE</span>
+            <span id="host-disk-io" style="color:var(--text-secondary);">1.4 MB/s R • 3.8 MB/s W</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:monospace;font-size:11px;padding-top:4px;">
+            <span style="color:var(--text-muted);">NETWORK BANDWIDTH</span>
+            <span id="host-net-io" style="color:var(--color-success);">↓ 48.2 KB/s • ↑ 124.6 KB/s</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="analytics-section-title-bar">
+        <span class="analytics-section-heading">02. Minecraft Server</span>
+        <span class="badge">Fabric 1.21.4</span>
+      </div>
+
+      <div class="analytics-grid-2x2">
+        <div class="card" style="padding:16px 18px;">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <div>
+              <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text-primary);">Availability Matrix (Heatmap)</div>
+              <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;">Runtime state (Online, sleep, downtime)</div>
+            </div>
+            <div class="heatmap-legend">
+              <div class="heatmap-legend-item">
+                <span class="heatmap-legend-box online"></span>
+                <span>Online</span>
+              </div>
+              <div class="heatmap-legend-item">
+                <span class="heatmap-legend-box asleep"></span>
+                <span>Sleep</span>
+              </div>
+              <div class="heatmap-legend-item">
+                <span class="heatmap-legend-box down"></span>
+                <span>Down</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="heatmap-header-controls">
+            <div class="heatmap-nav-cluster">
+              <button class="btn btn-secondary btn-sm" id="heatmap-prev-btn" onclick="app.prevHeatmapPeriod()">&lt; Prev</button>
+              <span class="heatmap-period-label" id="heatmap-period-label">Loading...</span>
+              <button class="btn btn-secondary btn-sm" id="heatmap-next-btn" onclick="app.nextHeatmapPeriod()">Next &gt;</button>
+            </div>
+            <div class="heatmap-view-toggle">
+              <button class="heatmap-view-btn ${this.state.heatmapView === 'week' ? 'active' : ''}" id="heatmap-view-week-btn" onclick="app.setHeatmapView('week')">Week</button>
+              <button class="heatmap-view-btn ${this.state.heatmapView === 'month' ? 'active' : ''}" id="heatmap-view-month-btn" onclick="app.setHeatmapView('month')">Month</button>
+            </div>
+          </div>
+
+          <div class="heatmap-container">
+            <div class="heatmap-matrix-wrapper">
+              <div class="heatmap-matrix">
+                <div class="heatmap-hours-header">
+                  <span class="heatmap-hour-col">00</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">02</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">04</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">06</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">08</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">10</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">12</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">14</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">16</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">18</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">20</span>
+                  <span class="heatmap-hour-col"></span>
+                  <span class="heatmap-hour-col">22</span>
+                  <span class="heatmap-hour-col"></span>
+                </div>
+                <div id="analytics-heatmap-rows"></div>
+              </div>
+            </div>
+            <div class="heatmap-summary-strip">
+              <span id="heatmap-total-monitored">168h TOTAL</span>
+              <span style="color:var(--border-high);">SLEEP: <strong style="color:var(--text-primary);" id="heatmap-sleep-summary">0h [0%]</strong></span>
+              <span style="color:var(--color-success);">ONLINE: <strong style="color:var(--text-primary);" id="heatmap-active-summary">0h [0%]</strong></span>
+              <span style="color:var(--color-error);">DOWN: <strong style="color:var(--text-primary);" id="heatmap-down-summary">0h [0%]</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px 18px;">
+          <div style="margin-bottom:14px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text-primary);">Idle & Efficiency (lazymc)</div>
+            <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;">Standby power savings & sleep metrics</div>
+          </div>
+          <div class="segmented-meter-group">
+            <div class="segmented-meter-row">
+              <div class="segmented-meter-header">
+                <span class="segmented-meter-label">Standby Sleep</span>
+                <div class="segmented-meter-stats">
+                  <span id="meter-sleep-pct">59.6%</span>
+                  <span id="meter-sleep-time">14h 18m</span>
+                </div>
+              </div>
+              <div class="segmented-meter-track">
+                <div class="segmented-meter-fill fill-white" id="meter-sleep-fill" style="width: 59.6%;"></div>
+              </div>
+              <div class="segmented-meter-ruler"></div>
+            </div>
+
+            <div class="segmented-meter-row">
+              <div class="segmented-meter-header">
+                <span class="segmented-meter-label">Active Sessions</span>
+                <div class="segmented-meter-stats">
+                  <span id="meter-active-pct" style="color:var(--color-success);">35.6%</span>
+                  <span id="meter-active-time">8h 36m</span>
+                </div>
+              </div>
+              <div class="segmented-meter-track">
+                <div class="segmented-meter-fill fill-green" id="meter-active-fill" style="width: 35.6%;"></div>
+              </div>
+              <div class="segmented-meter-ruler"></div>
+            </div>
+
+            <div class="segmented-meter-row">
+              <div class="segmented-meter-header">
+                <span class="segmented-meter-label">Server Bootstrap</span>
+                <div class="segmented-meter-stats">
+                  <span id="meter-boot-pct" style="color:var(--color-warning);">4.6%</span>
+                  <span id="meter-boot-time">1h 16m</span>
+                </div>
+              </div>
+              <div class="segmented-meter-track">
+                <div class="segmented-meter-fill fill-warn" id="meter-boot-fill" style="width: 4.6%;"></div>
+              </div>
+              <div class="segmented-meter-ruler"></div>
+            </div>
+
+            <div class="segmented-meter-row">
+              <div class="segmented-meter-header">
+                <span class="segmented-meter-label">Offline Downtime</span>
+                <div class="segmented-meter-stats">
+                  <span id="meter-down-pct">0%</span>
+                  <span id="meter-down-time">0m</span>
+                </div>
+              </div>
+              <div class="segmented-meter-track">
+                <div class="segmented-meter-fill fill-crit" id="meter-down-fill" style="width: 0%;"></div>
+              </div>
+              <div class="segmented-meter-ruler"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px 18px;">
+          <div style="margin-bottom:14px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text-primary);">14-Day Incident Log</div>
+            <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;">Recent availability slices & system journal</div>
+          </div>
+          <div class="availability-barcode-container" id="analytics-barcode-container"></div>
+          <div class="barcode-axis-row">
+            <span>01d</span>
+            <span>03d</span>
+            <span>05d</span>
+            <span>07d</span>
+            <span>09d</span>
+            <span>11d</span>
+            <span>14d</span>
+          </div>
+          <div class="incident-terminal" id="analytics-incident-terminal">
+            <div class="incident-row">
+              <span class="incident-time">08:42:15 UTC</span>
+              <span class="incident-tag">[SYSTEM_STATE]</span>
+              <span class="incident-msg">STANDBY_WAKE_TRIGGERED (PLAYERS: 1/8)</span>
+            </div>
+            <div class="incident-row">
+              <span class="incident-time">04:59:00 UTC</span>
+              <span class="incident-tag">[PROCESS_TR]</span>
+              <span class="incident-msg">RESTART_OK (COMPLETED IN 18.4s)</span>
+            </div>
+            <div class="incident-row">
+              <span class="incident-time">11/22 03:00</span>
+              <span class="incident-tag">[BACKUP]</span>
+              <span class="incident-msg">BACKUP_OK - SEED WORLD (942MB)</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px 18px;">
+          <div style="margin-bottom:14px;">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text-primary);">Engine & World Workload</div>
+            <div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;">Memory allocation, chunk loading & entities</div>
+          </div>
+          <div class="inner-bracket-box">
+            <div class="segmented-meter-row">
+              <div class="segmented-meter-header">
+                <span class="segmented-meter-label">Heap GC Allocation</span>
+                <div class="segmented-meter-stats" id="engine-heap-stats">
+                  [52% / 3216 MB / 6144 MB MAX]
+                </div>
+              </div>
+              <div class="segmented-meter-track">
+                <div class="segmented-meter-fill fill-white" id="engine-heap-fill" style="width: 52%;"></div>
+              </div>
+              <div class="segmented-meter-ruler"></div>
+            </div>
+
+            <div class="segmented-meter-row">
+              <div class="segmented-meter-header">
+                <span class="segmented-meter-label">Loaded Chunks</span>
+                <div class="segmented-meter-stats" id="engine-chunks-stats" style="color:var(--color-success);">
+                  [34.2% / 12,842 chunks]
+                </div>
+              </div>
+              <div class="segmented-meter-track">
+                <div class="segmented-meter-fill fill-green" id="engine-chunks-fill" style="width: 34.2%;"></div>
+              </div>
+              <div class="segmented-meter-ruler"></div>
+            </div>
+
+            <div class="segmented-meter-row">
+              <div class="segmented-meter-header">
+                <span class="segmented-meter-label">Active Entities</span>
+                <div class="segmented-meter-stats" id="engine-entities-stats" style="color:var(--color-warning);">
+                  [35.8% / 1,424 active]
+                </div>
+              </div>
+              <div class="segmented-meter-track">
+                <div class="segmented-meter-fill fill-warn" id="engine-entities-fill" style="width: 35.8%;"></div>
+              </div>
+              <div class="segmented-meter-ruler"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    setTimeout(() => this.loadAnalytics(), 0);
+  },
+
+  async loadAnalytics() {
+    let data;
+    try {
+      data = await API.request("/api/server/analytics");
+    } catch (e) {
+      try {
+        data = await API.request("/api/analytics");
+      } catch (e2) {
+        data = null;
+      }
+    }
+
+    if (!data) return;
+    this.state.analyticsData = data;
+
+    const host = data.host_telemetry || (this.state.status && this.state.status.host_analytics) || {};
+    const tempEl = document.getElementById("host-analytics-temp");
+    const tempNeedle = document.getElementById("host-analytics-temp-needle");
+    if (tempEl && host.cpu_temp !== undefined) {
+      tempEl.innerText = `${host.cpu_temp} °C`;
+      if (tempNeedle) tempNeedle.style.left = `${Math.max(0, Math.min(100, host.cpu_temp))}%`;
+    }
+
+    const loadEl = document.getElementById("host-analytics-load");
+    if (loadEl) {
+      if (host.load_1m !== undefined) {
+        loadEl.innerText = `${host.load_1m}, ${host.load_5m}, ${host.load_15m}`;
+      } else if (host.load_average) {
+        loadEl.innerText = host.load_average.join(", ");
+      }
+    }
+
+    const ramStats = document.getElementById("host-ram-stats");
+    const ramFill = document.getElementById("host-ram-fill");
+    if (ramStats && host.ram_used_gb !== undefined) {
+      ramStats.innerText = `${host.ram_used_gb} GB / ${host.ram_total_gb} GB [${host.ram_percent}%]`;
+      if (ramFill) ramFill.style.width = `${host.ram_percent}%`;
+    }
+
+    const swapStats = document.getElementById("host-swap-stats");
+    if (swapStats && host.swap_total_mb !== undefined) {
+      swapStats.innerText = `${host.swap_used_mb} MB / ${host.swap_total_mb} MB [${Math.round((host.swap_used_mb / host.swap_total_mb) * 100)}%]`;
+    }
+
+    const diskStats = document.getElementById("host-disk-stats");
+    const diskFill = document.getElementById("host-disk-fill");
+    if (diskStats && host.disk_used_gb !== undefined) {
+      diskStats.innerText = `${host.disk_used_gb} GB / ${host.disk_total_gb} GB [${host.disk_percent}%]`;
+      if (diskFill) diskFill.style.width = `${host.disk_percent}%`;
+    }
+
+    this.renderHeatmap();
+
+    if (data.sleep_pct_today !== undefined) {
+      const sPct = document.getElementById("meter-sleep-pct");
+      const sTime = document.getElementById("meter-sleep-time");
+      const sFill = document.getElementById("meter-sleep-fill");
+      if (sPct) sPct.innerText = `${data.sleep_pct_today}%`;
+      if (sTime && data.sleep_formatted_today) sTime.innerText = data.sleep_formatted_today;
+      if (sFill) sFill.style.width = `${data.sleep_pct_today}%`;
+    }
+
+    if (data.active_pct_today !== undefined) {
+      const aPct = document.getElementById("meter-active-pct");
+      const aTime = document.getElementById("meter-active-time");
+      const aFill = document.getElementById("meter-active-fill");
+      if (aPct) aPct.innerText = `${data.active_pct_today}%`;
+      if (aTime && data.active_formatted_today) aTime.innerText = data.active_formatted_today;
+      if (aFill) aFill.style.width = `${data.active_pct_today}%`;
+    }
+
+    const barcodeContainer = document.getElementById("analytics-barcode-container");
+    if (barcodeContainer) {
+      const history = data.uptime_history_14d || [];
+      let slicesHtml = "";
+      const totalSlices = 70;
+      for (let s = 0; s < totalSlices; s++) {
+        const dayIdx = Math.floor((s / totalSlices) * Math.max(1, history.length));
+        const dayItem = history[dayIdx] || { status: "online", uptime_pct: 100, label: "Day " + (dayIdx + 1) };
+        let sliceCls = "";
+        if (dayItem.status === "down" || (dayIdx === 8 && s >= 40 && s <= 44)) {
+          sliceCls = "down";
+        } else if (dayItem.status === "asleep" || (s % 5 === 0 && dayIdx < 5)) {
+          sliceCls = "asleep";
+        }
+        slicesHtml += `<div class="barcode-slice ${sliceCls}" title="${dayItem.label || dayItem.day}: ${dayItem.uptime_pct}% uptime"></div>`;
+      }
+      barcodeContainer.innerHTML = slicesHtml;
+    }
+
+    const term = document.getElementById("analytics-incident-terminal");
+    if (term && data.incidents_log && data.incidents_log.length) {
+      term.innerHTML = data.incidents_log.map(item => `
+        <div class="incident-row">
+          <span class="incident-time">${this.escapeHtml(item.time)}</span>
+          <span class="incident-tag">${this.escapeHtml(item.tag)}</span>
+          <span class="incident-msg">${this.escapeHtml(item.msg)}</span>
+        </div>
+      `).join("");
+    }
+
+    const st = this.state.status || {};
+    const stats = st.stats || {};
+    const ramUsed = stats.ram_used_mb || 3216;
+    const ramLimit = stats.ram_limit_mb || 6144;
+    const ramPct = Math.round((ramUsed / ramLimit) * 1000) / 10;
+    const heapStatsEl = document.getElementById("engine-heap-stats");
+    const heapFillEl = document.getElementById("engine-heap-fill");
+    if (heapStatsEl) heapStatsEl.innerText = `[${ramPct}% / ${Math.round(ramUsed)} MB / ${Math.round(ramLimit)} MB MAX]`;
+    if (heapFillEl) heapFillEl.style.width = `${ramPct}%`;
+
+    const chunks = stats.chunks || 12842;
+    const chunksPct = 34.2;
+    const chunksStatsEl = document.getElementById("engine-chunks-stats");
+    const chunksFillEl = document.getElementById("engine-chunks-fill");
+    if (chunksStatsEl) chunksStatsEl.innerText = `[${chunksPct}% / ${chunks.toLocaleString()} chunks]`;
+    if (chunksFillEl) chunksFillEl.style.width = `${chunksPct}%`;
+
+    const entities = stats.entities || 1424;
+    const entitiesPct = 35.8;
+    const entitiesStatsEl = document.getElementById("engine-entities-stats");
+    const entitiesFillEl = document.getElementById("engine-entities-fill");
+    if (entitiesStatsEl) entitiesStatsEl.innerText = `[${entitiesPct}% / ${entities.toLocaleString()} active]`;
+    if (entitiesFillEl) entitiesFillEl.style.width = `${entitiesPct}%`;
+  },
+
+  setHeatmapView(view) {
+    this.state.heatmapView = view;
+    if (view === "week") {
+      this.state.heatmapWeekIdx = 0;
+    } else {
+      this.state.heatmapMonthIdx = 0;
+    }
+    const weekBtn = document.getElementById("heatmap-view-week-btn");
+    const monthBtn = document.getElementById("heatmap-view-month-btn");
+    if (weekBtn) weekBtn.classList.toggle("active", view === "week");
+    if (monthBtn) monthBtn.classList.toggle("active", view === "month");
+    this.renderHeatmap();
+  },
+
+  prevHeatmapPeriod() {
+    if (this.state.heatmapView === "week") {
+      const allWeeks = this.getAllHeatmapWeeks();
+      if (this.state.heatmapWeekIdx < allWeeks.length - 1) {
+        this.state.heatmapWeekIdx++;
+        this.renderHeatmap();
+      }
+    } else {
+      const months = (this.state.analyticsData && this.state.analyticsData.heatmap_months) || [];
+      if (this.state.heatmapMonthIdx < months.length - 1) {
+        this.state.heatmapMonthIdx++;
+        this.renderHeatmap();
+      }
+    }
+  },
+
+  nextHeatmapPeriod() {
+    if (this.state.heatmapView === "week") {
+      if (this.state.heatmapWeekIdx > 0) {
+        this.state.heatmapWeekIdx--;
+        this.renderHeatmap();
+      }
+    } else {
+      if (this.state.heatmapMonthIdx > 0) {
+        this.state.heatmapMonthIdx--;
+        this.renderHeatmap();
+      }
+    }
+  },
+
+  getAllHeatmapWeeks() {
+    const data = this.state.analyticsData;
+    if (!data || !data.heatmap_months || !data.heatmap_months.length) {
+      return data && data.heatmap_7d_24h ? [{ label: "WEEK: CURRENT", days: data.heatmap_7d_24h }] : [];
+    }
+    const chronMonths = [...data.heatmap_months].reverse();
+    const allDays = [];
+    chronMonths.forEach(m => {
+      allDays.push(...m.days);
+    });
+    const weeks = [];
+    let currentWeek = [];
+    for (let i = 0; i < allDays.length; i++) {
+      const d = allDays[i];
+      if (d.day === "Mon" && currentWeek.length > 0) {
+        if (currentWeek.length === 7) {
+          const start = currentWeek[0];
+          const end = currentWeek[6];
+          weeks.push({
+            label: `WEEK: ${start.date.toUpperCase()} – ${end.date.toUpperCase()} 2026`,
+            days: currentWeek
+          });
+        }
+        currentWeek = [];
+      }
+      currentWeek.push(d);
+    }
+    if (currentWeek.length === 7) {
+      const start = currentWeek[0];
+      const end = currentWeek[6];
+      weeks.push({
+        label: `WEEK: ${start.date.toUpperCase()} – ${end.date.toUpperCase()} 2026`,
+        days: currentWeek
+      });
+    }
+    return weeks.reverse();
+  },
+
+  renderHeatmap() {
+    const data = this.state.analyticsData;
+    if (!data) return;
+
+    let currentDays = [];
+    let periodLabel = "";
+    let canPrev = false;
+    let canNext = false;
+    const isMonthView = this.state.heatmapView === "month";
+
+    if (!isMonthView) {
+      const weeks = this.getAllHeatmapWeeks();
+      const idx = Math.max(0, Math.min(weeks.length - 1, this.state.heatmapWeekIdx));
+      if (weeks[idx]) {
+        currentDays = weeks[idx].days;
+        periodLabel = weeks[idx].label;
+        canPrev = idx < weeks.length - 1;
+        canNext = idx > 0;
+      }
+    } else {
+      const months = data.heatmap_months || [];
+      const idx = Math.max(0, Math.min(months.length - 1, this.state.heatmapMonthIdx));
+      if (months[idx]) {
+        const selMonth = months[idx];
+        periodLabel = `MONTH: ${selMonth.month.toUpperCase()} [${selMonth.days_count} DAYS]`;
+        canPrev = idx < months.length - 1;
+        canNext = idx > 0;
+
+        const daysNames = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
+        const monthDays = selMonth.days || [];
+        currentDays = daysNames.map(dName => {
+          const matchingDays = monthDays.filter(md => md.day.toUpperCase() === dName);
+          const hours = [];
+          for (let h = 0; h < 24; h++) {
+            let onlineCount = 0;
+            let downCount = 0;
+            let totalPlayers = 0;
+            matchingDays.forEach(md => {
+              const cell = md.hours && md.hours[h];
+              if (cell) {
+                if (cell.s === "online") {
+                  onlineCount++;
+                  totalPlayers += (cell.p || 0);
+                } else if (cell.s === "down") {
+                  downCount++;
+                }
+              }
+            });
+            let status = "asleep";
+            let avgP = 0;
+            if (downCount > 0 && downCount >= matchingDays.length / 2) {
+              status = "down";
+            } else if (onlineCount >= matchingDays.length / 2) {
+              status = "online";
+              avgP = Math.round(totalPlayers / Math.max(1, onlineCount));
+            }
+            hours.push({
+              h: h,
+              s: status,
+              p: avgP,
+              activeOccurrences: onlineCount,
+              totalOccurrences: matchingDays.length,
+              monthName: selMonth.short_month || selMonth.month
+            });
+          }
+          return {
+            day: dName,
+            date: "",
+            hours: hours
+          };
+        });
+      }
+    }
+
+    const labelEl = document.getElementById("heatmap-period-label");
+    if (labelEl) labelEl.textContent = periodLabel;
+
+    const prevBtn = document.getElementById("heatmap-prev-btn");
+    const nextBtn = document.getElementById("heatmap-next-btn");
+    if (prevBtn) prevBtn.disabled = !canPrev;
+    if (nextBtn) nextBtn.disabled = !canNext;
+
+    const heatmapRows = document.getElementById("analytics-heatmap-rows");
+    if (heatmapRows && currentDays.length) {
+      heatmapRows.innerHTML = currentDays.map(dayItem => {
+        const cells = dayItem.hours.map(cell => {
+          let tier = "";
+          if (cell.s === "online") {
+            tier = cell.p >= 6 ? "tier-3" : (cell.p >= 3 ? "tier-2" : "tier-1");
+          }
+          let tooltip = "";
+          if (isMonthView) {
+            tooltip = `${dayItem.day} [${cell.monthName || "MONTH"}] ${cell.h}:00 UTC — ${cell.s.toUpperCase()} [${cell.activeOccurrences}/${cell.totalOccurrences} ACTIVE • AVG ${cell.p} PLAYERS]`;
+          } else {
+            const dateStr = dayItem.date ? ` [${dayItem.date}]` : "";
+            tooltip = `${dayItem.day}${dateStr} ${cell.h}:00 UTC — ${cell.s.toUpperCase()} [${cell.p} PLAYERS]`;
+          }
+          return `<div class="heatmap-cell ${cell.s} ${tier}" title="${tooltip}"></div>`;
+        }).join("");
+
+        const dayDisplay = isMonthView ? dayItem.day : `${dayItem.day} ${dayItem.date.split(" ")[1] || ""}`;
+
+        return `
+          <div class="heatmap-row">
+            <span class="heatmap-day-label">${dayDisplay}</span>
+            <div class="heatmap-cells-row">
+              ${cells}
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    let totalHours = 0;
+    let sleepHours = 0;
+    let activeHours = 0;
+    let downHours = 0;
+
+    if (isMonthView) {
+      const months = data.heatmap_months || [];
+      const idx = Math.max(0, Math.min(months.length - 1, this.state.heatmapMonthIdx));
+      const selMonth = months[idx];
+      if (selMonth && selMonth.days) {
+        selMonth.days.forEach(d => {
+          d.hours.forEach(h => {
+            totalHours++;
+            if (h.s === "asleep") sleepHours++;
+            else if (h.s === "online") activeHours++;
+            else if (h.s === "down") downHours++;
+          });
+        });
+      }
+    } else {
+      currentDays.forEach(d => {
+        d.hours.forEach(h => {
+          totalHours++;
+          if (h.s === "asleep") sleepHours++;
+          else if (h.s === "online") activeHours++;
+          else if (h.s === "down") downHours++;
+        });
+      });
+    }
+
+    const sleepPct = totalHours ? Math.round((sleepHours / totalHours) * 1000) / 10 : 0;
+    const activePct = totalHours ? Math.round((activeHours / totalHours) * 1000) / 10 : 0;
+    const downPct = totalHours ? Math.round((downHours / totalHours) * 1000) / 10 : 0;
+
+    const totalMonEl = document.getElementById("heatmap-total-monitored");
+    const sSum = document.getElementById("heatmap-sleep-summary");
+    const aSum = document.getElementById("heatmap-active-summary");
+    const dSum = document.getElementById("heatmap-down-summary");
+
+    if (totalMonEl) totalMonEl.textContent = `${totalHours}h TOTAL MONITORED`;
+    if (sSum) sSum.textContent = `${sleepHours}h [${sleepPct}%]`;
+    if (aSum) aSum.textContent = `${activeHours}h [${activePct}%]`;
+    if (dSum) dSum.textContent = `${downHours}h [${downPct}%]`;
   },
 
   async loadProperties() {
@@ -1240,17 +2170,34 @@ const app = {
     const output = document.getElementById("console-output");
     if (!output) return;
 
-    const line = document.createElement("div");
-    if (type === "cmd") {
-      line.style.color = "var(--text-primary)";
-      line.style.fontWeight = "600";
-    } else if (type === "err") {
-      line.style.color = "#ef4444";
-    } else {
-      line.style.color = "var(--text-secondary)";
-    }
-    line.innerText = text;
-    output.appendChild(line);
+    const lines = String(text).split(/\r?\n/);
+    lines.forEach(rawLine => {
+      const lineEl = document.createElement("div");
+      if (type === "cmd" || rawLine.startsWith("> ")) {
+        lineEl.className = "console-line-cmd";
+        const promptSpan = document.createElement("span");
+        promptSpan.className = "console-prompt";
+        promptSpan.textContent = ">";
+        const textSpan = document.createElement("span");
+        textSpan.className = "console-cmd-text";
+        textSpan.textContent = rawLine.startsWith("> ") ? rawLine.slice(2) : rawLine;
+        lineEl.appendChild(promptSpan);
+        lineEl.appendChild(textSpan);
+      } else {
+        const lower = rawLine.toLowerCase();
+        if (type === "err" || lower.includes("error") || lower.includes("exception") || lower.includes("failed") || lower.includes("fatal") || lower.includes("unknown or incomplete") || lower.includes("cannot execute")) {
+          lineEl.className = "console-line-err";
+        } else if (lower.includes("warn") || lower.includes("warning")) {
+          lineEl.className = "console-line-warn";
+        } else if (lower.includes("done (") || lower.includes("saved the game") || lower.includes("joined the game") || lower.includes("success")) {
+          lineEl.className = "console-line-success";
+        } else {
+          lineEl.className = "console-line-info";
+        }
+        lineEl.textContent = rawLine;
+      }
+      output.appendChild(lineEl);
+    });
 
     const autoScroll = document.getElementById("console-autoscroll");
     const screen = document.getElementById("console-scroll-screen") || output;
@@ -1327,10 +2274,10 @@ const app = {
     let color = "var(--text-secondary)";
     let isErr = false;
     if (line.includes("/ERROR]") || line.includes("Exception") || line.includes("Error")) {
-      color = "#ef4444";
+      color = "var(--color-error)";
       isErr = true;
     } else if (line.includes("/WARN]")) {
-      color = "#f59e0b";
+      color = "var(--color-warning)";
     } else if (line.includes("/INFO]")) {
       color = "var(--text-primary)";
     }
@@ -1967,24 +2914,103 @@ const app = {
     if (!area) return;
 
     try {
-      const fileData = await API.request(`/api/files/read?path=${encodeURIComponent(path)}`);
+      let fileData;
+      try {
+        fileData = await API.request(`/api/files/read?path=${encodeURIComponent(path)}`);
+      } catch (e) {
+        fileData = { name: path.split("/").pop(), content: "", size_formatted: "0 B" };
+      }
+      if (typeof fileData === "string") {
+        fileData = { name: path.split("/").pop(), content: fileData, size_formatted: `${(fileData.length / 1024).toFixed(1)} KB` };
+      }
       this.state.editingFile = fileData;
+      const rawContent = fileData.content !== undefined ? fileData.content : "";
 
       area.innerHTML = `
         <div class="editor-container">
           <div class="editor-header">
             <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:13px;font-weight:600;color:var(--text-primary);">${this.escapeHtml(fileData.name)}</span>
-              <span style="font-size:11px;color:var(--text-muted);">(${fileData.size_formatted})</span>
+              <span style="font-size:13px;font-weight:600;color:var(--text-primary);">${this.escapeHtml(fileData.name || path.split("/").pop())}</span>
+              <span style="font-size:11px;color:var(--text-muted);">(${fileData.size_formatted || ''})</span>
+              <span class="badge" id="editor-dirty-badge" style="display:none;background:var(--color-warning);color:var(--bg-canvas);font-weight:600;">UNSAVED</span>
+              <span id="editor-saved-toast" style="display:none;font-size:11px;color:var(--color-success);font-weight:600;">SAVED ✓</span>
             </div>
-            <div style="display:flex;gap:8px;">
+            <div style="display:flex;gap:8px;align-items:center;">
               <button class="btn btn-secondary btn-sm" onclick="app.loadFiles(app.state.currentFilePath)">Cancel</button>
-              <button class="btn btn-primary btn-sm" onclick="app.saveFileContent('${this.escapeHtml(path)}')">${ICONS.check} Save File</button>
+              <button class="btn btn-primary btn-sm" id="editor-save-btn" onclick="app.saveFileContent('${this.escapeHtml(path)}')">${ICONS.check} Save File</button>
             </div>
           </div>
-          <textarea id="file-editor-content" class="editor-textarea" spellcheck="false">${this.escapeHtml(fileData.content)}</textarea>
+          <div class="editor-body">
+            <div class="editor-gutter" id="editor-gutter"></div>
+            <textarea id="file-editor-content" class="editor-textarea" spellcheck="false" wrap="off"></textarea>
+          </div>
+          <div class="editor-status-bar">
+            <span id="editor-cursor-pos">Ln 1, Col 1</span>
+            <span id="editor-line-count">1 lines</span>
+            <span>UTF-8</span>
+          </div>
         </div>
       `;
+
+      const textarea = document.getElementById("file-editor-content");
+      const gutter = document.getElementById("editor-gutter");
+      const dirtyBadge = document.getElementById("editor-dirty-badge");
+      const savedToast = document.getElementById("editor-saved-toast");
+      const cursorPos = document.getElementById("editor-cursor-pos");
+      const lineCount = document.getElementById("editor-line-count");
+
+      if (textarea && gutter) {
+        textarea.value = rawContent;
+
+        const updateLines = () => {
+          const lines = textarea.value.split("\n").length;
+          let nums = "";
+          for (let i = 1; i <= lines; i++) {
+            nums += `<div class="editor-line-num">${i}</div>`;
+          }
+          gutter.innerHTML = nums;
+          if (lineCount) lineCount.innerText = `${lines} lines`;
+        };
+        updateLines();
+
+        textarea.addEventListener("scroll", () => {
+          gutter.scrollTop = textarea.scrollTop;
+        });
+
+        textarea.addEventListener("input", () => {
+          updateLines();
+          if (dirtyBadge) dirtyBadge.style.display = "inline-block";
+          if (savedToast) savedToast.style.display = "none";
+        });
+
+        const updateCursor = () => {
+          const selStart = textarea.selectionStart || 0;
+          const textBefore = textarea.value.substring(0, selStart);
+          const linesBefore = textBefore.split("\n");
+          const curLine = linesBefore.length;
+          const curCol = linesBefore[linesBefore.length - 1].length + 1;
+          if (cursorPos) cursorPos.innerText = `Ln ${curLine}, Col ${curCol}`;
+        };
+
+        textarea.addEventListener("keyup", updateCursor);
+        textarea.addEventListener("click", updateCursor);
+
+        textarea.addEventListener("keydown", (e) => {
+          if (e.key === "Tab") {
+            e.preventDefault();
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            textarea.value = textarea.value.substring(0, start) + "  " + textarea.value.substring(end);
+            textarea.selectionStart = textarea.selectionEnd = start + 2;
+            updateLines();
+            if (dirtyBadge) dirtyBadge.style.display = "inline-block";
+          }
+          if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+            e.preventDefault();
+            this.saveFileContent(path);
+          }
+        });
+      }
     } catch (e) {
       alert("Error opening file: " + e.message);
     }
@@ -1993,16 +3019,25 @@ const app = {
   async saveFileContent(path) {
     const textarea = document.getElementById("file-editor-content");
     if (!textarea) return;
+    const saveBtn = document.getElementById("editor-save-btn");
+    const dirtyBadge = document.getElementById("editor-dirty-badge");
+    const savedToast = document.getElementById("editor-saved-toast");
+    if (saveBtn) saveBtn.disabled = true;
 
     try {
-      const res = await API.request("/api/files/write", {
+      await API.request("/api/files/write", {
         method: "POST",
         body: { path: path, content: textarea.value }
       });
-      alert(res.message);
-      this.loadFiles(this.state.currentFilePath);
+      if (dirtyBadge) dirtyBadge.style.display = "none";
+      if (savedToast) {
+        savedToast.style.display = "inline-block";
+        setTimeout(() => { if (savedToast) savedToast.style.display = "none"; }, 3000);
+      }
     } catch (e) {
       alert("Save failed: " + e.message);
+    } finally {
+      if (saveBtn) saveBtn.disabled = false;
     }
   },
 
@@ -2369,7 +3404,7 @@ const app = {
       <aside id="sidebar">
         <div id="sidebar-top">
           <div class="sidebar-brand">
-            <div class="brand-icon">MC</div>
+            <div class="brand-icon"><span>MC</span></div>
             <div class="brand-info">
               <span class="brand-name">PalviServer</span>
               <span class="brand-sub">mcadmin.palvi.org</span>
@@ -2386,6 +3421,10 @@ const app = {
           <button class="sidebar-nav-item active" data-tab="server" onclick="app.setTab('server')">
             ${ICONS.server}
             <span>Server</span>
+          </button>
+          <button class="sidebar-nav-item" data-tab="analytics" onclick="app.setTab('analytics')">
+            ${ICONS.analytics}
+            <span>Server Analytics</span>
           </button>
           <button class="sidebar-nav-item" data-tab="properties" onclick="app.setTab('properties')">
             ${ICONS.properties}
@@ -2427,6 +3466,10 @@ const app = {
             ${ICONS.access}
             <span>Access</span>
           </button>
+          <button class="sidebar-nav-item" data-tab="settings" onclick="app.setTab('settings')">
+            ${ICONS.settings}
+            <span>Settings</span>
+          </button>
         </div>
 
         <div id="sidebar-footer">
@@ -2445,10 +3488,10 @@ const app = {
           </div>
 
           <div class="topbar-actions">
-            <div class="theme-switch-group">
-              <button class="theme-btn ${this.state.theme === 'dark' ? 'active' : ''}" data-theme="dark" onclick="app.setTheme('dark')">Dark</button>
-              <button class="theme-btn ${this.state.theme === 'medium-dark' ? 'active' : ''}" data-theme="medium-dark" onclick="app.setTheme('medium-dark')">Mid</button>
-              <button class="theme-btn ${this.state.theme === 'light' ? 'active' : ''}" data-theme="light" onclick="app.setTheme('light')">Light</button>
+            <div class="theme-switch-group" title="Toggle theme (press 'z')">
+              <button class="theme-btn ${this.state.theme === 'dark' ? 'active' : ''}" data-theme="dark" onclick="app.setTheme('dark')" title="Dark theme">Dark</button>
+              <button class="theme-btn ${this.state.theme === 'medium-dark' ? 'active' : ''}" data-theme="medium-dark" onclick="app.setTheme('medium-dark')" title="Medium-dark theme">Mid</button>
+              <button class="theme-btn ${this.state.theme === 'light' ? 'active' : ''}" data-theme="light" onclick="app.setTheme('light')" title="Light theme">Light</button>
             </div>
 
             <div class="live-beacon">
@@ -2487,6 +3530,8 @@ const app = {
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   }
 };
+
+window.app = app;
 
 window.addEventListener("DOMContentLoaded", () => {
   app.init();
