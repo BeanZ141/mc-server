@@ -1,4 +1,4 @@
-# mcadmin.palvi.org — Minecraft Admin Panel
+# mcadmin.palvi.org - Minecraft Admin Panel
 
 Lightweight LAN-only web management panel for the Minecraft server stack on **palviserver** (`BabaSquadWorld`, Fabric 26.3, `itzg/minecraft-server` + `lazymc` + `mc-watch`).
 
