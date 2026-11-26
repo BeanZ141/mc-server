@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, Depends, Request, HTTPException
 from pydantic import BaseModel
 from app.auth import get_current_user_and_session
@@ -6,7 +7,6 @@ from app.database import log_audit
 
 router = APIRouter(prefix="/api/software", tags=["software"])
 
-# Supported software types catalog
 SOFTWARE_CATALOG = [
     {
         "id": "FABRIC",
@@ -70,16 +70,15 @@ SOFTWARE_CATALOG = [
     }
 ]
 
+
 class SwitchSoftwareRequest(BaseModel):
     software_id: str
     version: str | None = None
     confirm: bool = False
 
+
 @router.get("")
 async def get_software_info(session: dict = Depends(get_current_user_and_session)):
-    """
-    Returns installed software and the catalog of available software platforms.
-    """
     parsed = settings_manager.parse_env()
     current_type = parsed.get("TYPE", "FABRIC").upper()
     current_version = parsed.get("VERSION", "26.3")
@@ -95,16 +94,13 @@ async def get_software_info(session: dict = Depends(get_current_user_and_session
         "available": SOFTWARE_CATALOG
     }
 
+
 @router.post("/switch")
 async def switch_software(
     payload: SwitchSoftwareRequest,
     request: Request,
     session: dict = Depends(get_current_user_and_session)
 ):
-    """
-    Switches server software. Requires explicit confirmation to prevent accidental mod/world damage.
-    Preserves Fabric as default.
-    """
     client_ip = request.client.host if request.client else "unknown"
     sw_id = payload.software_id.upper()
 
@@ -123,17 +119,16 @@ async def switch_software(
             "software": matching
         }
 
-    # If confirmed, update TYPE in mc.env
-    current_env = settings_manager.parse_env()
-    current_env["TYPE"] = sw_id
+    updates = {"TYPE": sw_id}
     if payload.version:
-        current_env["VERSION"] = payload.version
+        if any(c in payload.version for c in ("\r", "\n")):
+            raise HTTPException(status_code=400, detail="Invalid version format.")
+        updates["VERSION"] = payload.version.strip()
 
-    new_content = "\n".join(f"{k}={v}" for k, v in current_env.items()) + "\n"
-    backup = settings_manager.save_with_backup(new_content)
+    new_content = settings_manager.build_updated_content(updates)
+    backup = await asyncio.to_thread(settings_manager.save_with_backup, new_content)
 
     log_audit("admin", "switch_software", sw_id, f"Switched software to {sw_id} (backup: {backup})", "SUCCESS", client_ip)
-
     return {
         "success": True,
         "message": f"Server software set to {matching['name']}. Server container recreation required to install.",

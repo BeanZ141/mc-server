@@ -1,5 +1,6 @@
 import os
 import shutil
+import asyncio
 import zipfile
 import tempfile
 from datetime import datetime
@@ -12,6 +13,7 @@ from pydantic import BaseModel
 from app.auth import get_current_user_and_session
 from app.config import get_minecraft_data_dir
 from app.database import log_audit
+from app.utils import format_size
 
 router = APIRouter(prefix="/api/files", tags=["files"])
 
@@ -21,20 +23,12 @@ EDITABLE_EXTENSIONS = {
     ".sh", ".md", ".csv", ".xml"
 }
 
-def format_size(size_bytes: int) -> str:
-    if size_bytes < 1024:
-        return f"{size_bytes} B"
-    elif size_bytes < 1024 * 1024:
-        return f"{size_bytes / 1024:.1f} KB"
-    elif size_bytes < 1024 * 1024 * 1024:
-        return f"{size_bytes / (1024 * 1024):.1f} MB"
-    else:
-        return f"{size_bytes / (1024 * 1024 * 1024):.2f} GB"
 
 def is_blocked_name(name: str) -> bool:
     """Checks whether a file or directory name is a dotfile, .rcon-cli.env, or *.env file."""
     clean = name.strip()
     return clean.startswith(".") or clean.lower().endswith(".env") or clean.lower() == ".rcon-cli.env"
+
 
 def check_blocked_path(target: Path, base_dir: Path):
     """Enforces blocking of dotfiles, .rcon-cli.env, and *.env files along the path."""
@@ -45,6 +39,7 @@ def check_blocked_path(target: Path, base_dir: Path):
         if is_blocked_name(part):
             raise HTTPException(status_code=403, detail=f"Access denied: access to '{part}' is restricted.")
 
+
 def resolve_safe_path(rel_path: str = "") -> Path:
     """
     Safely resolves a relative path within server data directory.
@@ -53,37 +48,83 @@ def resolve_safe_path(rel_path: str = "") -> Path:
     base_dir = get_minecraft_data_dir().resolve()
     clean_rel = rel_path.strip().lstrip("/\\")
     target = (base_dir / clean_rel).resolve()
-    
+
     if not (target == base_dir or target.is_relative_to(base_dir)):
         raise HTTPException(status_code=403, detail="Access denied: path is outside server directory.")
-    
+
     check_blocked_path(target, base_dir)
     return target
+
 
 class WriteFileRequest(BaseModel):
     path: str
     content: str
 
+
 class CreateFolderRequest(BaseModel):
     path: str
     name: str
+
 
 class DeleteRequest(BaseModel):
     path: str
     confirm: bool = False
 
+
+def _scan_dir_sync(target: Path, base_dir: Path) -> list[dict]:
+    items = []
+    for entry in os.scandir(target):
+        if is_blocked_name(entry.name):
+            continue
+
+        entry_path = Path(entry.path)
+        try:
+            resolved = entry_path.resolve()
+            if not (resolved == base_dir or resolved.is_relative_to(base_dir)):
+                continue
+            if is_blocked_name(resolved.name):
+                continue
+            entry_rel = str(resolved.relative_to(base_dir)).replace("\\", "/")
+        except (ValueError, RuntimeError, OSError):
+            continue
+
+        is_dir = entry.is_dir()
+        try:
+            stat = entry.stat()
+            size = stat.st_size if not is_dir else 0
+            mtime = datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+        except Exception:
+            size = 0
+            mtime = "-"
+
+        ext = entry_path.suffix.lower()
+        is_server_props = (entry.name.lower() == "server.properties")
+        editable = (not is_dir) and (ext in EDITABLE_EXTENSIONS) and (not is_server_props)
+        warning = "itzg overwrites server.properties from mc.env on container startup." if is_server_props else None
+
+        items.append({
+            "name": entry.name,
+            "path": entry_rel,
+            "type": "directory" if is_dir else "file",
+            "extension": ext,
+            "size": size,
+            "size_formatted": format_size(size) if not is_dir else "—",
+            "modified": mtime,
+            "editable": editable,
+            "read_only": is_server_props,
+            "warning": warning
+        })
+
+    items.sort(key=lambda x: (0 if x["type"] == "directory" else 1, x["name"].lower()))
+    return items
+
+
 @router.get("/list")
 async def list_files(path: str = "", session: dict = Depends(get_current_user_and_session)):
-    """
-    Lists files and directories in the requested path within MINECRAFT_DATA_DIR.
-    Dotfiles and *.env files are hard-blocked from listing.
-    server.properties is flagged read-only with a warning.
-    Skips any entry whose resolved path is not is_relative_to(base_dir).
-    """
     base_dir = get_minecraft_data_dir().resolve()
     base_dir.mkdir(parents=True, exist_ok=True)
     target = resolve_safe_path(path)
-    
+
     if not target.exists():
         raise HTTPException(status_code=404, detail="Directory not found.")
     if not target.is_dir():
@@ -91,7 +132,7 @@ async def list_files(path: str = "", session: dict = Depends(get_current_user_an
 
     rel = target.relative_to(base_dir)
     rel_str = str(rel).replace("\\", "/") if str(rel) != "." else ""
-    
+
     parts = [p for p in rel_str.split("/") if p]
     breadcrumbs = [{"name": "root", "path": ""}]
     acc = []
@@ -99,53 +140,10 @@ async def list_files(path: str = "", session: dict = Depends(get_current_user_an
         acc.append(p)
         breadcrumbs.append({"name": p, "path": "/".join(acc)})
 
-    items = []
     try:
-        for entry in os.scandir(target):
-            if is_blocked_name(entry.name):
-                continue
-
-            entry_path = Path(entry.path)
-            try:
-                resolved = entry_path.resolve()
-                if not (resolved == base_dir or resolved.is_relative_to(base_dir)):
-                    continue
-                if is_blocked_name(resolved.name):
-                    continue
-                entry_rel = str(resolved.relative_to(base_dir)).replace("\\", "/")
-            except (ValueError, RuntimeError, OSError):
-                continue
-
-            is_dir = entry.is_dir()
-            try:
-                stat = entry.stat()
-                size = stat.st_size if not is_dir else 0
-                mtime = datetime.fromtimestamp(stat.st_mtime).strftime("%Y-%m-%d %H:%M:%S")
-            except Exception:
-                size = 0
-                mtime = "-"
-
-            ext = entry_path.suffix.lower()
-            is_server_props = (entry.name.lower() == "server.properties")
-            editable = (not is_dir) and (ext in EDITABLE_EXTENSIONS) and (not is_server_props)
-            warning = "itzg overwrites server.properties from mc.env on container startup." if is_server_props else None
-
-            items.append({
-                "name": entry.name,
-                "path": entry_rel,
-                "type": "directory" if is_dir else "file",
-                "extension": ext,
-                "size": size,
-                "size_formatted": format_size(size) if not is_dir else "—",
-                "modified": mtime,
-                "editable": editable,
-                "read_only": is_server_props,
-                "warning": warning
-            })
+        items = await asyncio.to_thread(_scan_dir_sync, target, base_dir)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to scan directory: {e}")
-
-    items.sort(key=lambda x: (0 if x["type"] == "directory" else 1, x["name"].lower()))
 
     return {
         "current_path": rel_str,
@@ -154,12 +152,9 @@ async def list_files(path: str = "", session: dict = Depends(get_current_user_an
         "total_items": len(items)
     }
 
+
 @router.get("/read")
 async def read_file_content(path: str, session: dict = Depends(get_current_user_and_session)):
-    """
-    Reads text file content for viewing/editing.
-    Hard-blocks dotfiles, .rcon-cli.env, and *.env files.
-    """
     target = resolve_safe_path(path)
     if not target.exists():
         raise HTTPException(status_code=404, detail="File not found.")
@@ -172,7 +167,7 @@ async def read_file_content(path: str, session: dict = Depends(get_current_user_
         raise HTTPException(status_code=400, detail=f"File extension '{ext}' is not editable as text.")
 
     try:
-        content = target.read_text(encoding="utf-8", errors="replace")
+        content = await asyncio.to_thread(target.read_text, encoding="utf-8", errors="replace")
         stat = target.stat()
         return {
             "path": path,
@@ -187,15 +182,12 @@ async def read_file_content(path: str, session: dict = Depends(get_current_user_
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to read file: {e}")
 
+
 @router.post("/write")
 async def write_file_content(payload: WriteFileRequest, request: Request, session: dict = Depends(get_current_user_and_session)):
-    """
-    Saves edited text file with automatic timestamped backup.
-    Blocks writing to dotfiles, *.env, and server.properties.
-    """
     client_ip = request.client.host if request.client else "unknown"
     target = resolve_safe_path(payload.path)
-    
+
     if target.name.lower() == "server.properties":
         raise HTTPException(
             status_code=403,
@@ -209,18 +201,17 @@ async def write_file_content(payload: WriteFileRequest, request: Request, sessio
     if ext not in EDITABLE_EXTENSIONS:
         raise HTTPException(status_code=400, detail=f"File extension '{ext}' is not an editable text type.")
 
-    # Create backup if original exists
     backup_file = None
     if target.exists():
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_file = target.parent / f"{target.name}.bak-{timestamp}"
         try:
-            shutil.copy2(target, backup_file)
+            await asyncio.to_thread(shutil.copy2, target, backup_file)
         except Exception:
             pass
 
     try:
-        target.write_text(payload.content, encoding="utf-8")
+        await asyncio.to_thread(target.write_text, payload.content, encoding="utf-8")
         log_audit("admin", "file_edit", payload.path, f"Saved file {payload.path} (backup: {backup_file.name if backup_file else 'none'})", "SUCCESS", client_ip)
         return {
             "success": True,
@@ -232,34 +223,12 @@ async def write_file_content(payload: WriteFileRequest, request: Request, sessio
         log_audit("admin", "file_edit", payload.path, f"Failed to save {payload.path}: {e}", "FAILURE", client_ip)
         raise HTTPException(status_code=500, detail=f"Failed to write file: {e}")
 
-@router.get("/download")
-async def download_file(path: str = "", session: dict = Depends(get_current_user_and_session)):
-    """
-    Downloads a single file, or zips and streams a directory.
-    Uses zipfile + os.walk(followlinks=False) to safely exclude dotfiles, *.env, and symlink escapes.
-    Registers BackgroundTask to clean up temp dir after response completes.
-    """
-    target = resolve_safe_path(path)
-    if not target.exists():
-        raise HTTPException(status_code=404, detail="File or directory not found.")
 
-    if target.is_file():
-        return FileResponse(
-            path=str(target),
-            filename=target.name,
-            media_type="application/octet-stream"
-        )
-    
-    base_dir = get_minecraft_data_dir().resolve()
-    tmp_dir = tempfile.mkdtemp()
-    zip_name = f"{target.name}.zip" if target != base_dir else "server_files.zip"
-    zip_file_path = Path(tmp_dir) / zip_name
-
+def _build_safe_zip_sync(target: Path, base_dir: Path, zip_file_path: Path):
     with zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, dirs, files in os.walk(target, followlinks=False):
             root_path = Path(root)
 
-            # Prune directories in place: exclude blocked names and escaping symlinks
             pruned_dirs = []
             for d in dirs:
                 if is_blocked_name(d):
@@ -294,6 +263,31 @@ async def download_file(path: str = "", session: dict = Depends(get_current_user
                 arcname = str(file_path.relative_to(target)).replace("\\", "/")
                 zipf.write(file_path, arcname=arcname)
 
+
+@router.get("/download")
+async def download_file(path: str = "", session: dict = Depends(get_current_user_and_session)):
+    target = resolve_safe_path(path)
+    if not target.exists():
+        raise HTTPException(status_code=404, detail="File or directory not found.")
+
+    if target.is_file():
+        return FileResponse(
+            path=str(target),
+            filename=target.name,
+            media_type="application/octet-stream"
+        )
+
+    base_dir = get_minecraft_data_dir().resolve()
+    tmp_dir = tempfile.mkdtemp()
+    zip_name = f"{target.name}.zip" if target != base_dir else "server_files.zip"
+    zip_file_path = Path(tmp_dir) / zip_name
+
+    try:
+        await asyncio.to_thread(_build_safe_zip_sync, target, base_dir, zip_file_path)
+    except Exception as e:
+        shutil.rmtree(tmp_dir, ignore_errors=True)
+        raise HTTPException(status_code=500, detail=f"Failed to create zip archive: {e}")
+
     return FileResponse(
         path=str(zip_file_path),
         filename=zip_name,
@@ -301,12 +295,9 @@ async def download_file(path: str = "", session: dict = Depends(get_current_user
         background=BackgroundTask(shutil.rmtree, tmp_dir, ignore_errors=True)
     )
 
+
 @router.delete("/delete")
 async def delete_item(payload: DeleteRequest, request: Request, session: dict = Depends(get_current_user_and_session)):
-    """
-    Deletes a file or directory with mandatory confirmation.
-    Blocked files and server.properties cannot be deleted.
-    """
     client_ip = request.client.host if request.client else "unknown"
     if not payload.confirm:
         raise HTTPException(status_code=400, detail="Confirmation required to delete file or folder.")
@@ -324,10 +315,10 @@ async def delete_item(payload: DeleteRequest, request: Request, session: dict = 
 
     try:
         if target.is_dir():
-            shutil.rmtree(target)
+            await asyncio.to_thread(shutil.rmtree, target)
             msg = f"Directory '{target.name}' and its contents deleted."
         else:
-            target.unlink()
+            await asyncio.to_thread(target.unlink)
             msg = f"File '{target.name}' deleted."
 
         log_audit("admin", "file_delete", payload.path, msg, "SUCCESS", client_ip)
@@ -336,11 +327,9 @@ async def delete_item(payload: DeleteRequest, request: Request, session: dict = 
         log_audit("admin", "file_delete", payload.path, f"Failed delete: {e}", "FAILURE", client_ip)
         raise HTTPException(status_code=500, detail=f"Failed to delete: {e}")
 
+
 @router.post("/create-folder")
 async def create_folder(payload: CreateFolderRequest, request: Request, session: dict = Depends(get_current_user_and_session)):
-    """
-    Creates a new folder at the specified path.
-    """
     client_ip = request.client.host if request.client else "unknown"
     folder_name = payload.name.strip()
     if not folder_name or "/" in folder_name or "\\" in folder_name or ".." in folder_name:
@@ -364,13 +353,9 @@ async def create_folder(payload: CreateFolderRequest, request: Request, session:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to create folder: {e}")
 
+
 @router.post("/upload")
 async def upload_file(request: Request, path: str = "", file: UploadFile = File(...), session: dict = Depends(get_current_user_and_session)):
-    """
-    Uploads a file to the specified directory.
-    Uploading dotfiles, *.env, and server.properties is strictly forbidden.
-    Rejects overwriting symlinks and logs uploads to audit_log.
-    """
     client_ip = request.client.host if request.client else "unknown"
     parent = resolve_safe_path(path)
     if not parent.is_dir():
@@ -395,8 +380,11 @@ async def upload_file(request: Request, path: str = "", file: UploadFile = File(
         raise HTTPException(status_code=403, detail="Overwriting symlinks is strictly forbidden.")
 
     try:
-        with open(dest, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        def _write_upload():
+            with open(dest, "wb") as buffer:
+                shutil.copyfileobj(file.file, buffer)
+
+        await asyncio.to_thread(_write_upload)
         log_audit("admin", "file_upload", str(dest), f"Uploaded '{filename}'", "SUCCESS", client_ip)
         return {"success": True, "message": f"Uploaded '{filename}' successfully.", "filename": filename}
     except Exception as e:

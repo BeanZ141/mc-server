@@ -13,6 +13,7 @@
   --border-focus: #ffffff;
 
   --text-primary: #ffffff;
+  --text-inverted: #000000;
   --text-secondary: #8c8c8c;
   --text-muted: #757575;
 
@@ -42,7 +43,7 @@
 
   --color-success: #22c55e;
   --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  --color-error: #dd0000;
   --color-error-bg: rgba(239, 68, 68, 0.12);
   --color-error-border: #7f1d1d;
   --overlay-backdrop: rgba(0, 0, 0, 0.85);
@@ -66,6 +67,7 @@
   --border-focus: #ffffff;
 
   --text-primary: #f4f4f4;
+  --text-inverted: #000000;
   --text-secondary: #999999;
   --text-muted: #666666;
 
@@ -75,7 +77,7 @@
 
   --card-corner-color: var(--L-shape);
   --L-shape: #7a7a7a;
-  --T-shape: #575757;
+  --T-shape: #494949;
   --hatch: #242424;
   --dot-shape: var(--card-corner-color);
 
@@ -111,6 +113,7 @@
   --border-focus: #000000;
 
   --text-primary: #0a0a0a;
+  --text-inverted: #e6e6e6;
   --text-secondary: #505050;
   --text-muted: #808080;
 
@@ -120,7 +123,7 @@
 
   --card-corner-color: var(--L-shape);
   --L-shape: #000000;
-  --T-shape: #272727;
+  --T-shape: #b8b8b8;
   --hatch: #0000001c;
   --dot-shape: var(--card-corner-color);
 
@@ -1940,6 +1943,7 @@ strong {
   white-space: pre;
   tab-size: 2;
   overflow: auto;
+  scrollbar-width: none;
 }
 
 .editor-status-bar {
@@ -2394,12 +2398,19 @@ textarea:focus,
 }
 
 .console-line-err {
-  color: var(--color-error);
-  font-weight: 500;
+  color: var(--text-inverted);
+  width: fit-content;
+  font-weight: 400;
+  background: var(--color-error);
+  padding: 0px 5px;
 }
 
-.console-line-warn {
-  color: var(--color-warning);
+.console-line-err {
+  color: var(--text-inverted);
+  width: fit-content;
+  font-weight: 400;
+  background: var(--color-warning);
+  padding: 0px 5px;
 }
 
 .console-line-success {

@@ -1,29 +1,76 @@
-import os
 import difflib
-import datetime
 from pathlib import Path
 from app.config import MC_ENV_PATH, get_minecraft_data_dir
+
 
 class SettingsManager:
     def __init__(self, env_path: Path = MC_ENV_PATH):
         self.env_path = env_path
+        self._cache_key: tuple[str, int, int] | None = None
+        self._cached_raw: str = ""
+        self._cached_parsed: dict[str, str] = {}
+
+    def _refresh_cache(self):
+        if not self.env_path.exists():
+            self._cache_key = None
+            self._cached_raw = ""
+            self._cached_parsed = {}
+            return
+
+        try:
+            st = self.env_path.stat()
+            key = (str(self.env_path), st.st_mtime_ns, st.st_size)
+            if key == self._cache_key:
+                return
+            raw = self.env_path.read_text(encoding="utf-8")
+        except OSError:
+            return
+
+        parsed: dict[str, str] = {}
+        for line in raw.splitlines():
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#") or "=" not in stripped:
+                continue
+            k, val = stripped.split("=", 1)
+            parsed[k.strip()] = val.strip()
+
+        self._cache_key = key
+        self._cached_raw = raw
+        self._cached_parsed = parsed
 
     def read_raw(self) -> str:
-        if not self.env_path.exists():
-            return ""
-        return self.env_path.read_text(encoding="utf-8")
+        self._refresh_cache()
+        return self._cached_raw
 
     def parse_env(self) -> dict[str, str]:
+        self._refresh_cache()
+        return dict(self._cached_parsed)
+
+    def build_updated_content(self, updates: dict[str, str], remove_keys: list[str] | None = None) -> str:
+        """Builds updated mc.env text while preserving existing comments, blank lines, and ordering."""
         raw = self.read_raw()
-        settings = {}
+        remove_set = set(remove_keys or [])
+        seen: set[str] = set()
+        lines: list[str] = []
+
         for line in raw.splitlines():
-            line = line.strip()
-            if not line or line.startswith("#"):
-                continue
-            if "=" in line:
-                key, val = line.split("=", 1)
-                settings[key.strip()] = val.strip()
-        return settings
+            stripped = line.strip()
+            if stripped and not stripped.startswith("#") and "=" in stripped:
+                key, _ = stripped.split("=", 1)
+                key_clean = key.strip()
+                if key_clean in remove_set:
+                    continue
+                if key_clean in updates:
+                    lines.append(f"{key_clean}={updates[key_clean]}")
+                    seen.add(key_clean)
+                    continue
+            lines.append(line)
+
+        for key, val in updates.items():
+            if key not in seen and key not in remove_set:
+                lines.append(f"{key}={val}")
+
+        return "\n".join(lines) + ("\n" if lines else "")
 
     def get_structured_settings(self) -> dict:
         parsed = self.parse_env()
@@ -41,7 +88,7 @@ class SettingsManager:
                 "SPAWN_PROTECTION": int(parsed.get("SPAWN_PROTECTION", "16")),
             },
             "world": {
-                "LEVEL": parsed.get("LEVEL", "BabaSquadWorld"),
+                "LEVEL": level_name,
                 "SEED": parsed.get("SEED", ""),
                 "SEED_READ_ONLY": world_exists,
                 "DIFFICULTY": parsed.get("DIFFICULTY", "easy"),
@@ -77,31 +124,21 @@ class SettingsManager:
         }
 
     def validate_settings(self, updates: dict[str, str]) -> tuple[bool, str]:
-        # Validate MEMORY: max 4G
         mem = updates.get("MEMORY")
         if mem:
             mem_upper = mem.strip().upper()
             if mem_upper not in ("1G", "2G", "3G", "4G", "1024M", "2048M", "3072M", "4096M"):
                 return False, f"Memory must be capped at 4G for host hardware stability (got {mem}). Allowed: 1G, 2G, 3G, 4G."
 
-        # Validate distances
-        vd = updates.get("VIEW_DISTANCE")
-        if vd:
-            try:
-                v = int(vd)
-                if v < 2 or v > 32:
-                    return False, "VIEW_DISTANCE must be between 2 and 32."
-            except ValueError:
-                return False, "VIEW_DISTANCE must be an integer."
-
-        sd = updates.get("SIMULATION_DISTANCE")
-        if sd:
-            try:
-                s = int(sd)
-                if s < 2 or s > 32:
-                    return False, "SIMULATION_DISTANCE must be between 2 and 32."
-            except ValueError:
-                return False, "SIMULATION_DISTANCE must be an integer."
+        for key in ("VIEW_DISTANCE", "SIMULATION_DISTANCE"):
+            val = updates.get(key)
+            if val:
+                try:
+                    num = int(val)
+                    if num < 2 or num > 32:
+                        return False, f"{key} must be between 2 and 32."
+                except ValueError:
+                    return False, f"{key} must be an integer."
 
         mp = updates.get("MAX_PLAYERS")
         if mp:
@@ -112,17 +149,14 @@ class SettingsManager:
             except ValueError:
                 return False, "MAX_PLAYERS must be an integer."
 
-        # Validate DIFFICULTY
         diff = updates.get("DIFFICULTY")
         if diff and diff.lower() not in ("peaceful", "easy", "normal", "hard"):
             return False, "DIFFICULTY must be peaceful, easy, normal, or hard."
 
-        # Validate MODE
         mode = updates.get("MODE")
         if mode and mode.lower() not in ("survival", "creative", "adventure", "spectator"):
             return False, "MODE must be survival, creative, adventure, or spectator."
 
-        # Validate SPAWN_PROTECTION
         sp = updates.get("SPAWN_PROTECTION")
         if sp is not None and sp != "":
             try:
@@ -141,11 +175,10 @@ class SettingsManager:
                 continue
             if "=" not in line:
                 return False, f"Invalid line (must be KEY=VALUE): '{line}'"
-            key, val = line.split("=", 1)
+            key, _ = line.split("=", 1)
             key = key.strip()
             if not key.isidentifier():
                 return False, f"Invalid variable name: '{key}'"
-
         return True, ""
 
     def generate_diff(self, new_content: str) -> str:
@@ -161,11 +194,12 @@ class SettingsManager:
         return "".join(diff)
 
     def save_with_backup(self, new_content: str) -> str:
-        """Saves new content via root helper write-env action instead of direct host write."""
+        """Saves new content via root helper write-env action and invalidates env cache."""
         from app.helper_client import helper_client
         success, out = helper_client.write_env_sync(new_content, target_path=self.env_path)
         if not success:
             raise RuntimeError(f"Failed to write mc.env via helper: {out}")
+        self._cache_key = None
         return out.strip()
 
     def update_mod_projects(self, slug: str, action: str) -> str:
@@ -181,23 +215,9 @@ class SettingsManager:
             slugs = [s for s in slugs if s != slug]
 
         new_mods_str = ",".join(slugs)
-        parsed["MODRINTH_PROJECTS"] = new_mods_str
-
-        # Rebuild file preserving comments/formatting if possible or clean format
-        raw = self.read_raw()
-        lines = []
-        updated = False
-        for line in raw.splitlines():
-            if line.strip().startswith("MODRINTH_PROJECTS="):
-                lines.append(f"MODRINTH_PROJECTS={new_mods_str}")
-                updated = True
-            else:
-                lines.append(line)
-        if not updated:
-            lines.append(f"MODRINTH_PROJECTS={new_mods_str}")
-
-        new_content = "\n".join(lines) + "\n"
+        new_content = self.build_updated_content({"MODRINTH_PROJECTS": new_mods_str})
         self.save_with_backup(new_content)
         return new_mods_str
+
 
 settings_manager = SettingsManager()

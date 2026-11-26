@@ -1,29 +1,28 @@
-import os
 import sqlite3
 import datetime
 from pathlib import Path
-from app.config import DATA_DIR
+from app.config import get_data_dir
+
 
 def get_db_path() -> Path:
-    base_data = Path(os.environ.get("DATA_DIR", DATA_DIR))
-    return base_data / "mcadmin.db"
+    return get_data_dir() / "mcadmin.db"
+
 
 def get_db_connection() -> sqlite3.Connection:
     db_path = get_db_path()
-    db_path.parent.mkdir(parents=True, exist_ok=True)
+    if not db_path.parent.exists():
+        db_path.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(db_path, timeout=5.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA journal_mode=WAL;")
     conn.execute("PRAGMA busy_timeout=5000;")
     return conn
 
+
 def init_db():
     conn = get_db_connection()
-    conn.execute("PRAGMA journal_mode=WAL;")
-    conn.execute("PRAGMA busy_timeout=5000;")
     cursor = conn.cursor()
 
-    # Admin auth table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS admin_auth (
         id INTEGER PRIMARY KEY CHECK (id = 1),
@@ -33,7 +32,6 @@ def init_db():
     );
     """)
 
-    # Sessions table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS sessions (
         token TEXT PRIMARY KEY,
@@ -45,7 +43,6 @@ def init_db():
     );
     """)
 
-    # Failed login attempts for lockout tracking
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS failed_logins (
         ip_address TEXT PRIMARY KEY,
@@ -55,7 +52,6 @@ def init_db():
     );
     """)
 
-    # Audit log
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS audit_log (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -69,7 +65,6 @@ def init_db():
     );
     """)
 
-    # Key-value settings
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS panel_settings (
         key TEXT PRIMARY KEY,
@@ -77,7 +72,6 @@ def init_db():
     );
     """)
 
-    # Server metrics history for analytics & uptime
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS server_metrics (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -92,8 +86,39 @@ def init_db():
     );
     """)
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS server_metrics_hourly (
+        hour_key TEXT PRIMARY KEY,
+        online_samples INTEGER DEFAULT 0,
+        asleep_samples INTEGER DEFAULT 0,
+        active_samples INTEGER DEFAULT 0,
+        error_samples INTEGER DEFAULT 0,
+        total_samples INTEGER DEFAULT 0,
+        peak_players INTEGER DEFAULT 0,
+        tps_sum REAL DEFAULT 0.0,
+        tps_count INTEGER DEFAULT 0,
+        mspt_sum REAL DEFAULT 0.0,
+        mspt_count INTEGER DEFAULT 0
+    );
+    """)
+
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_server_metrics_ts ON server_metrics(timestamp);")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_audit_log_action_ts ON audit_log(action, timestamp);")
+
     conn.commit()
     conn.close()
+
+
+def cleanup_expired_sessions():
+    try:
+        conn = get_db_connection()
+        now_iso = datetime.datetime.now().isoformat()
+        conn.execute("DELETE FROM sessions WHERE expires_at < ?", (now_iso,))
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
 
 def record_server_metric(state: str, players_count: int = 0, cpu_percent: float = 0.0,
                          ram_used_mb: float = 0.0, ram_limit_mb: float = 0.0,
@@ -101,7 +126,10 @@ def record_server_metric(state: str, players_count: int = 0, cpu_percent: float 
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        now_iso = datetime.datetime.now().isoformat()
+        now = datetime.datetime.now()
+        now_iso = now.isoformat()
+        hour_key = now.strftime("%Y-%m-%dT%H")
+
         cursor.execute(
             """
             INSERT INTO server_metrics (timestamp, state, players_count, cpu_percent, ram_used_mb, ram_limit_mb, tps, mspt)
@@ -109,22 +137,59 @@ def record_server_metric(state: str, players_count: int = 0, cpu_percent: float 
             """,
             (now_iso, state, players_count, cpu_percent, ram_used_mb, ram_limit_mb, tps, mspt)
         )
-        # Keep only the last 5000 samples (~40 hours of 30s checks) to preserve storage
+
+        is_online = 1 if state == "Online" else 0
+        is_asleep = 1 if state == "Asleep" else 0
+        is_active = 1 if (state == "Online" and players_count > 0) else 0
+        is_error = 1 if state == "Error" else 0
+        valid_tps = tps if (is_online and tps and tps > 0) else 0.0
+        valid_tps_cnt = 1 if (is_online and tps and tps > 0) else 0
+        valid_mspt = mspt if (is_online and mspt and mspt > 0) else 0.0
+        valid_mspt_cnt = 1 if (is_online and mspt and mspt > 0) else 0
+
+        cursor.execute(
+            """
+            INSERT INTO server_metrics_hourly (
+                hour_key, online_samples, asleep_samples, active_samples, error_samples,
+                total_samples, peak_players, tps_sum, tps_count, mspt_sum, mspt_count
+            )
+            VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?, ?, ?)
+            ON CONFLICT(hour_key) DO UPDATE SET
+                online_samples = online_samples + excluded.online_samples,
+                asleep_samples = asleep_samples + excluded.asleep_samples,
+                active_samples = active_samples + excluded.active_samples,
+                error_samples = error_samples + excluded.error_samples,
+                total_samples = total_samples + 1,
+                peak_players = MAX(peak_players, excluded.peak_players),
+                tps_sum = tps_sum + excluded.tps_sum,
+                tps_count = tps_count + excluded.tps_count,
+                mspt_sum = mspt_sum + excluded.mspt_sum,
+                mspt_count = mspt_count + excluded.mspt_count
+            """,
+            (hour_key, is_online, is_asleep, is_active, is_error,
+             players_count, valid_tps, valid_tps_cnt, valid_mspt, valid_mspt_cnt)
+        )
+
+        # Keep last 5000 detailed 30s samples for 24h TPS/MSPT timelines, retain 95 days of hourly rollups
         cursor.execute(
             "DELETE FROM server_metrics WHERE id NOT IN (SELECT id FROM server_metrics ORDER BY id DESC LIMIT 5000)"
         )
+        hourly_cutoff = (now - datetime.timedelta(days=95)).strftime("%Y-%m-%dT%H")
+        cursor.execute("DELETE FROM server_metrics_hourly WHERE hour_key < ?", (hourly_cutoff,))
+
         conn.commit()
         conn.close()
     except Exception:
         pass
 
+
 def get_analytics_data(hours: int = 24) -> dict:
     conn = get_db_connection()
     cursor = conn.cursor()
     cutoff = (datetime.datetime.now() - datetime.timedelta(hours=hours)).isoformat()
-    
+
     cursor.execute(
-        "SELECT * FROM server_metrics WHERE timestamp >= ? ORDER BY id ASC",
+        "SELECT timestamp, state, players_count, tps, mspt FROM server_metrics WHERE timestamp >= ? ORDER BY id ASC",
         (cutoff,)
     )
     rows = cursor.fetchall()
@@ -161,10 +226,10 @@ def get_analytics_data(hours: int = 24) -> dict:
     error_count = sum(1 for r in rows if r["state"] == "Error")
 
     uptime_count = online_count + asleep_count
-    uptime_pct = round((uptime_count / total_samples) * 100.0, 1) if total_samples > 0 else 0.0
-    online_pct = round((online_count / total_samples) * 100.0, 1) if total_samples > 0 else 0.0
-    asleep_pct = round((asleep_count / total_samples) * 100.0, 1) if total_samples > 0 else 0.0
-    downtime_pct = round((error_count / total_samples) * 100.0, 1) if total_samples > 0 else 0.0
+    uptime_pct = round((uptime_count / total_samples) * 100.0, 1)
+    online_pct = round((online_count / total_samples) * 100.0, 1)
+    asleep_pct = round((asleep_count / total_samples) * 100.0, 1)
+    downtime_pct = round((error_count / total_samples) * 100.0, 1)
 
     valid_tps = [r["tps"] for r in rows if r["tps"] and r["tps"] > 0]
     avg_tps = round(sum(valid_tps) / len(valid_tps), 1) if valid_tps else 0.0
@@ -174,28 +239,25 @@ def get_analytics_data(hours: int = 24) -> dict:
 
     peak_players = max((r["players_count"] for r in rows), default=0)
 
-    # 24 hourly blocks
+    # Bucket rows by hour in a single O(N) pass
+    buckets: dict[str, list] = {}
+    for r in rows:
+        h_key = r["timestamp"][:13]
+        buckets.setdefault(h_key, []).append(r)
+
     now = datetime.datetime.now()
     hourly_blocks = []
     for i in range(24):
-        slot_start = now - datetime.timedelta(hours=24 - i)
-        slot_end = now - datetime.timedelta(hours=23 - i)
-        slot_rows = [r for r in rows if slot_start.isoformat() <= r["timestamp"] < slot_end.isoformat()]
+        slot_start = now - datetime.timedelta(hours=23 - i)
+        h_key = slot_start.strftime("%Y-%m-%dT%H")
+        slot_rows = buckets.get(h_key, [])
         if not slot_rows:
-            hourly_blocks.append({
-                "hour": slot_start.strftime("%H:00"),
-                "status": "down",
-                "uptime": 0
-            })
+            hourly_blocks.append({"hour": slot_start.strftime("%H:00"), "status": "down", "uptime": 0})
         else:
             good = sum(1 for r in slot_rows if r["state"] in ("Online", "Asleep"))
             pct = round((good / len(slot_rows)) * 100.0)
             status = "online" if pct >= 80 else ("asleep" if pct >= 30 else "down")
-            hourly_blocks.append({
-                "hour": slot_start.strftime("%H:00"),
-                "status": status,
-                "uptime": pct
-            })
+            hourly_blocks.append({"hour": slot_start.strftime("%H:00"), "status": status, "uptime": pct})
 
     step = max(1, total_samples // 30)
     timeline_rows = rows[::step][-30:]
@@ -226,6 +288,7 @@ def get_analytics_data(hours: int = 24) -> dict:
             "downtime_pct": downtime_pct
         }
     }
+
 
 def log_audit(user: str, action: str, target: str | None, details: str | None, result: str, ip_address: str | None):
     conn = get_db_connection()

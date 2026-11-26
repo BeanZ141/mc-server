@@ -1,64 +1,98 @@
-import os
 import shutil
+import asyncio
 import datetime
 from pathlib import Path
 from fastapi import APIRouter, Depends, Request, HTTPException
 from pydantic import BaseModel
 from app.auth import get_current_user_and_session
-from app.config import BACKUP_DIR, MINECRAFT_DATA_DIR
+from app.config import get_backup_dir, get_minecraft_data_dir
 from app.helper_client import helper_client
 from app.docker_client import docker_client
 from app.settings_manager import settings_manager
 from app.database import log_audit
+from app.utils import format_size, get_dir_size
 
 router = APIRouter(prefix="/api/backups", tags=["backups"])
+
 
 class RestoreRequest(BaseModel):
     backup_id: str
 
-def get_directory_size_bytes(path: Path) -> int:
-    total = 0
-    if not path.exists():
-        return 0
-    try:
-        if path.is_file():
-            return path.stat().st_size
-        for entry in path.rglob("*"):
-            if entry.is_file():
-                try:
-                    total += entry.stat().st_size
-                except Exception:
-                    pass
-    except Exception:
-        pass
-    return total
 
-def format_size(bytes_val: int) -> str:
-    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
-        if bytes_val < 1024.0:
-            return f"{bytes_val:.1f} {unit}"
-        bytes_val /= 1024.0
-    return f"{bytes_val:.1f} PB"
-
-@router.get("")
-async def list_backups(session: dict = Depends(get_current_user_and_session)):
+def _list_backups_sync() -> list[dict]:
+    backup_dir = get_backup_dir()
     backups = []
-    if BACKUP_DIR.exists():
-        for f in BACKUP_DIR.iterdir():
+    if backup_dir.exists():
+        for f in backup_dir.iterdir():
             if f.is_file() and f.name.endswith(".tar.gz"):
                 stat = f.stat()
                 backups.append({
-                    "id": f.name.replace(".tar.gz", ""),
+                    "id": f.name[:-7],
                     "filename": f.name,
                     "size_bytes": stat.st_size,
                     "size_human": format_size(stat.st_size),
                     "created_at": datetime.datetime.fromtimestamp(stat.st_mtime).isoformat(),
                     "is_safety": "safety" in f.name
                 })
-
-    # Sort newest first
     backups.sort(key=lambda x: x["created_at"], reverse=True)
+    return backups
+
+
+def _get_disk_usage_sync(level_name: str) -> dict:
+    mc_dir = get_minecraft_data_dir()
+    backup_dir = get_backup_dir()
+    world_path = mc_dir / level_name
+
+    world_size = get_dir_size(world_path)
+    backups_size = get_dir_size(backup_dir)
+
+    mc_free = mc_total = mc_used = 0
+    mc_pct = 0.0
+    try:
+        usage = shutil.disk_usage(str(mc_dir if mc_dir.exists() else Path(".")))
+        mc_free, mc_total, mc_used = usage.free, usage.total, usage.used
+        mc_pct = round((mc_used / mc_total) * 100.0, 1) if mc_total > 0 else 0.0
+    except Exception:
+        pass
+
+    backup_free = backup_total = backup_used = 0
+    backup_pct = 0.0
+    try:
+        b_usage = shutil.disk_usage(str(backup_dir if backup_dir.exists() else Path(".")))
+        backup_free, backup_total, backup_used = b_usage.free, b_usage.total, b_usage.used
+        backup_pct = round((backup_used / backup_total) * 100.0, 1) if backup_total > 0 else 0.0
+    except Exception:
+        pass
+
+    return {
+        "world_size_bytes": world_size,
+        "world_size_human": format_size(world_size),
+        "backups_size_bytes": backups_size,
+        "backups_size_human": format_size(backups_size),
+        "programming_disk": {
+            "used_bytes": mc_used,
+            "free_bytes": mc_free,
+            "free_human": format_size(mc_free),
+            "total_bytes": mc_total,
+            "total_human": format_size(mc_total),
+            "percent_used": mc_pct
+        },
+        "media_disk": {
+            "used_bytes": backup_used,
+            "free_bytes": backup_free,
+            "free_human": format_size(backup_free),
+            "total_bytes": backup_total,
+            "total_human": format_size(backup_total),
+            "percent_used": backup_pct
+        }
+    }
+
+
+@router.get("")
+async def list_backups(session: dict = Depends(get_current_user_and_session)):
+    backups = await asyncio.to_thread(_list_backups_sync)
     return {"backups": backups}
+
 
 @router.post("/create")
 async def create_backup(request: Request, session: dict = Depends(get_current_user_and_session)):
@@ -71,11 +105,11 @@ async def create_backup(request: Request, session: dict = Depends(get_current_us
     log_audit("admin", "create_backup", "minecraft", "Manual backup completed", "SUCCESS", client_ip)
     return {"success": True, "message": "Backup created successfully.", "output": output}
 
+
 @router.post("/restore")
 async def restore_backup(payload: RestoreRequest, request: Request, session: dict = Depends(get_current_user_and_session)):
     client_ip = request.client.host if request.client else "unknown"
-    
-    # 1. Minecraft MUST be stopped
+
     mc_info = await docker_client.get_container("mc")
     if mc_info and mc_info.get("State", {}).get("Running", False):
         raise HTTPException(status_code=400, detail="Cannot restore while Minecraft is running! Stop the server first.")
@@ -88,49 +122,9 @@ async def restore_backup(payload: RestoreRequest, request: Request, session: dic
     log_audit("admin", "restore_backup", payload.backup_id, "Restore completed", "SUCCESS", client_ip)
     return {"success": True, "message": f"Backup {payload.backup_id} restored successfully.", "output": output}
 
+
 @router.get("/disk-usage")
 async def get_disk_usage(session: dict = Depends(get_current_user_and_session)):
     parsed = settings_manager.parse_env()
     level_name = parsed.get("LEVEL", "BabaSquadWorld")
-    world_path = MINECRAFT_DATA_DIR / level_name
-
-    world_size = get_directory_size_bytes(world_path)
-    backups_size = get_directory_size_bytes(BACKUP_DIR)
-
-    # Free space on /programming and /mnt/media
-    mc_free = 0
-    mc_total = 0
-    try:
-        usage = shutil.disk_usage(str(MINECRAFT_DATA_DIR))
-        mc_free = usage.free
-        mc_total = usage.total
-    except Exception:
-        pass
-
-    backup_free = 0
-    backup_total = 0
-    try:
-        b_usage = shutil.disk_usage(str(BACKUP_DIR if BACKUP_DIR.exists() else Path(".")))
-        backup_free = b_usage.free
-        backup_total = b_usage.total
-    except Exception:
-        pass
-
-    return {
-        "world_size_bytes": world_size,
-        "world_size_human": format_size(world_size),
-        "backups_size_bytes": backups_size,
-        "backups_size_human": format_size(backups_size),
-        "programming_disk": {
-            "free_bytes": mc_free,
-            "free_human": format_size(mc_free),
-            "total_bytes": mc_total,
-            "total_human": format_size(mc_total)
-        },
-        "media_disk": {
-            "free_bytes": backup_free,
-            "free_human": format_size(backup_free),
-            "total_bytes": backup_total,
-            "total_human": format_size(backup_total)
-        }
-    }
+    return await asyncio.to_thread(_get_disk_usage_sync, level_name)

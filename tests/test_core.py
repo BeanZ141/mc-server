@@ -139,5 +139,28 @@ class TestMinecraftAdminPanel(unittest.TestCase):
         destroy_session(s_token)
         self.assertIsNone(get_session(s_token))
 
+    def test_settings_preserves_comments_and_hourly_rollup(self):
+        from app.database import record_server_metric, get_db_connection
+        env_file = Path(self.temp_dir.name) / "comments.env"
+        env_file.write_text("# Header comment\nVERSION=26.3\n\n# World\nLEVEL=TestWorld\n")
+        sm = SettingsManager(env_file)
+
+        updated = sm.build_updated_content({"LEVEL": "NewWorld", "SEED": "12345"}, remove_keys=[])
+        self.assertIn("# Header comment", updated)
+        self.assertIn("# World", updated)
+        self.assertIn("LEVEL=NewWorld", updated)
+        self.assertIn("SEED=12345", updated)
+
+        record_server_metric(state="Online", players_count=3, tps=20.0, mspt=10.0)
+        record_server_metric(state="Asleep", players_count=0)
+        conn = get_db_connection()
+        row = conn.execute("SELECT online_samples, asleep_samples, total_samples, peak_players FROM server_metrics_hourly").fetchone()
+        conn.close()
+        self.assertIsNotNone(row)
+        self.assertEqual(row["online_samples"], 1)
+        self.assertEqual(row["asleep_samples"], 1)
+        self.assertEqual(row["total_samples"], 2)
+        self.assertEqual(row["peak_players"], 3)
+
 if __name__ == "__main__":
     unittest.main()

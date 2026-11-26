@@ -333,5 +333,49 @@ class TestAPIEndpoints(unittest.TestCase):
         )
         self.assertEqual(del_wl_resp.status_code, 200)
 
+        # Invalid player / IP rejected
+        bad_player = self.client.post(
+            "/api/players/ops",
+            headers={CSRF_HEADER_NAME: csrf},
+            json={"player": "bad player\nsay hacked"}
+        )
+        self.assertEqual(bad_player.status_code, 400)
+
+        bad_ip = self.client.post(
+            "/api/players/ban-ip",
+            headers={CSRF_HEADER_NAME: csrf},
+            json={"ip": "999.999.999.999"}
+        )
+        self.assertEqual(bad_ip.status_code, 400)
+
+    def test_analytics_and_world_download_safety(self):
+        import io
+        import zipfile
+        from app.database import record_server_metric
+        csrf = self._setup_and_auth()
+
+        # Empty analytics returns zero/empty shape
+        empty_resp = self.client.get("/api/server/analytics")
+        self.assertEqual(empty_resp.status_code, 200)
+        self.assertEqual(empty_resp.json()["heatmap_months"], [])
+
+        # Populate hourly rollup metric and verify heatmap & funnel populate
+        record_server_metric(state="Online", players_count=2, tps=20.0, mspt=12.0)
+        pop_resp = self.client.get("/api/server/analytics")
+        self.assertEqual(pop_resp.status_code, 200)
+        pdata = pop_resp.json()
+        self.assertEqual(len(pdata["heatmap_months"]), 3)
+        self.assertEqual(len(pdata["funnel_stages"]), 4)
+        self.assertEqual(len(pdata["uptime_history_14d"]), 14)
+
+        # World download excludes any blocked files placed inside world directory
+        world_dir = Path(self.temp_dir.name) / "BabaSquadWorld"
+        (world_dir / "leak.env").write_text("SECRET=1\n")
+        dl_resp = self.client.get("/api/worlds/download")
+        self.assertEqual(dl_resp.status_code, 200)
+        with zipfile.ZipFile(io.BytesIO(dl_resp.content)) as z:
+            self.assertNotIn("leak.env", z.namelist())
+            self.assertIn("level.dat", z.namelist())
+
 if __name__ == "__main__":
     unittest.main()

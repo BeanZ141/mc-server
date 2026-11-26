@@ -7,7 +7,9 @@ from pathlib import Path
 
 from app.database import init_db
 from app.watcher import watcher
-from app.config import BASE_DIR, DATA_DIR
+from app.docker_client import docker_client
+from app.modrinth import modrinth_client
+from app.config import get_data_dir
 
 # Import routers
 from app.api.auth import router as auth_router
@@ -29,13 +31,12 @@ from app.api.analytics import router as analytics_router
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: ensure directories and database
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    get_data_dir().mkdir(parents=True, exist_ok=True)
     init_db()
-    
-    # Check if ADMIN_PASSWORD is provided in environment on first run
+
     env_admin_pass = os.environ.get("ADMIN_PASSWORD")
     if env_admin_pass:
         from app.auth import is_admin_set_up, setup_admin_password
@@ -44,8 +45,10 @@ async def lifespan(app: FastAPI):
 
     watcher.start()
     yield
-    # Shutdown
     watcher.stop()
+    await docker_client.close()
+    await modrinth_client.close()
+
 
 app = FastAPI(
     title="mcadmin.palvi.org",
@@ -54,7 +57,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Security headers middleware
+
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -64,7 +67,7 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Referrer-Policy"] = "same-origin"
     return response
 
-# Mount routers
+
 app.include_router(auth_router)
 app.include_router(status_router)
 app.include_router(control_router)
@@ -82,14 +85,15 @@ app.include_router(chunky_router)
 app.include_router(audit_router)
 app.include_router(analytics_router)
 
-# Healthz endpoint for Uptime Kuma
+
 @app.get("/healthz")
 async def healthz():
     return {"status": "ok", "app": "mcadmin.palvi.org"}
 
-# Mount static files
+
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
 
 @app.get("/")
 async def root():
