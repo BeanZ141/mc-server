@@ -4,6 +4,7 @@ set -euo pipefail
 cd "$(dirname "$0")"
 mkdir -p /mnt/media/backups/minecraft
 chown 1000:1000 /mnt/media/backups/minecraft
+rm -f /opt/stacks/minecraft/mc.env.tmp.*   # leftovers from failed write-env runs
 (cd helper && bash ./install.sh)
 # media-stop stops everything not in KEEP: keep the panel alive (idempotent)
 grep -q 'mc-panel' /usr/local/bin/media-stop || sed -i 's/^KEEP="\(.*\)"\(.*\)$/KEEP="\1 mc-panel mc-socket-proxy"\2/' /usr/local/bin/media-stop
