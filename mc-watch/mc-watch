@@ -82,8 +82,15 @@ log "mc-watch daemon started with GRACE=${GRACE}s"
 cancel_pending_timer
 init_state
 
+# On (re)start, if mc is not running, restore any media containers media-stop recorded.
+# (A restart of this daemon kills a pending grace timer, which would otherwise leave media down.)
+if [[ "$(docker inspect -f '{{.State.Running}}' mc 2>/dev/null || echo false)" != "true" ]]; then
+    log "mc not running at startup: media-start"
+    /usr/local/bin/media-start >/dev/null 2>&1 &
+fi
+
 # Handle mc events in a loop
-docker events --filter 'container=mc' --filter 'event=start' --filter 'event=die' --format '{{.Action}}' | while read -r event; do
+docker events --filter 'container=^mc$' --filter 'event=start' --filter 'event=die' --format '{{.Action}}' | while read -r event; do
     case "${event}" in
         start)
             log "Docker event: mc started"

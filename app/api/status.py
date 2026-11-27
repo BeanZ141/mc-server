@@ -91,7 +91,7 @@ async def get_status(session: dict = Depends(get_current_user_and_session)):
     elif not lazymc_running:
         computed_state = "Error"
     elif not mc_running:
-        computed_state = "Asleep" if exit_code == 0 else "Error"
+        computed_state = "Asleep" if exit_code in (0, 137, 143) else "Error"  # 137/143: normal docker stop of itzg/lazymc
     else:
         # mc is running: probe container stats + RCON player list concurrently
         stats_res, player_res = await asyncio.gather(

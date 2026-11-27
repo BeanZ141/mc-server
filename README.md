@@ -124,8 +124,8 @@ sudo docker compose -f /opt/stacks/mc-panel/compose.yaml up -d
 
 Check health:
 ```bash
-curl -I http://127.0.0.1:3555/healthz
-# Expected: HTTP/1.1 200 OK
+curl http://127.0.0.1:3555/healthz
+# Expected: HTTP 200 (GET; HEAD returns 405)
 ```
 
 ### 5. Nginx Proxy Manager (NPM)
