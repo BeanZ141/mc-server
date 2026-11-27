@@ -7,7 +7,7 @@ set -euo pipefail
 
 LOG_TAG="mc-admin-helper"
 MINECRAFT_STACK_DIR="/opt/stacks/minecraft"
-MINECRAFT_DATA_DIR="/programming/minecraft"
+MINECRAFT_DATA_DIR="/opt/containers/minecraft"
 BACKUP_DIR="/mnt/media/backups/minecraft"
 
 log() {

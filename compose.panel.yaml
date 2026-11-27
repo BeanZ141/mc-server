@@ -1,6 +1,8 @@
+# Image-based: mc-panel:latest is built once from the mc-server repo (docker build -t mc-panel:latest <repo>); no build context or /programming path at runtime.
 networks:
   minecraft-network:
     external: true
+    name: minecraft_minecraft-network
   mc-panel-net:
     driver: bridge
     internal: true
@@ -33,7 +35,6 @@ services:
       - mc-panel-net
 
   mc-panel:
-    build: .
     image: mc-panel:latest
     container_name: mc-panel
     restart: unless-stopped
@@ -61,7 +62,7 @@ services:
       TZ: "Asia/Kolkata"
     volumes:
       - /opt/containers/mc-panel:/data
-      - /programming/minecraft:/server-data:rw
+      - /opt/containers/minecraft:/server-data:rw
       - /opt/stacks/minecraft/mc.env:/stacks/mc.env:ro
       - /run/mc-watch:/run/mc-watch:ro
       - /run/mc-admin-helper:/run/mc-admin-helper:rw

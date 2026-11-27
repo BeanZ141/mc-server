@@ -16,7 +16,7 @@ services:
     ports:
       - "26656:25565"
     volumes:
-      - /programming/minecraft:/server:ro
+      - /opt/containers/minecraft:/server:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
   mc:
@@ -32,12 +32,13 @@ services:
       - lazymc.group=mc
       - lazymc.server.address=mc:25565
       - lazymc.time.sleep_after=300
-      - "lazymc.motd.sleeping=§2PalviServer is asleep\n§7Join to wake it up"
-      - "lazymc.motd.starting=§ePalviServer Waking up...\n§7Takes about 45 seconds"
-      - "lazymc.join.kick.starting=Server is waking up.\nWait about 20 seconds, then click Join again."
+      - lazymc.time.minimum_online=300
+      - "lazymc.motd.sleeping=§2PalviServer is asleep\\n§7Join to wake it up"
+      - "lazymc.motd.starting=§ePalviServer Waking up...\\n§7Takes about 45 seconds"
+      - "lazymc.join.kick.starting=Server is waking up.\\nWait about 20 seconds, then click Join again."
     env_file:
       - mc.env
     volumes:
-      - /programming/minecraft:/data
+      - /opt/containers/minecraft:/data
     stdin_open: true
     tty: true
