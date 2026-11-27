@@ -63,7 +63,7 @@ services:
     volumes:
       - /opt/containers/mc-panel:/data
       - /opt/containers/minecraft:/server-data:rw
-      - /opt/stacks/minecraft/mc.env:/stacks/mc.env:ro
+      - /opt/stacks/minecraft:/stacks:ro   # directory, not the file: the helper replaces mc.env atomically (new inode)
       - /run/mc-watch:/run/mc-watch:ro
       - /run/mc-admin-helper:/run/mc-admin-helper:rw
       - /mnt/media/backups/minecraft:/backups:ro
