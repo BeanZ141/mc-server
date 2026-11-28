@@ -32,8 +32,8 @@ function buildMeterBlocksHtml() {
 }
 
 export function renderServerTab() {
-  return `
-    <div class="card" style="margin-bottom:16px;padding:22px 28px;">
+  return `  
+    <div class="card" style="margin-bottom:16px;padding:12px 22px;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
         <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
           <div>
@@ -167,7 +167,7 @@ export function renderServerTab() {
     </div>
 
     <div class="card" style="padding:22px 24px;margin-bottom:16px;">
-      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:16px;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;gap:10px;">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 4px 0;margin-bottom:6px;flex-wrap:wrap;gap:10px;">
         <div>
           <span class="card-title" style="margin:0;">MEDIA STACK CONTROLLER (MC-WATCH)</span>
           <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">
@@ -181,7 +181,7 @@ export function renderServerTab() {
         </div>
       </div>
 
-      <div class="metric-strip" style="margin-bottom:16px;">
+      <div class="metric-strip" style="margin-bottom:8px;">
         <div class="metric-strip-card">
           <span class="metric-strip-label">Watched MC State</span>
           <span class="metric-strip-value" id="media-watch-mc" style="font-size:14px;">-</span>
@@ -199,7 +199,7 @@ export function renderServerTab() {
         </div>
       </div>
 
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;" id="media-containers-grid">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;" id="media-containers-grid">
         <div style="color:var(--text-muted);font-size:12px;">Click Refresh or wait for initial sync...</div>
       </div>
     </div>
@@ -456,8 +456,8 @@ export function updateServerMetrics(data, app = null) {
   if (mediaEl) {
     const isMediaRunning = watchState ? watchState.media === "running" : state.toLowerCase() !== "online";
     const mediaHtml = isMediaRunning
-      ? renderStatusBadge("online", "Running (Active)")
-      : renderStatusBadge("asleep", "Paused (mc-watch standby)");
+      ? renderStatusBadge("online", "Running")
+      : renderStatusBadge("asleep", "Paused");
     setHtmlIfChanged(mediaEl, mediaHtml);
   }
   renderWatchStateWidgets(watchState, app ? app.state.mediaContainers : null);
