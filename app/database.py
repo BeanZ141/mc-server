@@ -303,3 +303,22 @@ def log_audit(user: str, action: str, target: str | None, details: str | None, r
     )
     conn.commit()
     conn.close()
+
+
+def get_panel_setting(key: str, default: str = "") -> str:
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT value FROM panel_settings WHERE key = ?", (key,))
+    row = cursor.fetchone()
+    conn.close()
+    return row["value"] if row else default
+
+
+def set_panel_setting(key: str, value: str):
+    conn = get_db_connection()
+    conn.execute(
+        "INSERT INTO panel_settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        (key, value)
+    )
+    conn.commit()
+    conn.close()

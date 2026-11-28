@@ -1,4 +1,4 @@
-import { escapeHtml } from "../api.js";
+import { escapeHtml } from "../api.js?v=20261128-v11";
 
 export function renderAnalyticsPage(app) {
   const main = document.getElementById("main-content");
@@ -14,7 +14,7 @@ export function renderAnalyticsPage(app) {
       <span class="badge" id="analytics-os-badge">${escapeHtml(osBadge)}</span>
     </div>
 
-    <div class="grid-3" style="margin-bottom:20px;">
+    <div class="grid-3" style="margin-bottom:16px;">
       <div class="card" style="padding:18px 20px;">
         <div style="margin-bottom:14px;">
           <div style="font-size:13px;font-weight:700;text-transform:uppercase;color:var(--text-primary);">Host CPU & Load Average</div>

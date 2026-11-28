@@ -4,6 +4,7 @@ from app.auth import get_current_user_and_session
 from app.docker_client import docker_client
 from app.rcon_client import rcon_client
 from app.database import log_audit
+from app.api.status import invalidate_status_cache
 
 router = APIRouter(prefix="/api/control", tags=["control"])
 
@@ -21,6 +22,7 @@ async def start_server(request: Request, session: dict = Depends(get_current_use
             detail=f"Cannot reach Docker proxy ({docker_client.base_url}). If testing locally, the panel must be deployed on palviserver or connected via SSH tunnel."
         )
 
+    invalidate_status_cache()
     log_audit("admin", "start_server", "mc", "Started mc container", "SUCCESS", client_ip)
     return {"success": True, "message": "Minecraft server container started."}
 
@@ -58,6 +60,7 @@ async def stop_server(payload: StopRequest, request: Request, session: dict = De
             detail=f"Cannot reach Docker proxy ({docker_client.base_url}). If testing locally, the panel must be deployed on palviserver or connected via SSH tunnel."
         )
 
+    invalidate_status_cache()
     log_audit("admin", "stop_server", "mc", f"Stopped mc container (forced={payload.force})", "SUCCESS", client_ip)
     return {"success": True, "message": "Minecraft server stopped cleanly."}
 
@@ -93,5 +96,6 @@ async def restart_server(payload: StopRequest, request: Request, session: dict =
             detail=f"Cannot reach Docker proxy ({docker_client.base_url}). If testing locally, the panel must be deployed on palviserver or connected via SSH tunnel."
         )
 
+    invalidate_status_cache()
     log_audit("admin", "restart_server", "mc", "Restarted mc container", "SUCCESS", client_ip)
     return {"success": True, "message": "Minecraft server restarting."}

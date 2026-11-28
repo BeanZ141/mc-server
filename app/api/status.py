@@ -1,3 +1,4 @@
+import time
 import asyncio
 import datetime
 from fastapi import APIRouter, Depends
@@ -5,11 +6,18 @@ from app.auth import get_current_user_and_session
 from app.docker_client import docker_client
 from app.rcon_client import rcon_client
 from app.watcher import watcher
-from app.config import get_minecraft_data_dir
+from app.config import get_minecraft_data_dir, get_mc_env_path, get_mc_watch_state_path
 from app.settings_manager import settings_manager
 from app.system_metrics import get_system_analytics
+from app.api.media import read_mc_watch_state
 
 router = APIRouter(prefix="/api/status", tags=["status"])
+
+_STATUS_CACHE: dict[tuple[str, str, str, str], tuple[float, dict]] = {}
+
+
+def invalidate_status_cache():
+    _STATUS_CACHE.clear()
 
 
 def _check_log_done() -> bool:
@@ -48,6 +56,17 @@ async def get_status(session: dict = Depends(get_current_user_and_session)):
     - MSPT and TPS
     - Idle countdown
     """
+    cache_key = (
+        str(get_minecraft_data_dir()),
+        str(get_mc_env_path()),
+        str(get_mc_watch_state_path()),
+        docker_client.base_url
+    )
+    now = time.monotonic()
+    cached = _STATUS_CACHE.get(cache_key)
+    if cached and (now - cached[0]) < 2.0:
+        return dict(cached[1])
+
     mc_info, lazymc_info, analytics = await asyncio.gather(
         docker_client.get_container("mc"),
         docker_client.get_container("lazymc"),
@@ -62,19 +81,26 @@ async def get_status(session: dict = Depends(get_current_user_and_session)):
     sw_version = env_vars.get("VERSION")
     sw_name = sw_type.capitalize() if sw_type else None
 
+    watch_state = read_mc_watch_state()
+
     if not mc_info:
-        return {
+        res = {
             "state": "Error",
             "uptime_seconds": 0,
             "lazymc_running": lazymc_running,
-            "stats": {"cpu_percent": 0.0, "ram_used_mb": 0.0, "ram_limit_mb": 0.0},
+            "stats": {"cpu_percent": 0.0, "ram_used_mb": 0.0, "ram_limit_mb": 0.0, "entities": 0, "chunks": 0},
             "players": {"count": 0, "max": int(env_vars.get("MAX_PLAYERS", "8")), "players": []},
             "performance": {"tps": 0.0, "mspt": 0.0},
             "idle": watcher.get_idle_status(),
             "software": sw_name,
             "version": sw_version,
-            "host_analytics": analytics
+            "host_analytics": analytics,
+            "watch_state": watch_state
         }
+        if len(_STATUS_CACHE) > 4:
+            _STATUS_CACHE.clear()
+        _STATUS_CACHE[cache_key] = (now, dict(res))
+        return res
 
     state = mc_info.get("State", {})
     mc_running = state.get("Running", False)
@@ -82,7 +108,7 @@ async def get_status(session: dict = Depends(get_current_user_and_session)):
     status_raw = state.get("Status", "").lower()
 
     computed_state = "Asleep"
-    stats = {"cpu_percent": 0.0, "ram_used_mb": 0.0, "ram_limit_mb": 0.0}
+    stats = {"cpu_percent": 0.0, "ram_used_mb": 0.0, "ram_limit_mb": 0.0, "entities": 0, "chunks": 0}
     players = {"count": 0, "max": int(env_vars.get("MAX_PLAYERS", "8")), "players": []}
     performance = {"tps": 20.0, "mspt": 0.0}
 
@@ -105,6 +131,10 @@ async def get_status(session: dict = Depends(get_current_user_and_session)):
         if isinstance(player_res, dict):
             computed_state = "Online"
             players = player_res
+            watcher.update_player_cache(player_res)
+            workload = watcher.get_cached_workload()
+            stats["entities"] = workload.get("entities", 0)
+            stats["chunks"] = workload.get("chunks", 0)
             try:
                 performance = await rcon_client.get_mspt_and_tps()
             except Exception:
@@ -115,7 +145,7 @@ async def get_status(session: dict = Depends(get_current_user_and_session)):
 
     uptime_seconds = _calc_uptime(state.get("StartedAt", "")) if mc_running else 0
 
-    return {
+    res = {
         "state": computed_state,
         "exit_code": exit_code,
         "lazymc_running": lazymc_running,
@@ -126,5 +156,10 @@ async def get_status(session: dict = Depends(get_current_user_and_session)):
         "idle": watcher.get_idle_status(),
         "software": sw_name,
         "version": sw_version,
-        "host_analytics": analytics
+        "host_analytics": analytics,
+        "watch_state": watch_state
     }
+    if len(_STATUS_CACHE) > 4:
+        _STATUS_CACHE.clear()
+    _STATUS_CACHE[cache_key] = (now, dict(res))
+    return res

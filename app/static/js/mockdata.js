@@ -82,6 +82,12 @@
       },
       software: "Fabric",
       version: "1.21.4 (Fabric 26.3)",
+      watch_state: {
+        mc: "running",
+        media: "stopped",
+        media_start_at: null,
+        grace: 300
+      },
       host_analytics: {
         cpu_temp: 42.5,
         memory: {
@@ -104,13 +110,22 @@
       max_players: 8,
       gamemode: "survival",
       difficulty: "normal",
+      whitelist: false,
       white_list: false,
       allow_flight: true,
       spawn_protection: 16,
       motd: "A Palvi Minecraft Server",
       pvp: true,
       hardcore: false,
-      online_mode: false
+      online_mode: false,
+      view_distance: 16,
+      simulation_distance: 6,
+      enable_command_block: false,
+      allow_nether: true,
+      spawn_monsters: true,
+      spawn_animals: true,
+      spawn_npcs: true,
+      force_gamemode: false
     },
     logs: [
       "[13:40:02 INFO]: Loading Minecraft 1.21.4 with Fabric Loader 0.16.10",
@@ -179,12 +194,40 @@
         { id: "FORGE", name: "Forge", description: "Classic modding platform with the largest legacy ecosystem of mods.", icon: "forge", supports_mods: true, supports_plugins: false, mod_loader: "forge", is_default: false }
       ]
     },
-    installedMods: [
-      { filename: "fabric-api-0.115.0+1.21.4.jar", name: "Fabric API", version: "0.115.0+1.21.4", size_bytes: 2185420, size: "2.1 MB", description: "Essential hooks and interoperability libraries for Fabric mods." },
-      { filename: "lithium-fabric-0.14.7+mc1.21.4.jar", name: "Lithium", version: "0.14.7", size_bytes: 624100, size: "610 KB", description: "General-purpose optimization mod for Minecraft." },
-      { filename: "ferritecore-7.0.0-fabric.jar", name: "FerriteCore", version: "7.0.0", size_bytes: 312000, size: "304 KB", description: "Memory usage optimizations for Minecraft." },
-      { filename: "lazydfu-0.1.3.jar", name: "LazyDFU", version: "0.1.3", size_bytes: 14200, size: "14 KB", description: "Makes the game load faster by deferring DFU initialization." }
+    installedMods: {
+      loader: "fabric",
+      game_version: "26.3",
+      managed: [
+        { slug: "fabric-api", title: "Fabric API", installed_jar: "fabric-api-0.115.0+26.3.jar", status: "Installed" },
+        { slug: "lithium", title: "Lithium", installed_jar: "lithium-fabric-0.14.7+mc26.3.jar", status: "Installed" },
+        { slug: "ferrite-core", title: "FerriteCore", installed_jar: "ferritecore-7.0.0-fabric.jar", status: "Installed" }
+      ],
+      manual: [
+        { filename: "lazydfu-0.1.3.jar", size_bytes: 14200, modified_at: 1763800000 }
+      ]
+    },
+    mediaContainers: [
+      { name: "jellyfin", status: "Exited (0)", running: false },
+      { name: "jellyseerr", status: "Exited (0)", running: false },
+      { name: "sonarr", status: "Exited (0)", running: false },
+      { name: "radarr", status: "Exited (0)", running: false },
+      { name: "bazarr", status: "Exited (0)", running: false },
+      { name: "prowlarr", status: "Exited (0)", running: false },
+      { name: "flaresolverr", status: "Exited (0)", running: false },
+      { name: "qbittorrent", status: "Exited (0)", running: false }
     ],
+    backups: [
+      { id: "backup-2026-11-22-daily", filename: "backup-2026-11-22-daily.tar.gz", size_bytes: 420000000, size_human: "400.5 MB", created_at: "2026-11-22T04:00:00", is_safety: false },
+      { id: "backup-2026-11-21-daily", filename: "backup-2026-11-21-daily.tar.gz", size_bytes: 418000000, size_human: "398.6 MB", created_at: "2026-11-21T04:00:00", is_safety: false },
+      { id: "safety-before-update", filename: "safety-before-update.tar.gz", size_bytes: 415000000, size_human: "395.8 MB", created_at: "2026-11-20T12:00:00", is_safety: true }
+    ],
+    audit: [
+      { timestamp: "2026-11-22T04:00:02", user: "system", action: "backup", target: "minecraft", details: "Automated daily backup completed", result: "SUCCESS", ip_address: "127.0.0.1" },
+      { timestamp: "2026-11-22T09:15:10", user: "admin", action: "login", target: "session", details: "Successful admin sign in", result: "SUCCESS", ip_address: "192.168.1.42" },
+      { timestamp: "2026-11-22T09:20:44", user: "admin", action: "add_mod", target: "lithium", details: "Added mod lithium (success=True)", result: "SUCCESS", ip_address: "192.168.1.42" }
+    ],
+    panelWebhookUrl: "",
+    rawEnv: "VERSION=26.3\nTYPE=FABRIC\nMEMORY=3G\nVIEW_DISTANCE=16\nSIMULATION_DISTANCE=6\nMAX_PLAYERS=8\nMODE=survival\nDIFFICULTY=easy\nPVP=true\nHARDCORE=false\nENABLE_WHITELIST=false\nONLINE_MODE=false\nMOTD=palvi\nLEVEL=BabaSquadWorld\nSEED=1807738846518060059\nMODRINTH_PROJECTS=fabric-api,lithium,ferrite-core\nTZ=Asia/Kolkata\n",
     modrinthCatalog: [
       { id: "P7dR8mSH", slug: "fabric-api", title: "Fabric API", description: "Essential hooks and interoperability libraries for the Fabric mod ecosystem.", downloads: 84200310, date_modified: "2026-11-18T14:20:00Z", client_side: "optional", server_side: "required", icon_url: "https://cdn.modrinth.com/data/P7dR8mSH/icon.png" },
       { id: "gvQqBUqZ", slug: "lithium", title: "Lithium", description: "General-purpose physics, chunk generation, and AI optimization mod.", downloads: 32450120, date_modified: "2026-11-15T09:12:00Z", client_side: "optional", server_side: "required", icon_url: "https://cdn.modrinth.com/data/gvQqBUqZ/icon.png" },
@@ -461,6 +504,10 @@
       mockState.status.players.count = 3;
       mockState.status.players.players = ["PalviGamer", "Notch_99", "SteveCraft"];
       mockState.players.online_players = [...mockState.status.players.players];
+      mockState.status.watch_state.mc = "running";
+      mockState.status.watch_state.media = "stopped";
+      mockState.status.watch_state.media_start_at = null;
+      mockState.mediaContainers.forEach(c => { c.running = false; c.status = "Exited (0)"; });
       stepTelemetry();
       return jsonResponse({ success: true, message: "Server started" });
     }
@@ -471,6 +518,8 @@
       mockState.status.players.count = 0;
       mockState.status.players.players = [];
       mockState.players.online_players = [];
+      mockState.status.watch_state.mc = "stopped";
+      mockState.status.watch_state.media_start_at = new Date(Date.now() + (mockState.status.watch_state.grace || 300) * 1000).toISOString();
       stepTelemetry();
       return jsonResponse({ success: true, message: "Server stopped" });
     }
@@ -479,6 +528,109 @@
       mockState.status.state = "Online";
       stepTelemetry();
       return jsonResponse({ success: true, message: "Server restarting" });
+    }
+
+    if (pathname === "/api/media/status") {
+      return jsonResponse({
+        watch_state: mockState.status.watch_state,
+        containers: mockState.mediaContainers
+      });
+    }
+
+    if (pathname === "/api/media/set-grace") {
+      const body = typeof init.body === "string" ? JSON.parse(init.body) : (init.body || {});
+      mockState.status.watch_state.grace = parseInt(body.grace, 10) || 300;
+      return jsonResponse({ success: true, grace: mockState.status.watch_state.grace, output: "SUCCESS: grace updated" });
+    }
+
+    if (pathname === "/api/media/start-now") {
+      mockState.status.watch_state.media = "running";
+      mockState.status.watch_state.media_start_at = null;
+      mockState.mediaContainers.forEach(c => { c.running = true; c.status = "Up 5 seconds"; });
+      return jsonResponse({ success: true, output: "SUCCESS: media stack started" });
+    }
+
+    if (pathname === "/api/auth/change-password") {
+      return jsonResponse({ success: true, message: "Password updated" });
+    }
+
+    if (pathname === "/api/audit") {
+      const lim = parseInt(parsedUrl.searchParams.get("limit") || "15", 10);
+      const off = parseInt(parsedUrl.searchParams.get("offset") || "0", 10);
+      return jsonResponse({
+        entries: mockState.audit.slice(off, off + lim),
+        total: mockState.audit.length,
+        limit: lim,
+        offset: off
+      });
+    }
+
+    if (pathname === "/api/settings/panel-prefs") {
+      if (method === "POST") {
+        const body = typeof init.body === "string" ? JSON.parse(init.body) : (init.body || {});
+        mockState.panelWebhookUrl = body.alert_webhook_url || "";
+        return jsonResponse({ success: true, alert_webhook_url: mockState.panelWebhookUrl });
+      }
+      return jsonResponse({ alert_webhook_url: mockState.panelWebhookUrl });
+    }
+
+    if (pathname === "/api/settings") {
+      return jsonResponse({
+        properties: mockState.properties,
+        world: {
+          LEVEL: "BabaSquadWorld",
+          SEED: "1807738846518060059",
+          SEED_READ_ONLY: true,
+          DIFFICULTY: mockState.properties.difficulty || "easy",
+          MODE: mockState.properties.gamemode || "survival",
+          PVP: mockState.properties.pvp !== false,
+          HARDCORE: Boolean(mockState.properties.hardcore)
+        },
+        players: {
+          MAX_PLAYERS: mockState.properties.max_players || 8,
+          ENABLE_WHITELIST: Boolean(mockState.properties.white_list),
+          ONLINE_MODE: Boolean(mockState.properties.online_mode)
+        },
+        performance: {
+          VIEW_DISTANCE: 16,
+          SIMULATION_DISTANCE: 6,
+          MEMORY: "3G"
+        },
+        text: {
+          MOTD: mockState.properties.motd || "palvi"
+        },
+        system: {
+          TYPE: "FABRIC",
+          VERSION: "26.3",
+          TZ: "Asia/Kolkata",
+          MODRINTH_PROJECTS: mockState.installedMods.managed.map(m => m.slug).join(",")
+        },
+        world_exists: true,
+        raw: mockState.rawEnv
+      });
+    }
+
+    if (pathname === "/api/settings/diff") {
+      const body = typeof init.body === "string" ? JSON.parse(init.body) : (init.body || {});
+      const proposed = body.raw_content !== undefined ? body.raw_content : mockState.rawEnv;
+      return jsonResponse({
+        diff: proposed === mockState.rawEnv ? "" : "--- mc.env (current)\n+++ mc.env (proposed)\n+ # Updated preview\n",
+        new_content: proposed
+      });
+    }
+
+    if (pathname === "/api/settings/apply") {
+      const body = typeof init.body === "string" ? JSON.parse(init.body) : (init.body || {});
+      if (body.raw_content !== undefined) mockState.rawEnv = body.raw_content;
+      if (body.updates) {
+        if (body.updates.MODE) mockState.properties.gamemode = body.updates.MODE;
+        if (body.updates.DIFFICULTY) mockState.properties.difficulty = body.updates.DIFFICULTY;
+        if (body.updates.MAX_PLAYERS) mockState.properties.max_players = parseInt(body.updates.MAX_PLAYERS, 10);
+        if (body.updates.ONLINE_MODE !== undefined) mockState.properties.online_mode = body.updates.ONLINE_MODE === "true";
+        if (body.updates.ENABLE_WHITELIST !== undefined) mockState.properties.white_list = body.updates.ENABLE_WHITELIST === "true";
+        if (body.updates.MOTD) mockState.properties.motd = body.updates.MOTD;
+      }
+      return jsonResponse({ success: true, backup_file: "mc.env.bak-mock", message: "Settings applied cleanly (mock)." });
     }
 
     if (pathname === "/api/settings/properties") {
@@ -615,6 +767,18 @@
       return jsonResponse({ success: true });
     }
 
+    if (pathname === "/api/players/kick") {
+      try {
+        const body = typeof init.body === "string" ? JSON.parse(init.body) : (init.body || {});
+        mockState.players.online_players = mockState.players.online_players.filter(p => p !== body.player);
+        mockState.status.players.players = mockState.status.players.players.filter(p => p !== body.player);
+        mockState.status.players.count = mockState.status.players.players.length;
+        return jsonResponse({ success: true, output: `Kicked ${body.player}: ${body.reason || "Kicked by admin"}` });
+      } catch (e) {
+        return jsonResponse({ success: true, output: "Player kicked" });
+      }
+    }
+
     if (pathname === "/api/software") {
       return jsonResponse(mockState.software);
     }
@@ -627,8 +791,21 @@
       return jsonResponse(mockState.installedMods);
     }
 
+    if (pathname === "/api/mods/check") {
+      const slug = (parsedUrl.searchParams.get("slug") || "").toLowerCase();
+      const item = mockState.modrinthCatalog.find(m => m.slug === slug);
+      return jsonResponse({
+        compatible: slug !== "noisium",
+        reason: slug === "noisium" ? "Noisium has no Fabric 26.3 release yet" : "Compatible build found",
+        client_required: item ? item.client_side === "required" : false,
+        server_supported: true,
+        title: item ? item.title : slug,
+        version_number: "1.0.0+26.3"
+      });
+    }
+
     if (pathname === "/api/mods/search") {
-      const q = (parsedUrl.searchParams.get("query") || "").toLowerCase();
+      const q = (parsedUrl.searchParams.get("q") || parsedUrl.searchParams.get("query") || "").toLowerCase();
       const env = parsedUrl.searchParams.get("environment") || "all";
       let results = mockState.modrinthCatalog;
       if (q) {
@@ -639,31 +816,44 @@
       } else if (env === "server") {
         results = results.filter(m => m.server_side === "required" || m.server_side === "optional");
       }
-      return jsonResponse({ hits: results, total_hits: results.length });
+      return jsonResponse({ hits: results, total_hits: results.length, loader: "fabric", game_version: "26.3" });
     }
 
     if (pathname === "/api/mods/add") {
       try {
         const body = typeof init.body === "string" ? JSON.parse(init.body) : (init.body || {});
-        const modTitle = body.title || body.name || "Custom Mod";
-        mockState.installedMods.push({
-          filename: `${modTitle.toLowerCase().replace(/\s+/g, "-")}-1.0.0.jar`,
-          name: modTitle,
-          version: "1.0.0",
-          size_bytes: 450000,
-          size: "440 KB",
-          description: "Installed via Modrinth browser"
-        });
+        const slug = body.slug || "custom-mod";
+        if (!mockState.installedMods.managed.some(m => m.slug === slug)) {
+          mockState.installedMods.managed.push({
+            slug: slug,
+            title: slug,
+            installed_jar: `${slug}-1.0.0.jar`,
+            status: "Installed"
+          });
+        }
       } catch (e) { }
-      return jsonResponse({ success: true, message: "Mod installed successfully" });
+      return jsonResponse({ success: true, message: "Mod added cleanly (mock)." });
     }
 
     if (pathname === "/api/mods/remove") {
       try {
         const body = typeof init.body === "string" ? JSON.parse(init.body) : (init.body || {});
-        mockState.installedMods = mockState.installedMods.filter(m => m.filename !== body.filename && m.name !== body.filename);
+        mockState.installedMods.managed = mockState.installedMods.managed.filter(m => m.slug !== body.slug);
       } catch (e) { }
-      return jsonResponse({ success: true, message: "Mod removed successfully" });
+      return jsonResponse({ success: true, message: "Mod removed cleanly (mock)." });
+    }
+
+    if (pathname.startsWith("/api/mods/manual/")) {
+      const filename = decodeURIComponent(pathname.split("/").pop());
+      mockState.installedMods.manual = mockState.installedMods.manual.filter(j => j.filename !== filename);
+      return jsonResponse({ success: true, message: `Deleted ${filename}` });
+    }
+
+    if (pathname === "/api/chunky/command") {
+      const body = typeof init.body === "string" ? JSON.parse(init.body) : (init.body || {});
+      const act = body.action || "progress";
+      const prm = body.param ? ` ${body.param}` : "";
+      return jsonResponse({ success: true, command: `chunky ${act}${prm}`, output: `[Chunky] Executed ${act}${prm} cleanly.` });
     }
 
     if (pathname === "/api/files/list") {
@@ -776,13 +966,25 @@
     }
 
     if (pathname === "/api/backups") {
-      return jsonResponse({
-        backups: [
-          { id: "backup-2026-11-22-daily", filename: "backup-2026-11-22-daily.tar.gz", size_bytes: 420000000, size_human: "400.5 MB", created_at: "2026-11-22T04:00:00", is_safety: false },
-          { id: "backup-2026-11-21-daily", filename: "backup-2026-11-21-daily.tar.gz", size_bytes: 418000000, size_human: "398.6 MB", created_at: "2026-11-21T04:00:00", is_safety: false },
-          { id: "safety-before-update", filename: "safety-before-update.tar.gz", size_bytes: 415000000, size_human: "395.8 MB", created_at: "2026-11-20T12:00:00", is_safety: true }
-        ]
+      return jsonResponse({ backups: mockState.backups });
+    }
+
+    if (pathname === "/api/backups/create") {
+      const id = `backup-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}`;
+      mockState.backups.unshift({
+        id: id,
+        filename: `${id}.tar.gz`,
+        size_bytes: 422000000,
+        size_human: "402.4 MB",
+        created_at: new Date().toISOString(),
+        is_safety: false
       });
+      return jsonResponse({ success: true, message: `Backup ${id} created successfully (mock).` });
+    }
+
+    if (pathname === "/api/backups/restore") {
+      const body = typeof init.body === "string" ? JSON.parse(init.body) : (init.body || {});
+      return jsonResponse({ success: true, message: `Backup ${body.backup_id} restored successfully (mock).` });
     }
 
     return originalFetch.apply(this, arguments);
@@ -792,7 +994,12 @@
     constructor(url) {
       this.url = url;
       this.readyState = 1;
+      this.onopen = null;
       this.onmessage = null;
+      this.onerror = null;
+      setTimeout(() => {
+        if (typeof this.onopen === "function") this.onopen();
+      }, 40);
       this.timer = setInterval(() => {
         if (typeof this.onmessage === "function") {
           const now = new Date().toTimeString().slice(0, 8);

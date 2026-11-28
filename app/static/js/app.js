@@ -1,5 +1,21 @@
-import { ICONS, escapeHtml, formatSeconds, formatDate, createApiClient } from "./api.js";
-import { renderServerTab, updateServerMetrics, updateSquareMeter } from "./views/server.js";
+import {
+  ICONS,
+  escapeHtml,
+  formatSeconds,
+  formatDate,
+  renderStatusBadge,
+  setTextIfChanged,
+  setHtmlIfChanged,
+  createApiClient
+} from "./api.js?v=20261128-v11";
+import {
+  renderServerTab,
+  updateServerMetrics,
+  updateSquareMeter,
+  loadMediaStatus,
+  setMediaGrace,
+  startMediaNow
+} from "./views/server.js?v=20261128-v11";
 import {
   renderAnalyticsPage,
   loadAnalytics,
@@ -8,7 +24,7 @@ import {
   nextHeatmapPeriod,
   getAllHeatmapWeeks,
   renderHeatmap
-} from "./views/analytics.js";
+} from "./views/analytics.js?v=20261128-v11";
 import {
   renderPropertiesTab,
   loadProperties,
@@ -23,6 +39,7 @@ import {
   clearConsole,
   renderLogsTab,
   initLogs,
+  stopLogStream,
   renderLogs,
   appendLogLine,
   filterLogs,
@@ -38,8 +55,11 @@ import {
   banIp,
   unbanIp,
   addPlayerWhitelist,
-  removePlayerWhitelist
-} from "./views/operations.js";
+  removePlayerWhitelist,
+  kickPlayer,
+  toggleWhitelist,
+  selectPlayerTarget
+} from "./views/operations.js?v=20261128-v11";
 import {
   renderSoftwareTab,
   loadSoftware,
@@ -51,6 +71,7 @@ import {
   executeModSearch,
   installMod,
   removeMod,
+  deleteManualJar,
   renderFilesTab,
   loadFiles,
   openFileEditor,
@@ -60,15 +81,29 @@ import {
   uploadFile,
   renderWorldsTab,
   loadWorlds,
+  sendChunkyCommand,
   showUploadWorldModal,
   executeWorldUpload,
   showGenerateWorldModal,
   executeWorldGenerate,
   renderBackupsTab,
   loadBackups,
+  createBackup,
+  restoreBackup,
   renderAccessTab,
-  renderSettingsTab
-} from "./views/management.js";
+  loadAccess,
+  changeAdminPassword,
+  loadAuditLogs,
+  prevAuditPage,
+  nextAuditPage,
+  renderSettingsTab,
+  loadSettings,
+  switchSettingsTab,
+  saveMcEnvProperties,
+  previewMcEnvDiff,
+  applyMcEnvSettings,
+  saveAlertWebhook
+} from "./views/management.js?v=20261128-v11";
 
 const API = createApiClient(() => app.showLoginModal());
 
@@ -105,6 +140,7 @@ const app = {
     softwareCatalog: [],
     currentSoftware: null,
     installedMods: { managed: [], manual: [] },
+    installedModsLoaded: false,
     modSearchResults: [],
     modSearchLoading: false,
     modQuery: "",
@@ -117,13 +153,30 @@ const app = {
     editingFile: null,
     worldInfo: null,
     worldFiles: [],
-    diskUsage: null
+    diskUsage: null,
+    watchState: null,
+    mediaContainers: [],
+    lastServerState: null,
+    lastWatchMediaState: null,
+    lastMediaFetchAt: 0,
+    settingsSubtab: "webapp",
+    serverSettingsData: null,
+    backupsList: [],
+    auditPageOffset: 0,
+    auditLimit: 15,
+    auditTotal: 0,
+    panelWebhookUrl: "",
+    lastActivityAt: Date.now()
   },
 
   sseLogSource: null,
+  sseReconnectTimer: null,
+  sseRetryCount: 0,
   statusInterval: null,
   idleInterval: null,
   visibilityBound: false,
+  activityBound: false,
+  _lastBeaconState: null,
 
   fontMap: {
     "Outfit": "'Outfit', sans-serif",
@@ -141,6 +194,7 @@ const app = {
     }
     this.initKeyboardShortcuts();
     this.bindVisibilityHandler();
+    this.bindActivityHandlers();
     this.render();
     try {
       const me = await API.request("/api/auth/me");
@@ -168,6 +222,55 @@ const app = {
         this.fetchStatus();
       }
     });
+  },
+
+  bindActivityHandlers() {
+    if (this.activityBound) return;
+    this.activityBound = true;
+    const touch = () => {
+      const now = Date.now();
+      if (now - this.state.lastActivityAt > 1000) {
+        this.state.lastActivityAt = now;
+      }
+    };
+    window.addEventListener("mousemove", touch, { passive: true });
+    window.addEventListener("keydown", touch, { passive: true });
+    window.addEventListener("click", touch, { passive: true });
+  },
+
+  playOutageChime() {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const notes = [523.25, 349.23];
+      notes.forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "triangle";
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.08, ctx.currentTime + i * 0.18);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.25);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime + i * 0.18);
+        osc.stop(ctx.currentTime + i * 0.18 + 0.26);
+      });
+    } catch (e) { }
+  },
+
+  checkOutageAlert(prevState, nextState) {
+    if ((prevState === "Online" || prevState === "Starting") && nextState === "Error") {
+      const prefs = JSON.parse(localStorage.getItem("mcadmin_webapp_prefs") || "{}");
+      if (prefs.audioChime) {
+        this.playOutageChime();
+      }
+      if ("Notification" in window && Notification.permission === "granted") {
+        try {
+          new Notification("Palvi MC Alert", { body: `Server transitioned from ${prevState} to Error.` });
+        } catch (e) { }
+      }
+    }
   },
 
   setTheme(theme) {
@@ -273,15 +376,25 @@ const app = {
       clearInterval(this.idleInterval);
       this.idleInterval = null;
     }
-    if (this.sseLogSource) {
-      this.sseLogSource.close();
-      this.sseLogSource = null;
-    }
+    stopLogStream(this);
+  },
+
+  async loadPanelPrefs() {
+    try {
+      const res = await API.request("/api/settings/panel-prefs");
+      this.state.panelWebhookUrl = res.alert_webhook_url || "";
+      const input = document.getElementById("setting-webhook-url");
+      if (input && (!document.activeElement || document.activeElement.id !== "setting-webhook-url")) {
+        input.value = this.state.panelWebhookUrl;
+      }
+    } catch (e) { }
   },
 
   startDashboard() {
     this.stopDashboard();
+    this.state.lastActivityAt = Date.now();
     this.fetchStatus();
+    this.loadPanelPrefs();
     this.statusInterval = setInterval(() => {
       if (!document.hidden) {
         this.fetchStatus();
@@ -295,6 +408,14 @@ const app = {
           this.updateIdleBadge();
         }
       }
+      const prefs = JSON.parse(localStorage.getItem("mcadmin_webapp_prefs") || "{}");
+      const timeoutVal = prefs.sessionTimeout || "60";
+      if (this.state.authenticated && timeoutVal !== "never") {
+        const mins = parseInt(timeoutVal, 10);
+        if (mins > 0 && Date.now() - this.state.lastActivityAt >= mins * 60 * 1000) {
+          this.logout();
+        }
+      }
     }, 1000);
 
     this.setTab("server");
@@ -302,8 +423,18 @@ const app = {
 
   async fetchStatus() {
     try {
+      const prevMcState = this.state.lastServerState;
+      const prevWatchMedia = this.state.lastWatchMediaState;
       const data = await API.request("/api/status");
       this.state.status = data;
+      if (data.watch_state) {
+        this.state.watchState = data.watch_state;
+        this.state.lastWatchMediaState = data.watch_state.media;
+      }
+      this.state.lastServerState = data.state;
+      if (prevMcState) {
+        this.checkOutageAlert(prevMcState, data.state);
+      }
       if (data.idle && data.idle.remaining_seconds !== undefined) {
         this.state.idleSecondsRemaining = data.idle.remaining_seconds;
       }
@@ -311,7 +442,11 @@ const app = {
       this.updateSidebarState(data);
       this.updateIdleBadge();
       if (this.state.activeTab === "server") {
-        this.updateServerMetrics(data);
+        this.updateServerMetrics(data, this);
+        const stateChanged = (prevMcState && prevMcState !== data.state) || (prevWatchMedia && data.watch_state && prevWatchMedia !== data.watch_state.media);
+        if (stateChanged) {
+          this.loadMediaStatus(true);
+        }
       }
     } catch (e) {
       console.debug("Status fetch error:", e);
@@ -326,16 +461,14 @@ const app = {
     const sDot = document.getElementById("sidebar-dot");
 
     const isError = (state || "").toLowerCase() === "error";
+    const changed = this._lastBeaconState !== state;
+    this._lastBeaconState = state;
 
     if (bText) {
-      if (isError) {
-        bText.innerHTML = `<span class="badge badge-error">ERROR</span>`;
-      } else {
-        bText.innerText = (state || "-").toUpperCase();
-      }
+      setHtmlIfChanged(bText, renderStatusBadge(state));
     }
 
-    if (bDot) {
+    if (bDot && changed) {
       if (isError) {
         bDot.className = "beacon-dot down flash";
       } else {
@@ -346,7 +479,7 @@ const app = {
       }
     }
 
-    if (sDot) {
+    if (sDot && changed) {
       if (isError) {
         sDot.className = "status-indicator-dot down flash";
       } else {
@@ -363,20 +496,14 @@ const app = {
     const sCount = document.getElementById("sidebar-player-count");
 
     if (sText) {
-      const st = data.state || "-";
-      if (st.toLowerCase() === "error") {
-        sText.innerHTML = `<span class="badge badge-error">ERROR</span>`;
-      } else {
-        sText.innerText = st;
-      }
+      setHtmlIfChanged(sText, renderStatusBadge(data.state));
     }
 
     if (sCount) {
-      if (data.players && data.players.count !== undefined) {
-        sCount.innerText = `${data.players.count} / ${data.players.max !== undefined ? data.players.max : 8}`;
-      } else {
-        sCount.innerText = "-";
-      }
+      const nextCount = (data.players && data.players.count !== undefined)
+        ? `${data.players.count} / ${data.players.max !== undefined ? data.players.max : 8}`
+        : "-";
+      setTextIfChanged(sCount, nextCount);
     }
   },
 
@@ -384,8 +511,8 @@ const app = {
     const idleEl = document.getElementById("topbar-idle-timer");
     const stripIdle = document.getElementById("strip-idle");
     const val = this.state.idleSecondsRemaining !== null ? this.formatSeconds(this.state.idleSecondsRemaining) : "-";
-    if (idleEl) idleEl.innerText = val;
-    if (stripIdle) stripIdle.innerText = val;
+    setTextIfChanged(idleEl, val);
+    setTextIfChanged(stripIdle, val);
   },
 
   showConfirmModal(title, message, onConfirm, { danger = true, confirmText = "Confirm" } = {}) {
@@ -481,6 +608,10 @@ const app = {
   updateSquareMeter,
   updateServerMetrics,
 
+  loadMediaStatus(force = false) { return loadMediaStatus(this, force); },
+  setMediaGrace() { return setMediaGrace(this); },
+  startMediaNow() { return startMediaNow(this); },
+
   setTab(tab) {
     this.state.activeTab = tab;
     this.closeMobileSidebar();
@@ -508,14 +639,16 @@ const app = {
     const titleEl = document.getElementById("topbar-view-title");
     if (titleEl) titleEl.innerText = titles[tab] || "Dashboard";
 
-    if (tab !== "log" && this.sseLogSource) {
-      this.sseLogSource.close();
-      this.sseLogSource = null;
+    if (tab !== "log") {
+      stopLogStream(this);
     }
 
     this.renderTabContent();
 
-    if (tab === "server") this.fetchStatus();
+    if (tab === "server") {
+      this.fetchStatus();
+      this.loadMediaStatus(false);
+    }
     if (tab === "analytics") this.loadAnalytics();
     if (tab === "properties") this.loadProperties();
     if (tab === "console") this.initConsole();
@@ -527,6 +660,7 @@ const app = {
     if (tab === "worlds") this.loadWorlds();
     if (tab === "backups") this.loadBackups();
     if (tab === "access") this.loadAccess();
+    if (tab === "settings") this.loadSettings();
   },
 
   renderTabContent() {
@@ -540,7 +674,7 @@ const app = {
     }
     if (tab === "server") {
       main.innerHTML = renderServerTab();
-      if (this.state.status) this.updateServerMetrics(this.state.status);
+      if (this.state.status) this.updateServerMetrics(this.state.status, this);
       return;
     }
     const tabRenderers = {
@@ -595,6 +729,9 @@ const app = {
   unbanIp(ip) { return unbanIp(this, ip); },
   addPlayerWhitelist() { return addPlayerWhitelist(this); },
   removePlayerWhitelist(name) { return removePlayerWhitelist(this, name); },
+  kickPlayer(name = null) { return kickPlayer(this, name); },
+  toggleWhitelist(action) { return toggleWhitelist(this, action); },
+  selectPlayerTarget(name) { return selectPlayerTarget(this, name); },
 
   loadSoftware() { return loadSoftware(this); },
   requestSwitchSoftware(swId, swName) { return requestSwitchSoftware(this, swId, swName); },
@@ -626,8 +763,9 @@ const app = {
     executeModSearch(this);
   },
   executeModSearch() { return executeModSearch(this); },
-  installMod(slug) { return installMod(this, slug); },
+  installMod(slug, title = null, clientSide = null) { return installMod(this, slug, title, clientSide); },
   removeMod(slug) { return removeMod(this, slug); },
+  deleteManualJar(filename) { return deleteManualJar(this, filename); },
 
   loadFiles(relPath = "") { return loadFiles(this, relPath); },
   openFileEditor(path) { return openFileEditor(this, path); },
@@ -637,6 +775,7 @@ const app = {
   uploadFile(input) { return uploadFile(this, input); },
 
   loadWorlds() { return loadWorlds(this); },
+  sendChunkyCommand(action) { return sendChunkyCommand(this, action); },
   jumpToWorldInFiles() {
     const worldName = this.state.worldInfo ? this.state.worldInfo.world_name : "";
     this.setTab("files");
@@ -648,7 +787,19 @@ const app = {
   executeWorldGenerate() { return executeWorldGenerate(this); },
 
   loadBackups() { return loadBackups(this); },
-  loadAccess() { },
+  createBackup() { return createBackup(this); },
+  restoreBackup(backupId) { return restoreBackup(this, backupId); },
+  loadAccess() { return loadAccess(this); },
+  changeAdminPassword() { return changeAdminPassword(this); },
+  loadAuditLogs(offset = null) { return loadAuditLogs(this, offset); },
+  prevAuditPage() { return prevAuditPage(this); },
+  nextAuditPage() { return nextAuditPage(this); },
+  loadSettings() { return loadSettings(this); },
+  switchSettingsTab(subtab) { return switchSettingsTab(this, subtab); },
+  saveMcEnvProperties() { return saveMcEnvProperties(this); },
+  previewMcEnvDiff() { return previewMcEnvDiff(this); },
+  applyMcEnvSettings() { return applyMcEnvSettings(this); },
+  saveAlertWebhook() { return saveAlertWebhook(this); },
 
   showLoginModal() {
     const overlay = document.getElementById("modal-overlay");
@@ -853,10 +1004,7 @@ const app = {
               <button class="theme-btn ${this.state.theme === "medium-dark" ? "active" : ""}" data-theme="medium-dark" onclick="app.setTheme('medium-dark')" title="Medium-dark theme">Mid</button>
               <button class="theme-btn ${this.state.theme === "light" ? "active" : ""}" data-theme="light" onclick="app.setTheme('light')" title="Light theme">Light</button>
             </div>
-
-            <div class="live-beacon">
-              <span id="topbar-beacon-text">CHECKING</span>
-            </div>
+            
             <div style="font-size:12px;color:var(--text-secondary);margin-right:8px;">
               Standby: <span id="topbar-idle-timer" style="color:var(--text-primary);font-weight:600;">-</span>
             </div>

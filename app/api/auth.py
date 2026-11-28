@@ -1,4 +1,5 @@
 import os
+import datetime
 from fastapi import APIRouter, Request, Response, HTTPException, status, Depends
 from pydantic import BaseModel
 from app.auth import (
@@ -29,7 +30,7 @@ class ChangePasswordRequest(BaseModel):
     new_password: str
 
 @router.get("/me")
-async def get_me(request: Request):
+async def get_me(request: Request, response: Response):
     setup_needed = not is_admin_set_up()
     
     session_token = request.cookies.get(SESSION_COOKIE_NAME)
@@ -40,9 +41,20 @@ async def get_me(request: Request):
     cursor = conn.cursor()
     cursor.execute("SELECT csrf_token, expires_at FROM sessions WHERE token = ?", (session_token,))
     row = cursor.fetchone()
+
+    expired = False
+    if row:
+        try:
+            expired = datetime.datetime.fromisoformat(row["expires_at"]) <= datetime.datetime.now()
+        except Exception:
+            expired = True
+        if expired:
+            cursor.execute("DELETE FROM sessions WHERE token = ?", (session_token,))
+            conn.commit()
     conn.close()
 
-    if not row:
+    if not row or expired:
+        response.delete_cookie(SESSION_COOKIE_NAME, httponly=True, samesite="strict")
         return {"authenticated": False, "setup_required": setup_needed, "csrf_token": None}
 
     return {
@@ -72,7 +84,7 @@ async def setup_initial_password(payload: SetupRequest, request: Request, respon
         value=session_token,
         httponly=True,
         secure=secure_cookie,
-        samesite="lax",
+        samesite="strict",
         max_age=86400 * 7
     )
     return {"success": True, "csrf_token": csrf_token, "session_token": session_token}
@@ -115,7 +127,7 @@ async def login(payload: LoginRequest, request: Request, response: Response):
         value=session_token,
         httponly=True,
         secure=secure_cookie,
-        samesite="lax",
+        samesite="strict",
         max_age=86400 * 7
     )
     log_audit("admin", "login_success", None, "Logged in successfully", "SUCCESS", client_ip)

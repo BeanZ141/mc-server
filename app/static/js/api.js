@@ -58,6 +58,48 @@ export function formatDate(dateStr) {
   }
 }
 
+export function setTextIfChanged(el, text) {
+  if (!el) return;
+  const next = text === null || text === undefined ? "" : String(text);
+  if (el.textContent !== next) {
+    el.textContent = next;
+  }
+}
+
+export function setHtmlIfChanged(el, html) {
+  if (!el) return;
+  const next = html === null || html === undefined ? "" : String(html);
+  if (el.dataset.lastHtml !== next) {
+    el.dataset.lastHtml = next;
+    el.innerHTML = next;
+  }
+}
+
+export function renderStatusBadge(state, labelOverride = null) {
+  const raw = (state || "-").trim();
+  const label = (labelOverride !== null && labelOverride !== undefined) ? labelOverride : raw;
+  const lower = raw.toLowerCase();
+  if (lower === "error") {
+    return `<span class="badge badge-error">${escapeHtml(label.toUpperCase())}</span>`;
+  }
+  if (lower === "online" || lower === "running" || lower === "active") {
+    return `<span class="badge badge-online">${escapeHtml(label)}</span>`;
+  }
+  if (lower === "asleep" || lower === "paused" || lower === "standby") {
+    return `<span class="badge badge-asleep">${escapeHtml(label)}</span>`;
+  }
+  if (lower === "offline" || lower === "exited" || lower === "stopped") {
+    return `<span class="badge badge-offline">${escapeHtml(label)}</span>`;
+  }
+  if (lower === "starting") {
+    return `<span class="badge badge-starting">${escapeHtml(label)}</span>`;
+  }
+  if (lower === "stopping") {
+    return `<span class="badge badge-stopping">${escapeHtml(label)}</span>`;
+  }
+  return escapeHtml(label);
+}
+
 export function createApiClient(onUnauthorized) {
   return {
     csrfToken: null,

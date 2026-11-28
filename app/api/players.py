@@ -33,9 +33,9 @@ def _validate_ip(ip_str: str) -> str:
         raise HTTPException(status_code=400, detail="Invalid IP address format.")
 
 
-def _sanitize_reason(reason: str) -> str:
+def _sanitize_reason(reason: str, default: str = "Banned by admin") -> str:
     clean = re.sub(r"[\r\n\x00]+", " ", reason or "").strip()
-    return (clean[:120] or "Banned by admin")
+    return (clean[:120] or default)
 
 
 class WhitelistAction(BaseModel):
@@ -64,6 +64,11 @@ class PardonAction(BaseModel):
 
 class PardonIpAction(BaseModel):
     ip: str
+
+
+class KickAction(BaseModel):
+    player: str
+    reason: str = "Kicked by admin"
 
 
 def _read_json_file(filename: str) -> list:
@@ -335,4 +340,19 @@ async def unban_ip(payload: PardonIpAction, request: Request, session: dict = De
             return {"success": True, "output": f"Unbanned IP {ip} in banned-ips.json."}
 
         log_audit("admin", "unban_ip", ip, f"Error: {e}", "FAILURE", client_ip)
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/kick")
+async def kick_player(payload: KickAction, request: Request, session: dict = Depends(get_current_user_and_session)):
+    client_ip = request.client.host if request.client else "unknown"
+    player = _validate_player(payload.player)
+    reason = _sanitize_reason(payload.reason, "Kicked by admin")
+    cmd = f"kick {player} {reason}"
+    try:
+        output = await rcon_client.execute(cmd)
+        log_audit("admin", "kick_player", player, cmd, "SUCCESS", client_ip)
+        return {"success": True, "output": output}
+    except Exception as e:
+        log_audit("admin", "kick_player", player, f"Error: {e}", "FAILURE", client_ip)
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,4 +1,5 @@
 import re
+import time
 import struct
 import asyncio
 import logging
@@ -18,6 +19,8 @@ class RCONClient:
         self.port = port
         self._cached_password: str | None = None
         self._cached_env_mtime: int | None = None
+        self._tps_cache: tuple[float, str, int, dict] | None = None
+        self._workload_cache: tuple[float, str, int, dict] | None = None
 
     def get_password(self) -> str:
         env_file = get_rcon_cli_env_file()
@@ -124,7 +127,11 @@ class RCONClient:
             return {"count": 0, "max": 0, "players": []}
 
     async def get_mspt_and_tps(self) -> dict:
-        """Tries spark tps or returns default estimate"""
+        """Tries spark tps (cached 10s across status & watcher) or returns default estimate"""
+        now = time.monotonic()
+        if self._tps_cache and self._tps_cache[1] == self.host and self._tps_cache[2] == self.port and (now - self._tps_cache[0]) < 10.0:
+            return dict(self._tps_cache[3])
+
         try:
             output = await self.execute("spark tps")
             tps_match = re.search(r"TPS from last.*?:\s*([\d\.]+)", output)
@@ -132,11 +139,41 @@ class RCONClient:
 
             tps = float(tps_match.group(1)) if tps_match else 20.0
             mspt = float(mspt_match.group(1)) if mspt_match else 5.0
-            return {"tps": tps, "mspt": mspt, "source": "spark"}
+            res = {"tps": tps, "mspt": mspt, "source": "spark"}
+            self._tps_cache = (now, self.host, self.port, dict(res))
+            return res
         except Exception:
             pass
 
         return {"tps": 20.0, "mspt": 0.0, "source": "default"}
+
+    async def get_world_workload(self) -> dict:
+        """Fetches active entity count and loaded chunks via RCON, cached 30s."""
+        now = time.monotonic()
+        if self._workload_cache and self._workload_cache[1] == self.host and self._workload_cache[2] == self.port and (now - self._workload_cache[0]) < 30.0:
+            return dict(self._workload_cache[3])
+
+        entities = 0
+        chunks = 0
+        try:
+            ent_out = await self.execute("execute if entity @e")
+            ent_match = re.search(r"(?:count:\s*|found\s+)(\d+)", ent_out, re.IGNORECASE)
+            if ent_match:
+                entities = int(ent_match.group(1))
+        except Exception:
+            pass
+
+        try:
+            spark_out = await self.execute("spark health")
+            chunk_match = re.search(r"chunks?\s*(?:loaded)?[:\s]+([\d,]+)", spark_out, re.IGNORECASE)
+            if chunk_match:
+                chunks = int(chunk_match.group(1).replace(",", ""))
+        except Exception:
+            pass
+
+        res = {"entities": entities, "chunks": chunks}
+        self._workload_cache = (now, self.host, self.port, dict(res))
+        return res
 
     async def save_all_flush(self) -> str:
         return await self.execute("save-all flush")

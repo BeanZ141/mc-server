@@ -1,13 +1,13 @@
-import { ICONS, escapeHtml } from "../api.js";
+import { ICONS, escapeHtml, renderStatusBadge, setHtmlIfChanged } from "../api.js?v=20261128-v11";
 
 export function renderPropertiesTab() {
   return `
-    <div class="card" style="max-width:800px;">
-      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;">
+    <div class="card" style="max-width:900px;">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <div>
           <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Server Properties</h2>
           <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">
-            Directly configures mc.env and synchronizes server.properties
+            Syncs mc.env and server.properties. Difficulty, Whitelist &amp; Gamemode apply live via RCON; container flags apply on wake or Settings -&gt; Apply &amp; Recreate.
           </div>
         </div>
         <button class="btn btn-primary btn-sm" onclick="app.saveProperties()">${ICONS.check} Save Properties</button>
@@ -28,18 +28,30 @@ export async function loadProperties(app) {
     const props = await app.api.request("/api/settings/properties");
     app.state.properties = props;
 
+    const toggles = [
+      { id: "prop-whitelist", key: "whitelist", label: "Whitelist", desc: "Only allow players listed on whitelist.json to connect", def: false },
+      { id: "prop-allow-flight", key: "allow_flight", label: "Allow Flight", desc: "Permit non-creative players to fly without being kicked", def: false },
+      { id: "prop-pvp", key: "pvp", label: "PvP Combat", desc: "Allow player-versus-player damage", def: true },
+      { id: "prop-hardcore", key: "hardcore", label: "Hardcore Mode", desc: "Lock difficulty to Hard and spectate/ban on death", def: false },
+      { id: "prop-command-block", key: "enable_command_block", label: "Enable Command Blocks", desc: "Allow redstone command blocks to execute commands", def: false },
+      { id: "prop-allow-nether", key: "allow_nether", label: "Allow Nether", desc: "Permit travel to the Nether dimension via portals", def: true },
+      { id: "prop-spawn-monsters", key: "spawn_monsters", label: "Spawn Monsters", desc: "Enable hostile mob spawning across worlds", def: true },
+      { id: "prop-spawn-animals", key: "spawn_animals", label: "Spawn Animals", desc: "Enable passive animals (cows, sheep, etc.) to spawn", def: true },
+      { id: "prop-spawn-npcs", key: "spawn_npcs", label: "Spawn Villagers (NPCs)", desc: "Allow villagers to spawn in generated villages", def: true },
+      { id: "prop-force-gamemode", key: "force_gamemode", label: "Force Gamemode on Join", desc: "Reset connecting players back to default gamemode", def: false }
+    ];
+
     container.innerHTML = `
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:6px;">
         <div class="form-group">
-          <label class="form-label" style="font-size:13px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+          <label class="form-label" style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
             Maximum Players (Slots)
           </label>
           <input type="number" id="prop-max-players" class="input" min="1" max="100" value="${props.max_players !== undefined ? props.max_players : 8}">
-          <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Player limit (1 to 100)</div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" style="font-size:13px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+          <label class="form-label" style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
             Default Gamemode
           </label>
           <select id="prop-gamemode" class="input">
@@ -48,11 +60,10 @@ export async function loadProperties(app) {
             <option value="adventure" ${props.gamemode === "adventure" ? "selected" : ""}>Adventure</option>
             <option value="spectator" ${props.gamemode === "spectator" ? "selected" : ""}>Spectator</option>
           </select>
-          <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Game mode for new players</div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" style="font-size:13px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+          <label class="form-label" style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
             Difficulty
           </label>
           <select id="prop-difficulty" class="input">
@@ -61,40 +72,53 @@ export async function loadProperties(app) {
             <option value="normal" ${props.difficulty === "normal" ? "selected" : ""}>Normal</option>
             <option value="hard" ${props.difficulty === "hard" ? "selected" : ""}>Hard</option>
           </select>
-          <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Server combat & mob difficulty</div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" style="font-size:13px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+          <label class="form-label" style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
             Spawn Protection Radius
           </label>
           <input type="number" id="prop-spawn-protection" class="input" min="0" max="1000" value="${props.spawn_protection !== undefined ? props.spawn_protection : 16}">
-          <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">Blocks around world spawn (0 to disable)</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+            View Distance (Chunks)
+          </label>
+          <input type="number" id="prop-view-distance" class="input" min="2" max="32" value="${props.view_distance !== undefined ? props.view_distance : 16}">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+            Simulation Distance (Chunks)
+          </label>
+          <input type="number" id="prop-simulation-distance" class="input" min="2" max="32" value="${props.simulation_distance !== undefined ? props.simulation_distance : 6}">
         </div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:12px;margin-top:10px;">
-        <div class="switch-label" onclick="app.togglePropertySwitch('prop-whitelist')">
-          <div>
-            <div style="font-size:13px;font-weight:600;">Whitelist</div>
-            <div style="font-size:13px;color:var(--text-muted);">Only allow players registered on whitelist.json to connect</div>
-          </div>
-          <div class="switch-toggle-box ${props.whitelist ? "active" : ""}" id="prop-whitelist-box">
-            <div class="switch-toggle-thumb"></div>
-          </div>
-          <input type="hidden" id="prop-whitelist" value="${props.whitelist ? "true" : "false"}">
-        </div>
+      <div class="form-group">
+        <label class="form-label" style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:6px;">
+          Server List MOTD
+        </label>
+        <input type="text" id="prop-motd" class="input" maxlength="120" value="${escapeHtml(props.motd !== undefined ? props.motd : "palvi")}">
+      </div>
 
-        <div class="switch-label" onclick="app.togglePropertySwitch('prop-allow-flight')">
-          <div>
-            <div style="font-size:13px;font-weight:600;">Allow Flight</div>
-            <div style="font-size:13px;color:var(--text-muted);">Permit players to fly in survival mode</div>
-          </div>
-          <div class="switch-toggle-box ${props.allow_flight ? "active" : ""}" id="prop-allow-flight-box">
-            <div class="switch-toggle-thumb"></div>
-          </div>
-          <input type="hidden" id="prop-allow-flight" value="${props.allow_flight ? "true" : "false"}">
-        </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-top:4px;">
+        ${toggles.map(t => {
+      const val = props[t.key] !== undefined ? Boolean(props[t.key]) : t.def;
+      return `
+            <div class="switch-label" onclick="app.togglePropertySwitch('${t.id}')">
+              <div>
+                <div style="font-size:13px;font-weight:600;">${t.label}</div>
+                <div style="font-size:12px;color:var(--text-muted);">${t.desc}</div>
+              </div>
+              <div class="switch-toggle-box ${val ? "active" : ""}" id="${t.id}-box">
+                <div class="switch-toggle-thumb"></div>
+              </div>
+              <input type="hidden" id="${t.id}" value="${val ? "true" : "false"}">
+            </div>
+          `;
+    }).join("")}
       </div>
     `;
   } catch (e) {
@@ -117,8 +141,11 @@ export async function saveProperties(app) {
   const gamemode = document.getElementById("prop-gamemode").value;
   const difficulty = document.getElementById("prop-difficulty").value;
   const spawnProt = parseInt(document.getElementById("prop-spawn-protection").value, 10);
-  const whitelist = document.getElementById("prop-whitelist").value === "true";
-  const allowFlight = document.getElementById("prop-allow-flight").value === "true";
+  const viewDist = parseInt(document.getElementById("prop-view-distance").value, 10);
+  const simDist = parseInt(document.getElementById("prop-simulation-distance").value, 10);
+  const motd = document.getElementById("prop-motd").value.trim();
+
+  const readBool = (id) => document.getElementById(id)?.value === "true";
 
   try {
     const res = await app.api.request("/api/settings/properties", {
@@ -127,11 +154,23 @@ export async function saveProperties(app) {
         max_players: maxPlayers,
         gamemode: gamemode,
         difficulty: difficulty,
+        whitelist: readBool("prop-whitelist"),
+        allow_flight: readBool("prop-allow-flight"),
         spawn_protection: spawnProt,
-        whitelist: whitelist,
-        allow_flight: allowFlight
+        view_distance: viewDist,
+        simulation_distance: simDist,
+        motd: motd,
+        pvp: readBool("prop-pvp"),
+        hardcore: readBool("prop-hardcore"),
+        enable_command_block: readBool("prop-command-block"),
+        allow_nether: readBool("prop-allow-nether"),
+        spawn_monsters: readBool("prop-spawn-monsters"),
+        spawn_animals: readBool("prop-spawn-animals"),
+        spawn_npcs: readBool("prop-spawn-npcs"),
+        force_gamemode: readBool("prop-force-gamemode")
       }
     });
+    app.state.serverSettingsData = null;
     alert(res.message);
     loadProperties(app);
   } catch (e) {
@@ -297,6 +336,7 @@ export function renderLogsTab() {
       <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:var(--bg-surface);border:1px solid var(--border-subtle);border-bottom:none;flex-wrap:wrap;gap:12px;">
         <div style="display:flex;align-items:center;gap:12px;">
           <span style="font-size:12px;font-weight:600;text-transform:uppercase;color:var(--text-primary);">latest.log Viewer</span>
+          <span id="logs-sse-status">${renderStatusBadge("asleep", "CONNECTING")}</span>
           <span style="font-size:13px;color:var(--text-muted);">(Preserved across restarts and offline)</span>
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -319,24 +359,75 @@ export function renderLogsTab() {
   `;
 }
 
+function setLogStreamStatus(stateKey, label) {
+  const el = document.getElementById("logs-sse-status");
+  if (el) {
+    setHtmlIfChanged(el, renderStatusBadge(stateKey, label));
+  }
+}
+
+export function stopLogStream(app) {
+  if (app.sseReconnectTimer) {
+    clearTimeout(app.sseReconnectTimer);
+    app.sseReconnectTimer = null;
+  }
+  if (app.sseLogSource) {
+    app.sseLogSource.close();
+    app.sseLogSource = null;
+  }
+}
+
+function connectLogStream(app) {
+  stopLogStream(app);
+  if (app.state.activeTab !== "log") return;
+
+  const src = new EventSource("/api/logs/stream");
+  app.sseLogSource = src;
+
+  src.onopen = () => {
+    app.sseRetryCount = 0;
+    setLogStreamStatus("online", "LIVE");
+  };
+
+  src.onmessage = (event) => {
+    app.sseRetryCount = 0;
+    setLogStreamStatus("online", "LIVE");
+    app.state.logs.push(event.data);
+    if (app.state.logs.length > 2000) app.state.logs.shift();
+    appendLogLine(app, event.data);
+  };
+
+  src.onerror = () => {
+    if (app.sseLogSource) {
+      app.sseLogSource.close();
+      app.sseLogSource = null;
+    }
+    if (app.state.activeTab !== "log") return;
+    app.sseRetryCount = (app.sseRetryCount || 0) + 1;
+    if (app.sseRetryCount <= 5) {
+      const delay = Math.min(15000, 1000 * Math.pow(2, app.sseRetryCount - 1));
+      setLogStreamStatus("asleep", "RECONNECTING");
+      app.sseReconnectTimer = setTimeout(() => connectLogStream(app), delay);
+    } else {
+      setLogStreamStatus("offline", "DISCONNECTED");
+    }
+  };
+}
+
 export async function initLogs(app) {
   const output = document.getElementById("log-output");
   if (!output) return;
+  stopLogStream(app);
+  app.sseRetryCount = 0;
+  setLogStreamStatus("asleep", "CONNECTING");
 
   try {
     const res = await app.api.request("/api/logs/tail?lines=500");
     app.state.logs = res.lines || [];
     renderLogs(app);
-
-    if (!app.sseLogSource) {
-      app.sseLogSource = new EventSource("/api/logs/stream");
-      app.sseLogSource.onmessage = (event) => {
-        app.state.logs.push(event.data);
-        if (app.state.logs.length > 2000) app.state.logs.shift();
-        appendLogLine(app, event.data);
-      };
-    }
+    connectLogStream(app);
   } catch (e) {
+    setLogStreamStatus("error", "ERROR");
     output.innerHTML = `<span class="badge badge-error">ERROR</span> <span style="margin-left:8px;color:var(--text-secondary);">${escapeHtml(e.message)}</span>`;
   }
 }
@@ -398,6 +489,10 @@ export function formatLogLine(line) {
 
 export function renderPlayersTab() {
   return `
+    <div class="card" style="padding:16px 20px;margin-bottom:16px;" id="players-online-bar">
+      <div style="color:var(--text-muted);font-size:12px;">Loading online players &amp; whitelist controls...</div>
+    </div>
+
     <div class="subnav-tabs">
       <button class="subnav-btn active" data-sub="ops" onclick="app.setPlayerSection('ops')">OP Players</button>
       <button class="subnav-btn" data-sub="banned_players" onclick="app.setPlayerSection('banned_players')">Banned Players</button>
@@ -407,6 +502,37 @@ export function renderPlayersTab() {
     </div>
 
     <div id="player-section-content"></div>
+  `;
+}
+
+function renderOnlinePlayersBar(app) {
+  const bar = document.getElementById("players-online-bar");
+  if (!bar) return;
+  const online = (app.state.playersData && app.state.playersData.online_players) || [];
+  const chipsHtml = online.length === 0
+    ? `<span style="font-size:12px;color:var(--text-muted);">No players currently online.</span>`
+    : online.map(name => `
+        <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 10px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);">
+          ${renderStatusBadge("online", name)}
+          <button class="btn btn-secondary btn-sm" style="padding:2px 6px;font-size:10.5px;" onclick="app.selectPlayerTarget('${escapeHtml(name)}')" title="Copy name to action input">Select</button>
+          <button class="btn btn-danger btn-sm" style="padding:2px 6px;font-size:10.5px;" onclick="app.kickPlayer('${escapeHtml(name)}')">Kick</button>
+        </div>
+      `).join("");
+
+  bar.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:12px;font-weight:700;text-transform:uppercase;color:var(--text-primary);">Online Players (${online.length})</span>
+      </div>
+      <div class="btn-group">
+        <button class="btn btn-secondary btn-sm" onclick="app.toggleWhitelist('on')">Whitelist ON</button>
+        <button class="btn btn-secondary btn-sm" onclick="app.toggleWhitelist('off')">Whitelist OFF</button>
+        <button class="btn btn-secondary btn-sm" onclick="app.loadPlayers()">${ICONS.refresh} Refresh</button>
+      </div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+      ${chipsHtml}
+    </div>
   `;
 }
 
@@ -429,6 +555,7 @@ export function setPlayerSection(app, sec) {
 }
 
 export function renderPlayerSection(app) {
+  renderOnlinePlayersBar(app);
   const container = document.getElementById("player-section-content");
   if (!container) return;
 
@@ -487,10 +614,12 @@ export function renderPlayerSection(app) {
   const cfg = configs[sec] || configs.ops;
 
   let formHtml = "";
+  const supportsReason = sec === "banned_players" || sec === "banned_ips";
   if (sec !== "offline") {
     formHtml = `
       <div style="display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;">
-        <input type="text" id="player-action-input" class="input" style="max-width:320px;" placeholder="${cfg.placeholder}">
+        <input type="text" id="player-action-input" class="input" style="max-width:260px;" placeholder="${cfg.placeholder}">
+        ${supportsReason ? `<input type="text" id="player-reason-input" class="input" style="max-width:240px;" placeholder="Reason (optional)">` : ""}
         <button class="btn btn-primary btn-sm" onclick="${cfg.onAdd}">${ICONS.plus} ${cfg.actionLabel}</button>
       </div>
     `;
@@ -512,14 +641,14 @@ export function renderPlayerSection(app) {
           </thead>
           <tbody>
             ${cfg.list.map(item => {
-              const displayId = typeof item === "string" ? item : (item.name || item.ip || "");
-              let details = "-";
-              if (item && typeof item === "object") {
-                if (item.reason) details = item.reason;
-                else if (item.level !== undefined) details = `Level ${item.level}`;
-                else if (item.uuid) details = item.uuid;
-              }
-              return `
+      const displayId = typeof item === "string" ? item : (item.name || item.ip || "");
+      let details = "-";
+      if (item && typeof item === "object") {
+        if (item.reason) details = item.reason;
+        else if (item.level !== undefined) details = `Level ${item.level}`;
+        else if (item.uuid) details = item.uuid;
+      }
+      return `
                 <tr>
                   <td style="font-weight:600;">${escapeHtml(displayId)}</td>
                   <td style="color:var(--text-secondary);font-size:12px;">${escapeHtml(details)}</td>
@@ -528,11 +657,11 @@ export function renderPlayerSection(app) {
                       <button class="btn btn-danger btn-sm" onclick="${cfg.onRemove}('${escapeHtml(displayId)}')">${ICONS.trash} Remove</button>
                     </td>
                   ` : `
-                    <td style="color:var(--text-muted);font-size:12px;">Offline</td>
+                    <td>${renderStatusBadge("Offline")}</td>
                   `}
                 </tr>
               `;
-            }).join("")}
+    }).join("")}
           </tbody>
         </table>
       </div>
@@ -575,11 +704,17 @@ export function removePlayerOp(app, name) {
 
 export async function banPlayer(app) {
   const input = document.getElementById("player-action-input");
+  const reasonEl = document.getElementById("player-reason-input");
   const name = input ? input.value.trim() : "";
+  const reason = reasonEl ? reasonEl.value.trim() : "";
   if (!name) return;
   try {
-    await app.api.request("/api/players/ban", { method: "POST", body: { player: name } });
+    await app.api.request("/api/players/ban", {
+      method: "POST",
+      body: reason ? { player: name, reason: reason } : { player: name }
+    });
     input.value = "";
+    if (reasonEl) reasonEl.value = "";
     loadPlayers(app);
   } catch (e) {
     alert(e.message);
@@ -599,11 +734,17 @@ export function unbanPlayer(app, name) {
 
 export async function banIp(app) {
   const input = document.getElementById("player-action-input");
+  const reasonEl = document.getElementById("player-reason-input");
   const ip = input ? input.value.trim() : "";
+  const reason = reasonEl ? reasonEl.value.trim() : "";
   if (!ip) return;
   try {
-    await app.api.request("/api/players/ban-ip", { method: "POST", body: { ip: ip } });
+    await app.api.request("/api/players/ban-ip", {
+      method: "POST",
+      body: reason ? { ip: ip, reason: reason } : { ip: ip }
+    });
     input.value = "";
+    if (reasonEl) reasonEl.value = "";
     loadPlayers(app);
   } catch (e) {
     alert(e.message);
@@ -643,4 +784,64 @@ export function removePlayerWhitelist(app, name) {
       alert(e.message);
     }
   });
+}
+
+export function selectPlayerTarget(app, name) {
+  const input = document.getElementById("player-action-input");
+  if (input) {
+    input.value = name;
+    input.focus();
+  }
+}
+
+export async function toggleWhitelist(app, action) {
+  try {
+    const res = await app.api.request("/api/players/whitelist", {
+      method: "POST",
+      body: { action: action }
+    });
+    alert(res.output || `Whitelist turned ${action.toUpperCase()}.`);
+  } catch (e) {
+    alert("Failed to toggle whitelist: " + e.message);
+  }
+}
+
+export function kickPlayer(app, name = null) {
+  const target = (name || document.getElementById("player-action-input")?.value || "").trim();
+  if (!target) return;
+
+  const overlay = document.getElementById("modal-overlay");
+  const body = document.getElementById("modal-body");
+  body.innerHTML = `
+    <div class="modal-header">
+      <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Kick ${escapeHtml(target)}</h3>
+      <button class="btn btn-secondary btn-sm" onclick="app.closeModal()">✕</button>
+    </div>
+    <div style="padding:18px 20px;display:flex;flex-direction:column;gap:12px;">
+      <p style="font-size:12.5px;color:var(--text-secondary);">Disconnect <strong>${escapeHtml(target)}</strong> from the live server.</p>
+      <div>
+        <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Reason (Optional)</label>
+        <input type="text" id="kick-reason-input" class="input" placeholder="Kicked by admin">
+      </div>
+    </div>
+    <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:12px 20px;border-top:1px solid var(--border-subtle);">
+      <button class="btn btn-secondary btn-sm" onclick="app.closeModal()">Cancel</button>
+      <button class="btn btn-danger btn-sm" id="kick-confirm-btn">Kick Player</button>
+    </div>
+  `;
+  document.getElementById("kick-confirm-btn").onclick = async () => {
+    const reason = (document.getElementById("kick-reason-input")?.value || "").trim() || "Kicked by admin";
+    app.closeModal();
+    try {
+      const res = await app.api.request("/api/players/kick", {
+        method: "POST",
+        body: { player: target, reason: reason }
+      });
+      alert(res.output || `Kicked ${target}.`);
+      loadPlayers(app);
+    } catch (e) {
+      alert("Kick failed: " + e.message);
+    }
+  };
+  overlay.style.display = "flex";
 }

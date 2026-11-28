@@ -1,3 +1,4 @@
+import time
 import asyncio
 import logging
 import httpx
@@ -10,6 +11,8 @@ class DockerClient:
     def __init__(self, base_url: str = DOCKER_HOST):
         self.base_url = base_url.rstrip("/")
         self._clients: dict[int, httpx.AsyncClient] = {}
+        self._inspect_cache: dict[str, tuple[float, dict | None]] = {}
+        self._stats_cache: dict[str, tuple[float, dict]] = {}
 
     def _get_client(self) -> httpx.AsyncClient:
         loop_id = id(asyncio.get_running_loop())
@@ -32,23 +35,44 @@ class DockerClient:
                     pass
         self._clients.clear()
 
+    def invalidate_container_cache(self, name: str | None = None):
+        if name is None:
+            self._inspect_cache.clear()
+            self._stats_cache.clear()
+        else:
+            for key in (name, f"{self.base_url}:{name}"):
+                self._inspect_cache.pop(key, None)
+                self._stats_cache.pop(key, None)
+
     async def get_container(self, name: str) -> dict | None:
+        now = time.monotonic()
+        cache_key = f"{self.base_url}:{name}"
+        cached = self._inspect_cache.get(cache_key)
+        if cached and (now - cached[0]) < 1.5:
+            return cached[1]
+
         client = self._get_client()
+        result = None
         try:
             resp = await client.get(f"/containers/{name}/json", timeout=5.0)
             if resp.status_code == 200:
-                return resp.json()
-            elif resp.status_code == 404:
-                return None
-            else:
+                result = resp.json()
+            elif resp.status_code != 404:
                 logger.warning(f"Failed to inspect container {name}: HTTP {resp.status_code}")
-                return None
         except Exception as e:
             logger.error(f"Error querying docker proxy for {name}: {e}")
-            return None
+
+        self._inspect_cache[cache_key] = (now, result)
+        return result
 
     async def get_container_stats(self, name: str) -> dict:
-        """Returns CPU % and Memory usage in MB"""
+        """Returns CPU % and Memory usage in MB, cached briefly so watcher and status share one probe."""
+        now = time.monotonic()
+        cache_key = f"{self.base_url}:{name}"
+        cached = self._stats_cache.get(cache_key)
+        if cached and (now - cached[0]) < 5.0:
+            return dict(cached[1])
+
         client = self._get_client()
         try:
             resp = await client.get(f"/containers/{name}/stats", params={"stream": "false"}, timeout=5.0)
@@ -75,16 +99,19 @@ class DockerClient:
             used_bytes = max(0, usage - cache)
             limit_bytes = memory_stats.get("limit", 0)
 
-            return {
+            res = {
                 "cpu_percent": cpu_percent,
                 "ram_used_mb": round(used_bytes / (1024 * 1024), 1),
                 "ram_limit_mb": round(limit_bytes / (1024 * 1024), 1)
             }
+            self._stats_cache[cache_key] = (now, dict(res))
+            return res
         except Exception as e:
             logger.debug(f"Could not retrieve stats for {name}: {e}")
             return {"cpu_percent": 0.0, "ram_used_mb": 0.0, "ram_limit_mb": 0.0}
 
     async def start_container(self, name: str) -> bool:
+        self.invalidate_container_cache(f"{self.base_url}:{name}")
         client = self._get_client()
         try:
             resp = await client.post(f"/containers/{name}/start", timeout=10.0)
@@ -97,6 +124,7 @@ class DockerClient:
             return False
 
     async def stop_container(self, name: str, timeout: int = 60) -> bool:
+        self.invalidate_container_cache(f"{self.base_url}:{name}")
         client = self._get_client()
         try:
             resp = await client.post(f"/containers/{name}/stop", params={"t": timeout}, timeout=float(timeout + 10))
@@ -109,6 +137,7 @@ class DockerClient:
             return False
 
     async def restart_container(self, name: str, timeout: int = 60) -> bool:
+        self.invalidate_container_cache(f"{self.base_url}:{name}")
         client = self._get_client()
         try:
             resp = await client.post(f"/containers/{name}/restart", params={"t": timeout}, timeout=float(timeout + 10))

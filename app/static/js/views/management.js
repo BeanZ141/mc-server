@@ -1,9 +1,9 @@
-import { ICONS, escapeHtml, formatDate } from "../api.js";
-import { updateSquareMeter } from "./server.js";
+import { ICONS, escapeHtml, formatDate, renderStatusBadge } from "../api.js?v=20261128-v11";
+import { updateSquareMeter } from "./server.js?v=20261128-v11";
 
 export function renderSoftwareTab() {
   return `
-    <div style="margin-bottom:20px;">
+    <div style="margin-bottom:16px;">
       <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Software Selection & Management</h2>
       <div style="font-size:12.5px;color:var(--text-secondary);margin-top:4px;">
         Fabric is the existing default server software. Switching requires confirmation to prevent mod/world incompatibility.
@@ -83,7 +83,7 @@ export function renderModsTab() {
   return `
     <div class="subnav-tabs">
       <button class="subnav-btn active" id="mods-tab-installed" onclick="app.switchModsTab('installed')">Installed Mods</button>
-      <button class="subnav-btn" id="mods-tab-browse" onclick="app.switchModsTab('browse')">Search & Install (Modrinth)</button>
+      <button class="subnav-btn" id="mods-tab-browse" onclick="app.switchModsTab('browse')">Browse Mods [Modrinth]</button>
     </div>
 
     <div id="mods-content-view"></div>
@@ -153,8 +153,43 @@ export async function renderInstalledMods(app) {
       `;
     }
 
+    let manualHtml = "";
+    if (!data.manual || data.manual.length === 0) {
+      manualHtml = `<div style="color:var(--text-muted);font-size:12.5px;padding:12px 0;">No manual .jar files in mods/ directory.</div>`;
+    } else {
+      manualHtml = `
+        <div class="file-table-container">
+          <table class="file-table">
+            <thead>
+              <tr>
+                <th>Manual JAR Filename</th>
+                <th>Size</th>
+                <th>Source</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.manual.map(j => {
+        const sz = j.size_bytes >= 1048576 ? `${(j.size_bytes / 1048576).toFixed(2)} MB` : `${Math.max(1, Math.round((j.size_bytes || 0) / 1024))} KB`;
+        return `
+                  <tr>
+                    <td style="font-weight:600;">${escapeHtml(j.filename)}</td>
+                    <td style="color:var(--text-secondary);font-size:12px;">${sz}</td>
+                    <td><span class="badge">Manual .jar</span></td>
+                    <td style="text-align:right;">
+                      <button class="btn btn-danger btn-sm" onclick="app.deleteManualJar('${escapeHtml(j.filename)}')">${ICONS.trash} Delete</button>
+                    </td>
+                  </tr>
+                `;
+      }).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
     view.innerHTML = `
-      <div class="card" style="padding:22px 24px;">
+      <div class="card" style="padding:22px 24px;margin-bottom:16px;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
           <div>
             <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Installed ${escapeHtml(loaderLabel)} Mods</h2>
@@ -163,6 +198,14 @@ export async function renderInstalledMods(app) {
           <button class="btn btn-primary btn-sm" onclick="app.switchModsTab('browse')">${ICONS.plus} Install New Mod</button>
         </div>
         ${managedHtml}
+      </div>
+
+      <div class="card" style="padding:22px 24px;">
+        <div style="margin-bottom:12px;">
+          <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Manual Mod Files (mods/)</h3>
+          <div style="font-size:12px;color:var(--text-secondary);">Standalone .jar files outside MODRINTH_PROJECTS</div>
+        </div>
+        ${manualHtml}
       </div>
     `;
   } catch (e) {
@@ -175,10 +218,10 @@ export function renderBrowseMods(app) {
   if (!view) return;
 
   view.innerHTML = `
-    <div class="card" style="padding:22px 24px;margin-bottom:20px;">
+    <div class="card" style="padding:22px 24px;margin-bottom:16px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
         <div>
-          <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Browse Modrinth Repository</h2>
+          <h2 style="font-size:15px;font-weight:700;text-transform:uppercase;">Browse Modrinth Repository <a href="https://modrinth.com/discover/mods" style="text-decoration: none;"> 🔗</a></h2>
           <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;" id="modrinth-target-subtitle">
             Direct Modrinth API catalog
           </div>
@@ -238,6 +281,28 @@ export function renderBrowseMods(app) {
   executeModSearch(app);
 }
 
+function getInstalledModStatus(app, slug) {
+  const data = app.state.installedMods || {};
+  const managed = data.managed || [];
+  const manual = data.manual || [];
+  const lowerSlug = String(slug || "").toLowerCase();
+  const cleanSlug = lowerSlug.replace(/[-_\s]/g, "");
+  if (!cleanSlug) return null;
+
+  const isManaged = managed.some(m => {
+    const ms = String(m.slug || "").toLowerCase();
+    return ms === lowerSlug || ms.replace(/[-_\s]/g, "") === cleanSlug;
+  });
+  if (isManaged) return "managed";
+
+  const isManual = manual.some(j => {
+    const jf = String(j.filename || j.name || "").toLowerCase().replace(/[-_\s]/g, "");
+    return jf.includes(cleanSlug);
+  });
+  if (isManual) return "manual";
+  return null;
+}
+
 export async function executeModSearch(app) {
   const area = document.getElementById("mod-search-results-area");
   if (!area) return;
@@ -255,7 +320,17 @@ export async function executeModSearch(app) {
   const env = app.state.modEnv && app.state.modEnv !== "all" ? `&environment=${encodeURIComponent(app.state.modEnv)}` : "";
 
   try {
-    const res = await app.api.request(`/api/mods/search?q=${q}&sort=${sort}${cat}${env}&limit=20`);
+    const installedPromise = app.state.installedModsLoaded
+      ? Promise.resolve(null)
+      : app.api.request("/api/mods/installed").catch(() => null);
+    const [installedRes, res] = await Promise.all([
+      installedPromise,
+      app.api.request(`/api/mods/search?q=${q}&sort=${sort}${cat}${env}&limit=20`)
+    ]);
+    if (installedRes) {
+      app.state.installedMods = installedRes;
+      app.state.installedModsLoaded = true;
+    }
     app.state.modSearchResults = res.hits || [];
 
     const loaderBadge = res.loader ? `${res.loader.charAt(0).toUpperCase() + res.loader.slice(1)} ${res.game_version || ""}`.trim() : "Fabric 26.3";
@@ -269,7 +344,9 @@ export async function executeModSearch(app) {
 
     area.innerHTML = `
       <div class="software-grid">
-        ${res.hits.map(h => `
+        ${res.hits.map(h => {
+      const installedSrc = getInstalledModStatus(app, h.slug);
+      return `
           <div class="software-card">
             <div>
               <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:10px;">
@@ -286,8 +363,10 @@ export async function executeModSearch(app) {
               </div>
 
               <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
-                <span class="badge" style="font-size:10px;padding:2px 6px;">Client: ${h.client_side || "optional"}</span>
-                <span class="badge" style="font-size:10px;padding:2px 6px;">Server: ${h.server_side || "optional"}</span>
+                <span class="badge" style="font-size:10px;padding:2px 6px;">Client: ${escapeHtml(h.client_side || "optional")}</span>
+                <span class="badge" style="font-size:10px;padding:2px 6px;">Server: ${escapeHtml(h.server_side || "optional")}</span>
+                ${h.client_side === "required" ? `<span class="badge" style="font-size:10px;padding:2px 6px;color:var(--color-warning);border-color:var(--border-high);">Client Mod Required</span>` : ""}
+                ${installedSrc ? `<span class="badge badge-online" style="font-size:10px;padding:2px 6px;">Installed${installedSrc === "manual" ? " (.jar)" : ""}</span>` : ""}
               </div>
 
               <p style="font-size:12px;color:var(--text-secondary);line-height:1.5;margin-bottom:12px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;min-height:54px;">
@@ -297,10 +376,13 @@ export async function executeModSearch(app) {
 
             <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border-subtle);padding-top:10px;">
               <span class="badge" style="color:#22c55e;">${escapeHtml(loaderBadge)}</span>
-              <button class="btn btn-primary btn-sm" onclick="app.installMod('${escapeHtml(h.slug)}')">${ICONS.plus} Install</button>
+              ${installedSrc
+          ? `<button class="btn btn-secondary btn-sm" disabled title="Already installed">${ICONS.check} Installed</button>`
+          : `<button class="btn btn-primary btn-sm" id="mod-install-btn-${escapeHtml(h.slug)}" onclick="app.installMod('${escapeHtml(h.slug)}', '${escapeHtml(h.title || h.slug)}', '${escapeHtml(h.client_side || "optional")}')">${ICONS.plus} Install</button>`}
             </div>
           </div>
-        `).join("")}
+        `;
+    }).join("")}
       </div>
     `;
   } catch (e) {
@@ -308,20 +390,76 @@ export async function executeModSearch(app) {
   }
 }
 
-export function installMod(app, slug) {
+export async function installMod(app, slug, title = null, clientSide = null) {
+  const btn = document.getElementById(`mod-install-btn-${slug}`);
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Checking...";
+  }
+  let compat = null;
+  try {
+    compat = await app.api.request(`/api/mods/check?slug=${encodeURIComponent(slug)}`);
+  } catch (e) {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `${ICONS.plus} Install`;
+    }
+    alert("Failed to verify compatibility: " + e.message);
+    return;
+  }
+
+  if (!compat.compatible) {
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = "Incompatible";
+      btn.title = compat.reason || "Incompatible build";
+    }
+    alert(`Cannot install '${compat.title || title || slug}': ${compat.reason || "No compatible release for active server version."}`);
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = false;
+    btn.innerHTML = `${ICONS.plus} Install`;
+  }
+
+  const clientWarn = (compat.client_required || clientSide === "required")
+    ? "WARNING: Players MUST also install this mod on their own Minecraft client! "
+    : "";
+  const buildLabel = compat.version_number ? ` (build ${compat.version_number})` : "";
+
   app.showConfirmModal(
-    `Install ${slug}`,
-    `Install mod '${slug}' from Modrinth? This will add it to mc.env and recreate the server container.`,
+    `Install ${compat.title || title || slug}`,
+    `${clientWarn}Install '${slug}'${buildLabel} from Modrinth? This adds it to mc.env and recreates the server container.`,
     async () => {
       try {
         const res = await app.api.request("/api/mods/add", { method: "POST", body: { slug: slug } });
+        app.state.installedModsLoaded = false;
         alert(res.message);
         switchModsTab(app, "installed");
       } catch (e) {
         alert(e.message);
       }
     },
-    { danger: false, confirmText: "Install Mod" }
+    { danger: Boolean(compat.client_required || clientSide === "required"), confirmText: "Install Mod" }
+  );
+}
+
+export function deleteManualJar(app, filename) {
+  app.showConfirmModal(
+    "Delete Manual Mod JAR",
+    `Permanently delete '${filename}' from mods/? A restart may be needed for changes to apply.`,
+    async () => {
+      try {
+        const res = await app.api.request(`/api/mods/manual/${encodeURIComponent(filename)}`, { method: "DELETE" });
+        app.state.installedModsLoaded = false;
+        alert(res.message);
+        renderInstalledMods(app);
+      } catch (e) {
+        alert(e.message);
+      }
+    },
+    { danger: true, confirmText: "Delete JAR" }
   );
 }
 
@@ -332,6 +470,7 @@ export function removeMod(app, slug) {
     async () => {
       try {
         const res = await app.api.request("/api/mods/remove", { method: "POST", body: { slug: slug } });
+        app.state.installedModsLoaded = false;
         alert(res.message);
         renderInstalledMods(app);
       } catch (e) {
@@ -473,7 +612,7 @@ export async function openFileEditor(app, path) {
             <span style="font-size:13px;font-weight:600;color:var(--text-primary);">${escapeHtml(fileData.name || path.split("/").pop())}</span>
             <span style="font-size:11px;color:var(--text-muted);">(${fileData.size_formatted || ""})</span>
             <span class="badge" id="editor-dirty-badge" style="display:none;background:var(--color-warning);color:var(--bg-canvas);font-weight:600;">UNSAVED</span>
-            <span id="editor-saved-toast" style="display:none;font-size:11px;color:var(--color-success);font-weight:600;">SAVED ✓</span>
+            <span id="editor-saved-toast" style="display:none;font-size:11px;color:var(--color-success);font-weight:600;">SAVED</span>
           </div>
           <div style="display:flex;gap:8px;align-items:center;">
             <button class="btn btn-secondary btn-sm" onclick="app.loadFiles(app.state.currentFilePath)">Back</button>
@@ -641,7 +780,7 @@ export async function uploadFile(app, input) {
 
 export function renderWorldsTab() {
   return `
-    <div class="card" style="margin-bottom:20px;padding:22px 24px;">
+    <div class="card" style="margin-bottom:16px;padding:22px 24px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
         <div>
           <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;">ACTIVE MINECRAFT WORLD</div>
@@ -659,12 +798,12 @@ export function renderWorldsTab() {
       </div>
     </div>
 
-    <div class="grid-2">
+    <div class="grid-2" style="margin-bottom:16px;">
       <div class="card">
         <div class="card-header">
           <span class="card-title">DIMENSIONS & COMPONENTS</span>
         </div>
-        <div style="padding:14px 20px;display:flex;flex-direction:column;gap:12px;" id="world-dimensions-container">
+        <div style="padding:14px 20px;display:flex;flex-direction:column;gap:0px;" id="world-dimensions-container">
           <div style="color:var(--text-muted);">Loading world details...</div>
         </div>
       </div>
@@ -679,7 +818,110 @@ export function renderWorldsTab() {
         </div>
       </div>
     </div>
+
+    <div class="card" style="padding:22px 24px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div>
+          <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Chunky World Pregeneration</h3>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:3px;">
+            Pre-generates chunks while the server is online. Pause before players join so tick rate stays smooth.
+          </div>
+        </div>
+        <span class="badge">RCON</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Dimension</label>
+          <select id="chunky-world" class="input">
+            <option value="minecraft:overworld">Overworld</option>
+            <option value="minecraft:the_nether">The Nether</option>
+            <option value="minecraft:the_end">The End</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Shape</label>
+          <select id="chunky-shape" class="input">
+            <option value="square">Square</option>
+            <option value="circle">Circle</option>
+            <option value="diamond">Diamond</option>
+            <option value="rectangle">Rectangle</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Radius (Blocks)</label>
+          <input type="number" id="chunky-radius" class="input" min="500" max="25000" value="2500">
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Center (X Z)</label>
+          <input type="text" id="chunky-center" class="input" value="0 0" placeholder="0 0">
+        </div>
+      </div>
+
+      <div class="btn-group" style="flex-wrap:wrap;margin-bottom:12px;">
+        <button class="btn btn-primary btn-sm" onclick="app.sendChunkyCommand('start')">${ICONS.start} Start Pregen</button>
+        <button class="btn btn-secondary btn-sm" onclick="app.sendChunkyCommand('pause')">Pause</button>
+        <button class="btn btn-secondary btn-sm" onclick="app.sendChunkyCommand('continue')">Continue</button>
+        <button class="btn btn-secondary btn-sm" onclick="app.sendChunkyCommand('progress')">Progress</button>
+        <button class="btn btn-danger btn-sm" onclick="app.sendChunkyCommand('cancel')">Cancel</button>
+      </div>
+
+      <div id="chunky-output-box" style="padding:10px 12px;background:var(--bg-canvas);border:1px solid var(--border-subtle);font-family:monospace;font-size:12px;color:var(--text-secondary);min-height:42px;white-space:pre-wrap;">[Ready] Select parameters and click Start Pregen when Minecraft is Online.</div>
+    </div>
   `;
+}
+
+export async function sendChunkyCommand(app, action) {
+  const outBox = document.getElementById("chunky-output-box");
+  const runCmd = async (act, param = "") => {
+    return app.api.request("/api/chunky/command", {
+      method: "POST",
+      body: { action: act, param: String(param) }
+    });
+  };
+
+  if (action === "start") {
+    const world = document.getElementById("chunky-world")?.value || "minecraft:overworld";
+    const shape = document.getElementById("chunky-shape")?.value || "square";
+    const radius = parseInt(document.getElementById("chunky-radius")?.value || "2500", 10);
+    const center = (document.getElementById("chunky-center")?.value || "0 0").trim() || "0 0";
+    if (Number.isNaN(radius) || radius < 100 || radius > 30000) {
+      alert("Radius must be between 100 and 30000 blocks.");
+      return;
+    }
+    const execStart = async () => {
+      if (outBox) outBox.textContent = "Configuring Chunky and starting task...";
+      try {
+        const logs = [];
+        for (const [act, prm] of [["world", world], ["shape", shape], ["center", center], ["radius", String(radius)], ["start", ""]]) {
+          const r = await runCmd(act, prm);
+          logs.push(`> chunky ${act}${prm ? " " + prm : ""}: ${r.output || "OK"}`);
+        }
+        if (outBox) outBox.textContent = logs.join("\n");
+      } catch (e) {
+        if (outBox) outBox.textContent = `Error: ${e.message}`;
+      }
+    };
+    if (radius > 5000) {
+      app.showConfirmModal(
+        "Large Pregeneration Radius",
+        `Start Chunky with radius ${radius} blocks? Large radii increase disk usage and CPU load substantially.`,
+        execStart,
+        { danger: true, confirmText: "Start Pregen" }
+      );
+    } else {
+      await execStart();
+    }
+    return;
+  }
+
+  if (outBox) outBox.textContent = `Sending chunky ${action}...`;
+  try {
+    const r = await runCmd(action, "");
+    if (outBox) outBox.textContent = `> chunky ${action}\n${r.output || "Command executed."}`;
+  } catch (e) {
+    if (outBox) outBox.textContent = `Error: ${e.message}`;
+  }
 }
 
 export async function loadWorlds(app) {
@@ -832,17 +1074,43 @@ export async function executeWorldGenerate(app) {
 export function renderBackupsTab() {
   const blocks = '<div class="meter-block"></div>'.repeat(24);
   return `
-    <div class="card" style="margin-bottom:20px;padding:22px 24px;">
-      <h2 style="font-size:16px;font-weight:700;text-transform:uppercase;margin-bottom:8px;">AUTOMATED WORLD BACKUPS</h2>
-      <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;max-width:700px;">
-        World backups are executed automatically every morning at <strong>04:00 AM (Asia/Kolkata)</strong>.
-        Backups are compressed and stored locally in the server's dedicated storage directory with rolling retention.
-      </p>
+    <div class="card" style="margin-bottom:16px;padding:22px 24px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;">
+        <div>
+          <h2 style="font-size:16px;font-weight:700;text-transform:uppercase;margin-bottom:8px;">WORLD BACKUPS & SNAPSHOTS</h2>
+          <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;max-width:700px;">
+            Automated backups run daily at <strong>04:00 AM (Asia/Kolkata)</strong>. Create manual snapshots or restore an archived snapshot below (server must be stopped before restore).
+          </p>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary btn-sm" id="backup-create-btn" onclick="app.createBackup()">${ICONS.plus} Backup Now</button>
+          <button class="btn btn-secondary btn-sm" onclick="app.loadBackups()">${ICONS.refresh} Refresh</button>
+        </div>
+      </div>
     </div>
 
-    <div class="progress-card" style="margin-bottom:20px;">
+    <div class="metric-strip" style="margin-bottom:16px;">
+      <div class="metric-strip-card">
+        <span class="metric-strip-label">Active World Size</span>
+        <span class="metric-strip-value" id="backup-world-size">-</span>
+      </div>
+      <div class="metric-strip-card">
+        <span class="metric-strip-label">Backup Archives Total</span>
+        <span class="metric-strip-value" id="backup-archives-size">-</span>
+      </div>
+      <div class="metric-strip-card">
+        <span class="metric-strip-label">MC Disk Free</span>
+        <span class="metric-strip-value" id="backup-mc-free">-</span>
+      </div>
+      <div class="metric-strip-card">
+        <span class="metric-strip-label">Backup Volume Free</span>
+        <span class="metric-strip-value" id="backup-avail-text">-</span>
+      </div>
+    </div>
+
+    <div class="progress-card" style="margin-bottom:16px;">
       <div class="progress-header">
-        <span class="progress-header-title">BACKUP STORAGE USAGE</span>
+        <span class="progress-header-title">BACKUP VOLUME STORAGE USAGE</span>
         <span class="progress-header-badge" id="backup-storage-badge">-</span>
       </div>
       <div class="meter-track" id="backup-meter-track">
@@ -850,29 +1118,57 @@ export function renderBackupsTab() {
       </div>
       <div class="meter-substats">
         <div class="meter-sub-left">BACKUPS ARCHIVES <strong id="backup-used-text">-</strong></div>
-        <div class="meter-sub-right neutral">DISK AVAILABLE <strong id="backup-avail-text">-</strong></div>
+        <div class="meter-sub-right neutral">TOTAL ARCHIVES <strong id="backup-count-text">-</strong></div>
       </div>
     </div>
 
-    <div class="card" style="padding:22px 24px;border-left:3px solid var(--border-high);">
-      <div style="font-size:13px;font-weight:600;text-transform:uppercase;margin-bottom:6px;color:var(--text-primary);">Development Status: Scheduled & Protected</div>
-      <div style="font-size:12.5px;color:var(--text-secondary);line-height:1.6;">
-        Interactive on-demand snapshots and 1-click restoration are scheduled for future release.
-        Your current world data is safe and scheduled for daily automated backups.
+    <div class="card" style="padding:22px 24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Available Archive Snapshots</h3>
+        <span style="font-size:12px;color:var(--text-muted);" id="backups-status-note">Compressed .tar.gz archives</span>
+      </div>
+      <div class="file-table-container">
+        <table class="file-table">
+          <thead>
+            <tr>
+              <th>Backup Archive ID</th>
+              <th>Type</th>
+              <th>Created</th>
+              <th>Size</th>
+              <th style="text-align:right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="backups-table-body">
+            <tr><td colspan="5" style="color:var(--text-muted);text-align:center;padding:24px;">Loading backup archives...</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
   `;
 }
 
 export async function loadBackups(app) {
+  const tbody = document.getElementById("backups-table-body");
   try {
-    const disk = await app.api.request("/api/backups/disk-usage");
+    const [disk, listRes] = await Promise.all([
+      app.api.request("/api/backups/disk-usage"),
+      app.api.request("/api/backups")
+    ]);
     app.state.diskUsage = disk;
+    app.state.backupsList = listRes.backups || [];
 
-    const fill = document.getElementById("backup-meter-fill");
     const badge = document.getElementById("backup-storage-badge");
     const usedText = document.getElementById("backup-used-text");
     const availText = document.getElementById("backup-avail-text");
+    const worldSizeEl = document.getElementById("backup-world-size");
+    const archSizeEl = document.getElementById("backup-archives-size");
+    const mcFreeEl = document.getElementById("backup-mc-free");
+    const countEl = document.getElementById("backup-count-text");
+
+    if (worldSizeEl) worldSizeEl.innerText = disk.world_size_human || "-";
+    if (archSizeEl) archSizeEl.innerText = disk.backups_size_human || "-";
+    if (mcFreeEl) mcFreeEl.innerText = (disk.programming_disk && disk.programming_disk.free_human) || "-";
+    if (countEl) countEl.innerText = String(app.state.backupsList.length);
 
     const vol = (disk && (disk.media_disk || disk.programming_disk)) || {};
     const totalBytes = vol.total_bytes || disk.total_bytes || 0;
@@ -885,68 +1181,288 @@ export async function loadBackups(app) {
     if (totalBytes > 0) {
       const bpct = Math.round(pctUsed);
       updateSquareMeter("backup-meter-track", bpct, bpct > 90 ? "crit" : (bpct > 80 ? "warn" : ""));
-      if (fill) fill.style.width = `${bpct}%`;
       if (badge) badge.innerText = `${pctUsed}% IN USE`;
       if (usedText) usedText.innerText = disk.backups_size_human || `${(usedBytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
       if (availText) availText.innerText = vol.free_human || `${(freeBytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
     } else {
       updateSquareMeter("backup-meter-track", 0);
-      if (fill) fill.style.width = "0%";
       if (badge) badge.innerText = "-";
       if (usedText) usedText.innerText = "-";
       if (availText) availText.innerText = "-";
     }
+
+    if (tbody) {
+      if (!app.state.backupsList.length) {
+        tbody.innerHTML = `<tr><td colspan="5" style="color:var(--text-muted);text-align:center;padding:24px;">No backup archives found yet. Click Backup Now to create one.</td></tr>`;
+      } else {
+        tbody.innerHTML = app.state.backupsList.map(b => {
+          const dt = b.created_at ? `${formatDate(b.created_at)} ${String(b.created_at).slice(11, 16)}` : "-";
+          const typeBadge = b.is_safety
+            ? `<span class="badge" style="color:var(--color-warning);">Safety</span>`
+            : `<span class="badge badge-online">Snapshot</span>`;
+          return `
+            <tr>
+              <td style="font-weight:600;font-family:monospace;font-size:12px;">${escapeHtml(b.id)}</td>
+              <td>${typeBadge}</td>
+              <td style="color:var(--text-secondary);font-size:12px;">${escapeHtml(dt)}</td>
+              <td style="font-size:12px;">${escapeHtml(b.size_human || "-")}</td>
+              <td style="text-align:right;">
+                <button class="btn btn-danger btn-sm" onclick="app.restoreBackup('${escapeHtml(b.id)}')">Restore</button>
+              </td>
+            </tr>
+          `;
+        }).join("");
+      }
+    }
   } catch (e) {
-    console.debug("Disk usage fetch error:", e);
+    if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;"><span class="badge badge-error">ERROR</span> <span style="margin-left:8px;color:var(--text-secondary);">${escapeHtml(e.message)}</span></td></tr>`;
   }
+}
+
+export async function createBackup(app) {
+  const btn = document.getElementById("backup-create-btn");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Backing up...";
+  }
+  try {
+    const res = await app.api.request("/api/backups/create", { method: "POST" });
+    alert(res.message || "Backup created successfully.");
+    await loadBackups(app);
+  } catch (e) {
+    alert("Backup failed: " + e.message);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `${ICONS.plus} Backup Now`;
+    }
+  }
+}
+
+export function restoreBackup(app, backupId) {
+  const isRunning = app.state.status && (app.state.status.state === "Online" || app.state.status.state === "Starting");
+  const extraWarn = isRunning ? "WARNING: Minecraft currently appears Online. Stop the server first or restore will be blocked. " : "";
+  app.showConfirmModal(
+    `Restore ${backupId}`,
+    `${extraWarn}Restore world archive '${backupId}'? Current unsaved world data will be replaced by this snapshot.`,
+    async () => {
+      try {
+        const res = await app.api.request("/api/backups/restore", {
+          method: "POST",
+          body: { backup_id: backupId }
+        });
+        alert(res.message || "Restore completed.");
+        await loadBackups(app);
+      } catch (e) {
+        alert("Restore failed: " + e.message);
+      }
+    },
+    { danger: true, confirmText: "Restore Backup" }
+  );
 }
 
 export function renderAccessTab() {
   return `
-    <div class="card" style="margin-bottom:20px;padding:22px 24px;">
+    <div class="card" style="margin-bottom:16px;padding:22px 24px;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
         <div>
           <div style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">ACTIVE ADMINISTRATOR</div>
           <h2 style="font-size:18px;font-weight:700;color:var(--text-primary);">admin</h2>
           <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">
-            LAN-only Access · Argon2id Password Hashing · CSRF Token Protection
+            LAN-only Access · Argon2id Password Hashing · Strict SameSite Cookie &amp; CSRF Guard
           </div>
         </div>
         <button class="btn btn-secondary btn-sm" onclick="app.logout()">${ICONS.logout} Sign Out</button>
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-header">
-        <span class="card-title">ACCESS PERMISSIONS MATRIX (FUTURE MULTI-USER ACCESS)</span>
+    <div class="grid-2" style="margin-bottom:16px;">
+      <div class="card" style="padding:20px 24px;">
+        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Change Admin Password</h3>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:14px;">Update administrator credentials (minimum 6 characters).</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div>
+            <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Current Password</label>
+            <input type="password" id="acc-old-pass" class="input" placeholder="Enter current password...">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">New Password</label>
+            <input type="password" id="acc-new-pass" class="input" placeholder="Enter new password...">
+          </div>
+          <div>
+            <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Confirm New Password</label>
+            <input type="password" id="acc-confirm-pass" class="input" placeholder="Confirm new password...">
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
+            <button class="btn btn-primary btn-sm" id="acc-change-pass-btn" onclick="app.changeAdminPassword()">${ICONS.check} Update Password</button>
+            <span id="acc-pass-status" style="font-size:12px;"></span>
+          </div>
+        </div>
       </div>
-      <div style="padding:16px 20px;">
-        <p style="font-size:12.5px;color:var(--text-secondary);margin-bottom:16px;">
-          Multi-member permission delegation is planned for future release. Currently, the master admin account has full authorization.
-        </p>
 
-        <table class="file-table" style="opacity:0.75;">
+      <div class="card" style="padding:20px 24px;">
+        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;margin-bottom:4px;">Authorization Scope</h3>
+        <div style="font-size:12px;color:var(--text-secondary);margin-bottom:12px;">Active privileges enforced for master admin session.</div>
+        <table class="file-table">
           <thead>
             <tr>
-              <th>Category</th>
-              <th>Permission Level</th>
+              <th>Subsystem</th>
+              <th>Privilege</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td>Control (Start/Stop/Restart)</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
-            <tr><td>Console & Execution</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
-            <tr><td>Persistent Server Logs</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
-            <tr><td>Players & Whitelist</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
-            <tr><td>Software Management</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
-            <tr><td>Mod Manager (Modrinth)</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
-            <tr><td>File Explorer & Editor</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
-            <tr><td>World Management</td><td>Full Access</td><td><span class="badge">Active</span></td></tr>
+            <tr><td>Container &amp; Media Watch</td><td>Full Control</td><td>${renderStatusBadge("online", "Active")}</td></tr>
+            <tr><td>Console, Logs &amp; Players</td><td>Full Control</td><td>${renderStatusBadge("online", "Active")}</td></tr>
+            <tr><td>Settings, Mods &amp; Files</td><td>Full Control</td><td>${renderStatusBadge("online", "Active")}</td></tr>
+            <tr><td>Worlds, Chunky &amp; Backups</td><td>Full Control</td><td>${renderStatusBadge("online", "Active")}</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card" style="padding:20px 24px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div>
+          <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Security &amp; Action Audit Log</h3>
+          <div style="font-size:12px;color:var(--text-secondary);" id="audit-page-info">Recent recorded actions</div>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-sm" id="audit-prev-btn" onclick="app.prevAuditPage()">&lt; Prev</button>
+          <button class="btn btn-secondary btn-sm" id="audit-next-btn" onclick="app.nextAuditPage()">Next &gt;</button>
+          <button class="btn btn-secondary btn-sm" onclick="app.loadAuditLogs()">${ICONS.refresh} Refresh</button>
+        </div>
+      </div>
+
+      <div class="file-table-container">
+        <table class="file-table">
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Action</th>
+              <th>Target</th>
+              <th>Details</th>
+              <th>IP</th>
+              <th>Result</th>
+            </tr>
+          </thead>
+          <tbody id="audit-table-body">
+            <tr><td colspan="6" style="color:var(--text-muted);text-align:center;padding:24px;">Loading audit log...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
   `;
+}
+
+export function loadAccess(app) {
+  app.state.auditPageOffset = 0;
+  return loadAuditLogs(app, 0);
+}
+
+export async function loadAuditLogs(app, offset = null) {
+  const tbody = document.getElementById("audit-table-body");
+  if (!tbody) return;
+  const off = offset !== null ? Math.max(0, offset) : (app.state.auditPageOffset || 0);
+  app.state.auditPageOffset = off;
+  const limit = app.state.auditLimit || 15;
+
+  try {
+    const res = await app.api.request(`/api/audit?limit=${limit}&offset=${off}`);
+    const entries = res.entries || [];
+    const total = res.total || 0;
+    app.state.auditTotal = total;
+
+    const infoEl = document.getElementById("audit-page-info");
+    if (infoEl) {
+      const startNum = total > 0 ? off + 1 : 0;
+      const endNum = Math.min(total, off + entries.length);
+      infoEl.innerText = `Showing ${startNum}–${endNum} of ${total} audit records`;
+    }
+
+    const prevBtn = document.getElementById("audit-prev-btn");
+    const nextBtn = document.getElementById("audit-next-btn");
+    if (prevBtn) prevBtn.disabled = off <= 0;
+    if (nextBtn) nextBtn.disabled = off + limit >= total;
+
+    if (!entries.length) {
+      tbody.innerHTML = `<tr><td colspan="6" style="color:var(--text-muted);text-align:center;padding:24px;">No audit log entries recorded yet.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = entries.map(e => {
+      const ts = e.timestamp ? String(e.timestamp).slice(0, 19).replace("T", " ") : "-";
+      const ok = String(e.result || "").toUpperCase() === "SUCCESS";
+      return `
+        <tr>
+          <td style="font-family:monospace;font-size:11.5px;white-space:nowrap;">${escapeHtml(ts)}</td>
+          <td style="font-weight:600;font-size:12px;">${escapeHtml(e.action)}</td>
+          <td style="font-size:12px;color:var(--text-secondary);">${escapeHtml(e.target || "-")}</td>
+          <td style="font-size:12px;max-width:340px;word-break:break-word;">${escapeHtml(e.details || "-")}</td>
+          <td style="font-family:monospace;font-size:11.5px;color:var(--text-muted);">${escapeHtml(e.ip_address || "-")}</td>
+          <td>${renderStatusBadge(ok ? "online" : "error", e.result || "UNKNOWN")}</td>
+        </tr>
+      `;
+    }).join("");
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:20px;"><span class="badge badge-error">ERROR</span> <span style="margin-left:8px;color:var(--text-secondary);">${escapeHtml(e.message)}</span></td></tr>`;
+  }
+}
+
+export function prevAuditPage(app) {
+  const limit = app.state.auditLimit || 15;
+  const nextOff = Math.max(0, (app.state.auditPageOffset || 0) - limit);
+  loadAuditLogs(app, nextOff);
+}
+
+export function nextAuditPage(app) {
+  const limit = app.state.auditLimit || 15;
+  const nextOff = (app.state.auditPageOffset || 0) + limit;
+  if (nextOff < (app.state.auditTotal || 0)) {
+    loadAuditLogs(app, nextOff);
+  }
+}
+
+export async function changeAdminPassword(app) {
+  const oldEl = document.getElementById("acc-old-pass");
+  const newEl = document.getElementById("acc-new-pass");
+  const confEl = document.getElementById("acc-confirm-pass");
+  const statusEl = document.getElementById("acc-pass-status");
+  const btn = document.getElementById("acc-change-pass-btn");
+
+  const oldPass = oldEl ? oldEl.value : "";
+  const newPass = newEl ? newEl.value : "";
+  const confirmPass = confEl ? confEl.value : "";
+
+  if (!oldPass || !newPass) {
+    if (statusEl) statusEl.innerHTML = `<span style="color:var(--color-error);">Fill all password fields.</span>`;
+    return;
+  }
+  if (newPass.length < 6) {
+    if (statusEl) statusEl.innerHTML = `<span style="color:var(--color-error);">New password must be at least 6 characters.</span>`;
+    return;
+  }
+  if (newPass !== confirmPass) {
+    if (statusEl) statusEl.innerHTML = `<span style="color:var(--color-error);">New passwords do not match.</span>`;
+    return;
+  }
+
+  if (btn) btn.disabled = true;
+  try {
+    await app.api.request("/api/auth/change-password", {
+      method: "POST",
+      body: { old_password: oldPass, new_password: newPass }
+    });
+    if (oldEl) oldEl.value = "";
+    if (newEl) newEl.value = "";
+    if (confEl) confEl.value = "";
+    if (statusEl) statusEl.innerHTML = `<span style="color:var(--color-success);">Password updated cleanly.</span>`;
+    loadAuditLogs(app, 0);
+  } catch (e) {
+    if (statusEl) statusEl.innerHTML = `<span style="color:var(--color-error);">${escapeHtml(e.message)}</span>`;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
 }
 
 export function renderSettingsTab(app) {
@@ -957,13 +1473,15 @@ export function renderSettingsTab(app) {
     { name: "Space Grotesk", tag: "Geometric Tech", desc: "Proportional futuristic" }
   ];
   const prefs = JSON.parse(localStorage.getItem("mcadmin_webapp_prefs") || "{}");
+  const sub = app.state.settingsSubtab || "webapp";
+  const webhookVal = app.state.panelWebhookUrl || prefs.webhookUrl || "";
 
   return `
     <div class="card" style="margin-bottom:16px;padding:16px 20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
         <div>
-          <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px;">APPLICATION ENVIRONMENT</div>
-          <h2 style="font-size:17px;font-weight:700;color:var(--text-primary);margin:0;">Web App Settings & Preferences</h2>
+          <div style="font-size:10.5px;font-weight:600;text-transform:uppercase;color:var(--text-muted);margin-bottom:2px;">PANEL &amp; SERVER CONFIGURATION</div>
+          <h2 style="font-size:17px;font-weight:700;color:var(--text-primary);margin:0;">Settings &amp; Environment (mc.env)</h2>
         </div>
         <div style="display:flex;align-items:center;gap:10px;">
           <span class="badge" style="font-size:10.5px;">MCADMIN V2.4</span>
@@ -971,148 +1489,484 @@ export function renderSettingsTab(app) {
       </div>
     </div>
 
-    <div class="settings-grid-compact">
-      <div class="settings-card-compact">
-        <div class="settings-card-header-compact">
-          <span class="settings-card-title-compact">Appearance & Interface</span>
-          <span class="badge">Visual</span>
-        </div>
-        <div class="settings-row-compact">
+    <div class="subnav-tabs">
+      <button class="subnav-btn ${sub === "webapp" ? "active" : ""}" id="settings-tab-webapp" onclick="app.switchSettingsTab('webapp')">Web App Preferences</button>
+      <button class="subnav-btn ${sub === "server" ? "active" : ""}" id="settings-tab-server" onclick="app.switchSettingsTab('server')">Server Configuration (mc.env)</button>
+      <button class="subnav-btn ${sub === "raw" ? "active" : ""}" id="settings-tab-raw" onclick="app.switchSettingsTab('raw')">Raw mc.env Editor</button>
+    </div>
+
+    <div id="settings-webapp-panel" style="display:${sub === "webapp" ? "block" : "none"};">
+      <div class="settings-grid-compact">
+        <div class="settings-card-compact">
+          <div class="settings-card-header-compact">
+            <span class="settings-card-title-compact">Appearance &amp; Interface</span>
+            <span class="badge">Visual</span>
+          </div>
+          <div class="settings-row-compact">
+            <div>
+              <div class="settings-label-compact">Active Theme</div>
+              <div class="settings-desc-compact">Global color scheme</div>
+            </div>
+            <div class="theme-buttons">
+              <button class="btn btn-secondary btn-sm theme-btn ${app.state.theme === "dark" ? "active" : ""}" onclick="app.setTheme('dark')">Dark</button>
+              <button class="btn btn-secondary btn-sm theme-btn ${app.state.theme === "medium-dark" ? "active" : ""}" onclick="app.setTheme('medium-dark')">Slate</button>
+              <button class="btn btn-secondary btn-sm theme-btn ${app.state.theme === "light" ? "active" : ""}" onclick="app.setTheme('light')">Light</button>
+            </div>
+          </div>
           <div>
-            <div class="settings-label-compact">Active Theme</div>
-            <div class="settings-desc-compact">Global color scheme</div>
-          </div>
-          <div class="theme-buttons">
-            <button class="btn btn-secondary btn-sm theme-btn ${app.state.theme === "dark" ? "active" : ""}" onclick="app.setTheme('dark')">Dark</button>
-            <button class="btn btn-secondary btn-sm theme-btn ${app.state.theme === "medium-dark" ? "active" : ""}" onclick="app.setTheme('medium-dark')">Slate</button>
-            <button class="btn btn-secondary btn-sm theme-btn ${app.state.theme === "light" ? "active" : ""}" onclick="app.setTheme('light')">Light</button>
-          </div>
-        </div>
-        <div>
-          <div class="settings-label-compact" style="margin-bottom:6px;">Universal Typography</div>
-          <div class="font-compact-grid">
-            ${fonts.map(f => {
-              const isCur = app.state.font === f.name;
-              return `
-                <div class="font-compact-card ${isCur ? "active" : ""}" onclick="app.setFont('${f.name}')">
-                  <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <span style="font-size:12px;font-weight:600;color:var(--text-primary);font-family:${app.fontMap[f.name] || "inherit"};">${f.name}</span>
-                    ${isCur ? `<span style="font-size:9.5px;color:var(--color-success);font-weight:700;">✓</span>` : ""}
+            <div class="settings-label-compact" style="margin-bottom:6px;">Universal Typography</div>
+            <div class="font-compact-grid">
+              ${fonts.map(f => {
+    const isCur = app.state.font === f.name;
+    return `
+                  <div class="font-compact-card ${isCur ? "active" : ""}" onclick="app.setFont('${f.name}')">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                      <span style="font-size:12px;font-weight:600;color:var(--text-primary);font-family:${app.fontMap[f.name] || "inherit"};">${f.name}</span>
+                      ${isCur ? `<span style="font-size:9.5px;color:var(--badge-text);font-weight:700;">▪</span>` : ""}
+                    </div>
+                    <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${f.tag}</div>
                   </div>
-                  <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">${f.tag}</div>
-                </div>
-              `;
-            }).join("")}
+                `;
+  }).join("")}
+            </div>
+          </div>
+          <div class="settings-row-compact">
+            <div>
+              <div class="settings-label-compact">Layout Density</div>
+              <div class="settings-desc-compact">Spacing across lists &amp; tables</div>
+            </div>
+            <select class="settings-select-compact" id="setting-density" onchange="app.updateAppPref('density', this.value)">
+              <option value="normal" ${prefs.density !== "compact" ? "selected" : ""}>Normal</option>
+              <option value="compact" ${prefs.density === "compact" ? "selected" : ""}>Compact (Dense)</option>
+            </select>
           </div>
         </div>
-        <div class="settings-row-compact">
-          <div>
-            <div class="settings-label-compact">Layout Density</div>
-            <div class="settings-desc-compact">Spacing across lists & tables</div>
-          </div>
-          <select class="settings-select-compact" id="setting-density" onchange="app.updateAppPref('density', this.value)">
-            <option value="normal" ${prefs.density !== "compact" ? "selected" : ""}>Normal</option>
-            <option value="compact" ${prefs.density === "compact" ? "selected" : ""}>Compact (Dense)</option>
-          </select>
-        </div>
-      </div>
 
-      <div class="settings-card-compact">
-        <div class="settings-card-header-compact">
-          <span class="settings-card-title-compact">Telemetry & Live Streams</span>
-          <span class="badge">Realtime</span>
-        </div>
-        <div class="settings-row-compact">
-          <div>
-            <div class="settings-label-compact">Telemetry Polling Rate</div>
-            <div class="settings-desc-compact">Metrics refresh frequency</div>
+        <div class="settings-card-compact">
+          <div class="settings-card-header-compact">
+            <span class="settings-card-title-compact">Telemetry &amp; Live Streams</span>
+            <span class="badge">Realtime</span>
           </div>
-          <select class="settings-select-compact" id="setting-polling-rate" onchange="app.updateAppPref('pollingRate', this.value)">
-            <option value="1000" ${prefs.pollingRate === "1000" ? "selected" : ""}>1.0s (Real-time)</option>
-            <option value="2500" ${!prefs.pollingRate || prefs.pollingRate === "2500" ? "selected" : ""}>2.5s (Balanced)</option>
-            <option value="5000" ${prefs.pollingRate === "5000" ? "selected" : ""}>5.0s (Low Data)</option>
-            <option value="10000" ${prefs.pollingRate === "10000" ? "selected" : ""}>10.0s (Throttled)</option>
-          </select>
-        </div>
-        <div class="settings-row-compact">
-          <div>
-            <div class="settings-label-compact">Console Buffer Limit</div>
-            <div class="settings-desc-compact">Max rendered console log lines</div>
+          <div class="settings-row-compact">
+            <div>
+              <div class="settings-label-compact">Telemetry Polling Rate</div>
+              <div class="settings-desc-compact">Metrics refresh frequency</div>
+            </div>
+            <select class="settings-select-compact" id="setting-polling-rate" onchange="app.updateAppPref('pollingRate', this.value)">
+              <option value="1000" ${prefs.pollingRate === "1000" ? "selected" : ""}>1.0s (Real-time)</option>
+              <option value="2500" ${!prefs.pollingRate || prefs.pollingRate === "2500" ? "selected" : ""}>2.5s (Balanced)</option>
+              <option value="5000" ${prefs.pollingRate === "5000" ? "selected" : ""}>5.0s (Low Data)</option>
+              <option value="10000" ${prefs.pollingRate === "10000" ? "selected" : ""}>10.0s (Throttled)</option>
+            </select>
           </div>
-          <select class="settings-select-compact" id="setting-console-buffer" onchange="app.updateAppPref('consoleBuffer', this.value)">
-            <option value="100" ${prefs.consoleBuffer === "100" ? "selected" : ""}>100 lines</option>
-            <option value="250" ${!prefs.consoleBuffer || prefs.consoleBuffer === "250" ? "selected" : ""}>250 lines</option>
-            <option value="500" ${prefs.consoleBuffer === "500" ? "selected" : ""}>500 lines</option>
-            <option value="1000" ${prefs.consoleBuffer === "1000" ? "selected" : ""}>1000 lines</option>
-          </select>
-        </div>
-        <div class="settings-row-compact">
-          <div>
-            <div class="settings-label-compact">Auto-Scroll Stream</div>
-            <div class="settings-desc-compact">Follow live console output</div>
+          <div class="settings-row-compact">
+            <div>
+              <div class="settings-label-compact">Console Buffer Limit</div>
+              <div class="settings-desc-compact">Max rendered console log lines</div>
+            </div>
+            <select class="settings-select-compact" id="setting-console-buffer" onchange="app.updateAppPref('consoleBuffer', this.value)">
+              <option value="100" ${prefs.consoleBuffer === "100" ? "selected" : ""}>100 lines</option>
+              <option value="250" ${!prefs.consoleBuffer || prefs.consoleBuffer === "250" ? "selected" : ""}>250 lines</option>
+              <option value="500" ${prefs.consoleBuffer === "500" ? "selected" : ""}>500 lines</option>
+              <option value="1000" ${prefs.consoleBuffer === "1000" ? "selected" : ""}>1000 lines</option>
+            </select>
           </div>
-          <input type="checkbox" id="setting-auto-scroll" ${prefs.autoScroll !== false ? "checked" : ""} onchange="app.updateAppPref('autoScroll', this.checked)">
+          <div class="settings-row-compact">
+            <div>
+              <div class="settings-label-compact">Auto-Scroll Stream</div>
+              <div class="settings-desc-compact">Follow live console output</div>
+            </div>
+            <input type="checkbox" id="setting-auto-scroll" ${prefs.autoScroll !== false ? "checked" : ""} onchange="app.updateAppPref('autoScroll', this.checked)">
+          </div>
         </div>
-      </div>
 
-      <div class="settings-card-compact">
-        <div class="settings-card-header-compact">
-          <span class="settings-card-title-compact">Web Alerts & Notifications</span>
-          <span class="badge">Audits</span>
-        </div>
-        <div class="settings-row-compact">
-          <div>
-            <div class="settings-label-compact">Audio Chime on Outage</div>
-            <div class="settings-desc-compact">Play sound alert if server stops</div>
+        <div class="settings-card-compact">
+          <div class="settings-card-header-compact">
+            <span class="settings-card-title-compact">Web Alerts &amp; Notifications</span>
+            <span class="badge">Audits</span>
           </div>
-          <input type="checkbox" id="setting-audio-chime" ${prefs.audioChime ? "checked" : ""} onchange="app.updateAppPref('audioChime', this.checked)">
-        </div>
-        <div class="settings-row-compact">
-          <div>
-            <div class="settings-label-compact">Browser Push Notifications</div>
-            <div class="settings-desc-compact">Desktop toast notifications</div>
+          <div class="settings-row-compact">
+            <div>
+              <div class="settings-label-compact">Audio Chime on Outage</div>
+              <div class="settings-desc-compact">Play sound alert if server enters Error</div>
+            </div>
+            <input type="checkbox" id="setting-audio-chime" ${prefs.audioChime ? "checked" : ""} onchange="app.updateAppPref('audioChime', this.checked)">
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="app.requestNotificationPermission()">Enable</button>
+          <div class="settings-row-compact">
+            <div>
+              <div class="settings-label-compact">Browser Push Notifications</div>
+              <div class="settings-desc-compact">Desktop toast notifications</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="app.requestNotificationPermission()">Enable</button>
+          </div>
+          <div class="settings-row-compact" style="flex-direction:column;align-items:flex-start;gap:6px;">
+            <div style="display:flex;justify-content:space-between;width:100%;align-items:center;">
+              <div class="settings-label-compact">Alert Webhook URL</div>
+              <span id="webhook-saved-badge" style="font-size:11px;color:var(--color-success);display:none;">Saved</span>
+            </div>
+            <div class="settings-desc-compact">Discord or Slack incoming webhook for Error transitions</div>
+            <div style="display:flex;gap:8px;width:100%;">
+              <input type="text" class="settings-input-compact" style="flex:1;" placeholder="https://discord.com/api/webhooks/..." id="setting-webhook-url" value="${escapeHtml(webhookVal)}">
+              <button class="btn btn-secondary btn-sm" onclick="app.saveAlertWebhook()">Save</button>
+            </div>
+          </div>
         </div>
-        <div class="settings-row-compact" style="flex-direction:column;align-items:flex-start;gap:6px;">
-          <div class="settings-label-compact">Alert Webhook URL</div>
-          <div class="settings-desc-compact">Discord or Slack incoming webhook for crash triggers</div>
-          <input type="text" class="settings-input-compact" style="width:100%;" placeholder="https://discord.com/api/webhooks/..." id="setting-webhook-url" value="${escapeHtml(prefs.webhookUrl || "")}" onchange="app.updateAppPref('webhookUrl', this.value)">
-        </div>
-      </div>
 
-      <div class="settings-card-compact">
-        <div class="settings-card-header-compact">
-          <span class="settings-card-title-compact">Session & Client Storage</span>
-          <span class="badge">Security</span>
-        </div>
-        <div class="settings-row-compact">
-          <div>
-            <div class="settings-label-compact">Session Inactivity Timeout</div>
-            <div class="settings-desc-compact">Auto-logout duration</div>
+        <div class="settings-card-compact">
+          <div class="settings-card-header-compact">
+            <span class="settings-card-title-compact">Session &amp; Client Storage</span>
+            <span class="badge">Security</span>
           </div>
-          <select class="settings-select-compact" id="setting-session-timeout" onchange="app.updateAppPref('sessionTimeout', this.value)">
-            <option value="15" ${prefs.sessionTimeout === "15" ? "selected" : ""}>15 Minutes</option>
-            <option value="60" ${!prefs.sessionTimeout || prefs.sessionTimeout === "60" ? "selected" : ""}>1 Hour</option>
-            <option value="480" ${prefs.sessionTimeout === "480" ? "selected" : ""}>8 Hours</option>
-            <option value="never" ${prefs.sessionTimeout === "never" ? "selected" : ""}>Never (Stay signed in)</option>
-          </select>
-        </div>
-        <div class="settings-row-compact">
-          <div>
-            <div class="settings-label-compact">CSRF Token Guard</div>
-            <div class="settings-desc-compact">Strict double-submit verification</div>
+          <div class="settings-row-compact">
+            <div>
+              <div class="settings-label-compact">Session Inactivity Timeout</div>
+              <div class="settings-desc-compact">Auto-logout after idle duration</div>
+            </div>
+            <select class="settings-select-compact" id="setting-session-timeout" onchange="app.updateAppPref('sessionTimeout', this.value)">
+              <option value="15" ${prefs.sessionTimeout === "15" ? "selected" : ""}>15 Minutes</option>
+              <option value="60" ${!prefs.sessionTimeout || prefs.sessionTimeout === "60" ? "selected" : ""}>1 Hour</option>
+              <option value="480" ${prefs.sessionTimeout === "480" ? "selected" : ""}>8 Hours</option>
+              <option value="never" ${prefs.sessionTimeout === "never" ? "selected" : ""}>Never (Stay signed in)</option>
+            </select>
           </div>
-          <span class="badge" style="color:var(--color-success);border-color:var(--border-high);">ENFORCED</span>
-        </div>
-        <div class="settings-row-compact" style="padding-top:6px;border-top:1px solid var(--border-subtle);">
-          <div>
-            <div class="settings-label-compact">Local UI Cache</div>
-            <div class="settings-desc-compact">Clear stored tokens and cache</div>
+          <div class="settings-row-compact">
+            <div>
+              <div class="settings-label-compact">CSRF Token Guard</div>
+              <div class="settings-desc-compact">Strict double-submit verification</div>
+            </div>
+            <span class="badge badge-online">ENFORCED</span>
           </div>
-          <button class="btn btn-secondary btn-sm" onclick="app.clearClientCache()">Clear Cache</button>
+          <div class="settings-row-compact" style="padding-top:6px;border-top:1px solid var(--border-subtle);">
+            <div>
+              <div class="settings-label-compact">Local UI Cache</div>
+              <div class="settings-desc-compact">Clear stored tokens and cache</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="app.clearClientCache()">Clear Cache</button>
+          </div>
         </div>
       </div>
     </div>
+
+    <div id="settings-server-panel" style="display:${sub === "server" ? "block" : "none"};">
+      <div class="card" style="padding:22px 24px;">
+        <div style="color:var(--text-muted);font-size:13px;">Loading mc.env configuration...</div>
+      </div>
+    </div>
+
+    <div id="settings-raw-panel" style="display:${sub === "raw" ? "block" : "none"};">
+      <div class="card" style="padding:22px 24px;">
+        <div style="color:var(--text-muted);font-size:13px;">Loading raw mc.env editor...</div>
+      </div>
+    </div>
   `;
+}
+
+export function switchSettingsTab(app, subtab) {
+  app.state.settingsSubtab = subtab;
+  ["webapp", "server", "raw"].forEach(k => {
+    const btn = document.getElementById(`settings-tab-${k}`);
+    const panel = document.getElementById(`settings-${k}-panel`);
+    if (btn) btn.classList.toggle("active", k === subtab);
+    if (panel) panel.style.display = k === subtab ? "block" : "none";
+  });
+  if ((subtab === "server" || subtab === "raw") && !app.state.serverSettingsData) {
+    loadSettings(app);
+  }
+}
+
+export async function saveAlertWebhook(app) {
+  const input = document.getElementById("setting-webhook-url");
+  const badge = document.getElementById("webhook-saved-badge");
+  const url = input ? input.value.trim() : "";
+  try {
+    const res = await app.api.request("/api/settings/panel-prefs", {
+      method: "POST",
+      body: { alert_webhook_url: url }
+    });
+    app.state.panelWebhookUrl = res.alert_webhook_url || "";
+    app.updateAppPref("webhookUrl", app.state.panelWebhookUrl);
+    if (badge) {
+      badge.style.display = "inline-block";
+      setTimeout(() => { if (badge) badge.style.display = "none"; }, 2500);
+    }
+  } catch (e) {
+    alert("Failed to save webhook URL: " + e.message);
+  }
+}
+
+export async function loadSettings(app) {
+  app.loadPanelPrefs();
+  try {
+    const data = await app.api.request("/api/settings");
+    app.state.serverSettingsData = data;
+    renderServerConfigPanels(app, data);
+  } catch (e) {
+    const sp = document.getElementById("settings-server-panel");
+    if (sp) sp.innerHTML = `<div class="card" style="padding:20px;"><span class="badge badge-error">ERROR</span> <span style="margin-left:8px;color:var(--text-secondary);">${escapeHtml(e.message)}</span></div>`;
+  }
+}
+
+function renderServerConfigPanels(app, data) {
+  const world = data.world || {};
+  const players = data.players || {};
+  const perf = data.performance || {};
+  const text = data.text || {};
+  const sys = data.system || {};
+
+  const sp = document.getElementById("settings-server-panel");
+  if (sp) {
+    sp.innerHTML = `
+      <div class="card" style="padding:22px 24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border-subtle);">
+          <div>
+            <h3 style="font-size:15px;font-weight:700;text-transform:uppercase;">Server Configuration (mc.env)</h3>
+            <div style="font-size:12px;color:var(--text-secondary);margin-top:2px;">Applying creates a timestamped backup and runs <code>recreate-mc</code>.</div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary btn-sm" onclick="app.previewMcEnvDiff()">Preview Diff</button>
+            <button class="btn btn-primary btn-sm" id="apply-mcenv-btn" onclick="app.applyMcEnvSettings()">${ICONS.check} Apply &amp; Recreate</button>
+          </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom:18px;">
+          <div class="settings-card-compact">
+            <div class="settings-card-header-compact">
+              <span class="settings-card-title-compact">World Settings</span>
+              <span class="badge">WORLD</span>
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">World Folder Name (LEVEL)</label>
+              <input type="text" id="env-level" class="input" value="${escapeHtml(world.LEVEL || "BabaSquadWorld")}">
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">World Seed (SEED)${world.SEED_READ_ONLY ? " · Locked" : ""}</label>
+              <input type="text" id="env-seed" class="input" value="${escapeHtml(world.SEED || "")}" ${world.SEED_READ_ONLY ? "readonly disabled" : ""}>
+              ${world.SEED_READ_ONLY ? `<div style="font-size:11px;color:var(--text-muted);margin-top:3px;">World already generated on disk. Use Worlds -&gt; Generate New World to reset seed.</div>` : ""}
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Difficulty</label>
+                <select id="env-difficulty" class="input">
+                  <option value="peaceful" ${world.DIFFICULTY === "peaceful" ? "selected" : ""}>Peaceful</option>
+                  <option value="easy" ${world.DIFFICULTY === "easy" ? "selected" : ""}>Easy</option>
+                  <option value="normal" ${world.DIFFICULTY === "normal" ? "selected" : ""}>Normal</option>
+                  <option value="hard" ${world.DIFFICULTY === "hard" ? "selected" : ""}>Hard</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Gamemode (MODE)</label>
+                <select id="env-mode" class="input">
+                  <option value="survival" ${world.MODE === "survival" ? "selected" : ""}>Survival</option>
+                  <option value="creative" ${world.MODE === "creative" ? "selected" : ""}>Creative</option>
+                  <option value="adventure" ${world.MODE === "adventure" ? "selected" : ""}>Adventure</option>
+                  <option value="spectator" ${world.MODE === "spectator" ? "selected" : ""}>Spectator</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">PVP Enabled</label>
+                <select id="env-pvp" class="input">
+                  <option value="true" ${world.PVP !== false ? "selected" : ""}>Enabled (true)</option>
+                  <option value="false" ${world.PVP === false ? "selected" : ""}>Disabled (false)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Hardcore</label>
+                <select id="env-hardcore" class="input">
+                  <option value="false" ${!world.HARDCORE ? "selected" : ""}>Off (false)</option>
+                  <option value="true" ${world.HARDCORE ? "selected" : ""}>On (true)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-card-compact">
+            <div class="settings-card-header-compact">
+              <span class="settings-card-title-compact">Players, Memory &amp; Text</span>
+              <span class="badge">TUNING</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Max Players</label>
+                <input type="number" id="env-max-players" class="input" min="1" max="100" value="${players.MAX_PLAYERS || 8}">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">JVM Memory (Max 4G)</label>
+                <select id="env-memory" class="input">
+                  <option value="1G" ${perf.MEMORY === "1G" ? "selected" : ""}>1G</option>
+                  <option value="2G" ${perf.MEMORY === "2G" ? "selected" : ""}>2G</option>
+                  <option value="3G" ${perf.MEMORY === "3G" ? "selected" : ""}>3G</option>
+                  <option value="4G" ${perf.MEMORY === "4G" ? "selected" : ""}>4G</option>
+                </select>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">View Distance (2–32)</label>
+                <input type="number" id="env-view-distance" class="input" min="2" max="32" value="${perf.VIEW_DISTANCE || 16}">
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Simulation Distance</label>
+                <input type="number" id="env-sim-distance" class="input" min="2" max="32" value="${perf.SIMULATION_DISTANCE || 6}">
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div>
+                <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Whitelist (mc.env)</label>
+                <select id="env-whitelist" class="input">
+                  <option value="true" ${players.ENABLE_WHITELIST ? "selected" : ""}>Enabled (true)</option>
+                  <option value="false" ${!players.ENABLE_WHITELIST ? "selected" : ""}>Disabled (false)</option>
+                </select>
+              </div>
+              <div>
+                <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Online Auth Mode</label>
+                <select id="env-online-mode" class="input" onchange="const w=document.getElementById('online-mode-warning'); if(w) w.style.display=this.value==='false'?'block':'none';">
+                  <option value="true" ${players.ONLINE_MODE ? "selected" : ""}>Online (Mojang Auth)</option>
+                  <option value="false" ${!players.ONLINE_MODE ? "selected" : ""}>Offline / Cracked</option>
+                </select>
+              </div>
+            </div>
+            <div id="online-mode-warning" style="display:${!players.ONLINE_MODE ? "block" : "none"};padding:8px 10px;border-left:3px solid var(--color-error);background:var(--color-error-bg);font-size:11.5px;color:var(--color-error);line-height:1.45;">
+              SECURITY WARNING: Offline mode disables Mojang authentication. Keep Whitelist enabled and expose Minecraft strictly over LAN/VPN.
+            </div>
+            <div>
+              <label style="font-size:11px;font-weight:600;text-transform:uppercase;color:var(--text-secondary);display:block;margin-bottom:4px;">Server MOTD</label>
+              <input type="text" id="env-motd" class="input" value="${escapeHtml(text.MOTD || "palvi")}">
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--text-muted);padding-top:10px;border-top:1px solid var(--border-subtle);">
+          <span>Type: <strong style="color:var(--text-primary);">${escapeHtml(sys.TYPE || "FABRIC")}</strong></span>
+          <span>Version: <strong style="color:var(--text-primary);">${escapeHtml(sys.VERSION || "26.3")}</strong></span>
+          <span>Timezone: <strong style="color:var(--text-primary);">${escapeHtml(sys.TZ || "Asia/Kolkata")}</strong></span>
+        </div>
+      </div>
+    `;
+  }
+
+  const rp = document.getElementById("settings-raw-panel");
+  if (rp) {
+    rp.innerHTML = `
+      <div class="editor-container">
+        <div class="editor-header">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:13px;font-weight:600;">mc.env Raw Editor</span>
+            <span class="badge">Validated Syntax</span>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-secondary btn-sm" onclick="app.previewMcEnvDiff()">Preview Diff</button>
+            <button class="btn btn-primary btn-sm" onclick="app.applyMcEnvSettings()">${ICONS.check} Apply Raw &amp; Recreate</button>
+          </div>
+        </div>
+        <div class="editor-body">
+          <div class="editor-gutter" id="raw-env-gutter"></div>
+          <textarea id="raw-env-textarea" class="editor-textarea" spellcheck="false" wrap="off"></textarea>
+        </div>
+      </div>
+    `;
+    const ta = document.getElementById("raw-env-textarea");
+    const gutter = document.getElementById("raw-env-gutter");
+    if (ta && gutter) {
+      ta.value = data.raw || "";
+      const syncNums = () => {
+        const count = ta.value.split("\n").length;
+        let html = "";
+        for (let i = 1; i <= count; i++) html += `<div class="editor-line-num">${i}</div>`;
+        gutter.innerHTML = html;
+      };
+      syncNums();
+      ta.addEventListener("input", syncNums);
+      ta.addEventListener("scroll", () => { gutter.scrollTop = ta.scrollTop; });
+    }
+  }
+}
+
+function buildSettingsPayload(app) {
+  if (app.state.settingsSubtab === "raw") {
+    const ta = document.getElementById("raw-env-textarea");
+    return { raw_content: ta ? ta.value : "" };
+  }
+  const updates = {
+    LEVEL: document.getElementById("env-level")?.value.trim() || "BabaSquadWorld",
+    DIFFICULTY: document.getElementById("env-difficulty")?.value || "easy",
+    MODE: document.getElementById("env-mode")?.value || "survival",
+    PVP: document.getElementById("env-pvp")?.value || "true",
+    HARDCORE: document.getElementById("env-hardcore")?.value || "false",
+    MAX_PLAYERS: String(parseInt(document.getElementById("env-max-players")?.value || "8", 10)),
+    MEMORY: document.getElementById("env-memory")?.value || "3G",
+    VIEW_DISTANCE: String(parseInt(document.getElementById("env-view-distance")?.value || "16", 10)),
+    SIMULATION_DISTANCE: String(parseInt(document.getElementById("env-sim-distance")?.value || "6", 10)),
+    ENABLE_WHITELIST: document.getElementById("env-whitelist")?.value || "false",
+    ONLINE_MODE: document.getElementById("env-online-mode")?.value || "false",
+    MOTD: document.getElementById("env-motd")?.value || "palvi"
+  };
+  const seedEl = document.getElementById("env-seed");
+  if (seedEl && !seedEl.disabled) {
+    updates.SEED = seedEl.value.trim();
+  }
+  return { updates: updates };
+}
+
+export async function previewMcEnvDiff(app) {
+  const payload = buildSettingsPayload(app);
+  try {
+    const res = await app.api.request("/api/settings/diff", {
+      method: "POST",
+      body: payload
+    });
+    const diffText = (res.diff && res.diff.trim()) ? res.diff : "No changes compared to active mc.env.";
+    const overlay = document.getElementById("modal-overlay");
+    const body = document.getElementById("modal-body");
+    body.innerHTML = `
+      <div class="modal-header">
+        <h3 style="font-size:14px;font-weight:700;text-transform:uppercase;">Proposed mc.env Diff</h3>
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal()">✕</button>
+      </div>
+      <div style="padding:16px 20px;max-height:60vh;overflow:auto;">
+        <pre style="margin:0;font-family:monospace;font-size:12px;line-height:1.5;background:var(--bg-canvas);padding:12px;border:1px solid var(--border-subtle);white-space:pre-wrap;">${escapeHtml(diffText)}</pre>
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:flex-end;gap:10px;padding:12px 20px;border-top:1px solid var(--border-subtle);">
+        <button class="btn btn-secondary btn-sm" onclick="app.closeModal()">Close</button>
+        <button class="btn btn-primary btn-sm" onclick="app.closeModal(); app.applyMcEnvSettings()">Apply &amp; Recreate</button>
+      </div>
+    `;
+    overlay.style.display = "flex";
+  } catch (e) {
+    alert("Diff preview error: " + e.message);
+  }
+}
+
+export async function applyMcEnvSettings(app, force = false) {
+  const payload = { ...buildSettingsPayload(app), force: force };
+  const btn = document.getElementById("apply-mcenv-btn");
+  if (btn) btn.disabled = true;
+  try {
+    const res = await app.api.request("/api/settings/apply", {
+      method: "POST",
+      body: payload
+    });
+    if (res.needs_confirmation) {
+      if (btn) btn.disabled = false;
+      app.showConfirmModal(
+        "Players Online — Confirm Recreate",
+        res.message || "Players are currently online. Applying mc.env will disconnect them while recreating the server.",
+        () => applyMcEnvSettings(app, true),
+        { danger: true, confirmText: "Disconnect Players & Apply" }
+      );
+      return;
+    }
+    alert(res.message || "Settings applied.");
+    await loadSettings(app);
+    app.fetchStatus();
+  } catch (e) {
+    alert("Failed to apply settings: " + e.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+export async function saveMcEnvProperties(app) {
+  return applyMcEnvSettings(app, false);
 }

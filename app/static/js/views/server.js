@@ -1,4 +1,4 @@
-import { ICONS, escapeHtml, formatSeconds } from "../api.js";
+import { ICONS, escapeHtml, formatSeconds, renderStatusBadge, setTextIfChanged, setHtmlIfChanged } from "../api.js?v=20261128-v11";
 
 export function updateSquareMeter(trackId, percent, statusClass = "") {
   const track = document.getElementById(trackId);
@@ -6,6 +6,7 @@ export function updateSquareMeter(trackId, percent, statusClass = "") {
   const totalBlocks = 24;
   const p = Math.max(0, Math.min(100, Math.round(percent || 0)));
   const filledBlocks = Math.round((p / 100) * totalBlocks);
+  const meterKey = `${filledBlocks}:${statusClass}`;
   let blocks = track.querySelectorAll(".meter-block");
   if (blocks.length !== totalBlocks) {
     let html = "";
@@ -14,12 +15,14 @@ export function updateSquareMeter(trackId, percent, statusClass = "") {
     }
     track.innerHTML = html;
     blocks = track.querySelectorAll(".meter-block");
+    track.dataset.lastMeter = "";
   }
+  if (track.dataset.lastMeter === meterKey) return;
+  track.dataset.lastMeter = meterKey;
   blocks.forEach((el, idx) => {
-    if (idx < filledBlocks) {
-      el.className = ("meter-block filled " + (statusClass || "")).trim();
-    } else {
-      el.className = "meter-block";
+    const nextCls = idx < filledBlocks ? ("meter-block filled " + (statusClass || "")).trim() : "meter-block";
+    if (el.className !== nextCls) {
+      el.className = nextCls;
     }
   });
 }
@@ -30,7 +33,7 @@ function buildMeterBlocksHtml() {
 
 export function renderServerTab() {
   return `
-    <div class="card" style="margin-bottom:20px;padding:22px 28px;">
+    <div class="card" style="margin-bottom:16px;padding:22px 28px;">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px;">
         <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
           <div>
@@ -62,7 +65,7 @@ export function renderServerTab() {
       </div>
     </div>
 
-    <div class="metric-strip" style="margin-bottom:20px;">
+    <div class="metric-strip" style="margin-bottom:16px;">
       <div class="metric-strip-card">
         <span class="metric-strip-label">Server State</span>
         <span class="metric-strip-value" id="strip-status">-</span>
@@ -81,7 +84,7 @@ export function renderServerTab() {
       </div>
     </div>
 
-    <div class="grid-2" style="margin-bottom:20px;">
+    <div class="grid-2" style="margin-bottom:16px;">
       <div class="card" style="padding:22px 24px;">
         <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
           <span class="progress-header-title">MINECRAFT HEAP ALLOCATION</span>
@@ -123,7 +126,7 @@ export function renderServerTab() {
       </div>
 
       <div class="card" style="padding:22px 24px;">
-        <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0px;">
           <span class="progress-header-title">HOST DISK STORAGE</span>
           <span class="badge" id="disk-header-badge">-</span>
         </div>
@@ -142,7 +145,7 @@ export function renderServerTab() {
           </div>
         </div>
 
-        <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <div class="progress-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0px;">
           <span class="progress-header-title">HOST SYSTEM RAM</span>
           <span class="badge" id="host-ram-header-badge">-</span>
         </div>
@@ -163,13 +166,51 @@ export function renderServerTab() {
       </div>
     </div>
 
-    <div class="card" style="padding:22px 24px;">
-      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:18px;border-bottom:1px solid var(--border-subtle);">
-        <span class="card-title" style="margin:0;">SYSTEM TELEMETRY & WORKLOAD MONITOR</span>
-        <span class="badge" id="telemetry-health-badge">LIVE METRICS</span>
+    <div class="card" style="padding:22px 24px;margin-bottom:16px;">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 14px 0;margin-bottom:16px;border-bottom:1px solid var(--border-subtle);flex-wrap:wrap;gap:10px;">
+        <div>
+          <span class="card-title" style="margin:0;">MEDIA STACK CONTROLLER (MC-WATCH)</span>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px;">
+            Stops Jellyfin &amp; media downloads while Minecraft is awake to reserve RAM, and restarts them after the grace timer once MC sleeps.
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span id="media-watch-state-badge">-</span>
+          <button class="btn btn-primary btn-sm" id="start-media-now-btn" onclick="app.startMediaNow()">${ICONS.start} Start Media Now</button>
+          <button class="btn btn-secondary btn-sm" onclick="app.loadMediaStatus(true)">${ICONS.refresh} Refresh</button>
+        </div>
       </div>
 
-      <div style="display:flex;flex-direction:column;gap:12px;">
+      <div class="metric-strip" style="margin-bottom:16px;">
+        <div class="metric-strip-card">
+          <span class="metric-strip-label">Watched MC State</span>
+          <span class="metric-strip-value" id="media-watch-mc" style="font-size:14px;">-</span>
+        </div>
+        <div class="metric-strip-card">
+          <span class="metric-strip-label">Media Restart Timer</span>
+          <span class="metric-strip-value" id="media-watch-countdown" style="font-size:14px;">-</span>
+        </div>
+        <div class="metric-strip-card">
+          <span class="metric-strip-label">Grace Delay (Seconds)</span>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <input type="number" id="media-grace-input" class="input" min="60" max="3600" value="300" style="width:92px;padding:4px 8px;font-size:12.5px;">
+            <button class="btn btn-secondary btn-sm" id="media-grace-btn" onclick="app.setMediaGrace()">Set Grace</button>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;" id="media-containers-grid">
+        <div style="color:var(--text-muted);font-size:12px;">Click Refresh or wait for initial sync...</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:22px 24px;">
+      <div class="card-header" style="display:flex;justify-content:space-between;align-items:center;padding:0 0 4px 0;">
+        <span class="card-title" style="margin:0;">SYSTEM TELEMETRY & WORKLOAD MONITOR</span>
+        <span class="badge-online badge-dot-only" id="telemetry-health-badge" title="Live Telemetry Indicator" aria-label="Live Telemetry"></span>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:0px;">
         <div class="metric-row">
           <span class="metric-label">CPU Core Temperature</span>
           <div class="temp-metric-container">
@@ -200,11 +241,124 @@ export function renderServerTab() {
   `;
 }
 
-export function updateServerMetrics(data) {
+function formatWatchCountdown(ws) {
+  if (!ws) return "-";
+  if (ws.media === "running") return "Running";
+  if (ws.media_start_at) {
+    const targetMs = Date.parse(ws.media_start_at);
+    if (!Number.isNaN(targetMs)) {
+      const rem = Math.max(0, Math.ceil((targetMs - Date.now()) / 1000));
+      return rem > 0 ? formatSeconds(rem) : "Starting...";
+    }
+  }
+  return ws.mc === "running" ? "Paused (MC Active)" : "Waiting";
+}
+
+function renderWatchStateWidgets(ws, containers = null) {
+  if (ws) {
+    const stateBadge = document.getElementById("media-watch-state-badge");
+    const mcEl = document.getElementById("media-watch-mc");
+    const cdEl = document.getElementById("media-watch-countdown");
+    const graceInput = document.getElementById("media-grace-input");
+    const mStatus = ws.media === "running" ? renderStatusBadge("online", "Media Running") : renderStatusBadge("asleep", "Media Stopped");
+    setHtmlIfChanged(stateBadge, mStatus);
+    setHtmlIfChanged(mcEl, renderStatusBadge(ws.mc === "running" ? "online" : "asleep", ws.mc === "running" ? "running" : "stopped"));
+    setTextIfChanged(cdEl, formatWatchCountdown(ws));
+    if (graceInput && ws.grace !== undefined && (!document.activeElement || document.activeElement.id !== "media-grace-input")) {
+      const graceStr = String(ws.grace);
+      if (graceInput.value !== graceStr) graceInput.value = graceStr;
+    }
+  }
+  if (Array.isArray(containers)) {
+    const grid = document.getElementById("media-containers-grid");
+    if (grid) {
+      if (containers.length === 0) {
+        setHtmlIfChanged(grid, `<div style="color:var(--text-muted);font-size:12px;">No media containers detected.</div>`);
+      } else {
+        const cardsHtml = containers.map(c => {
+          const isUp = Boolean(c.running || (c.status && String(c.status).toLowerCase().includes("up")));
+          const badge = renderStatusBadge(isUp ? "online" : "offline", isUp ? "Up" : "Exited");
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);">
+              <span style="font-size:12.5px;font-weight:600;color:var(--text-primary);">${escapeHtml(c.name)}</span>
+              ${badge}
+            </div>
+          `;
+        }).join("");
+        setHtmlIfChanged(grid, cardsHtml);
+      }
+    }
+  }
+}
+
+export async function loadMediaStatus(app, force = false) {
+  const now = Date.now();
+  if (!force && app.state.mediaContainers && app.state.mediaContainers.length > 0 && now - (app.state.lastMediaFetchAt || 0) < 15000) {
+    renderWatchStateWidgets(app.state.watchState, app.state.mediaContainers);
+    return;
+  }
+  try {
+    const res = await app.api.request("/api/media/status");
+    app.state.watchState = res.watch_state || app.state.watchState;
+    app.state.mediaContainers = res.containers || [];
+    app.state.lastMediaFetchAt = Date.now();
+    renderWatchStateWidgets(app.state.watchState, app.state.mediaContainers);
+  } catch (e) {
+    const grid = document.getElementById("media-containers-grid");
+    if (grid) setHtmlIfChanged(grid, `<span class="badge badge-error">ERROR</span> <span style="font-size:12px;color:var(--text-secondary);">${escapeHtml(e.message)}</span>`);
+  }
+}
+
+export async function setMediaGrace(app) {
+  const input = document.getElementById("media-grace-input");
+  const btn = document.getElementById("media-grace-btn");
+  const val = parseInt(input ? input.value : "300", 10);
+  if (Number.isNaN(val) || val < 60 || val > 3600) {
+    alert("Grace period must be between 60 and 3600 seconds.");
+    return;
+  }
+  if (btn) btn.disabled = true;
+  try {
+    const res = await app.api.request("/api/media/set-grace", {
+      method: "POST",
+      body: { grace: val }
+    });
+    if (app.state.watchState) app.state.watchState.grace = res.grace;
+    await loadMediaStatus(app, true);
+    alert(`Grace delay updated to ${res.grace}s.`);
+  } catch (e) {
+    alert("Failed to update grace period: " + e.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+export function startMediaNow(app) {
+  app.showConfirmModal(
+    "Start Media Stack Now",
+    "This will immediately start Jellyfin and the media stack containers even if grace period or Minecraft rules normally keep them stopped.",
+    async () => {
+      const btn = document.getElementById("start-media-now-btn");
+      if (btn) btn.disabled = true;
+      try {
+        await app.api.request("/api/media/start-now", { method: "POST" });
+        await loadMediaStatus(app, true);
+        app.fetchStatus();
+      } catch (e) {
+        alert("Failed to start media stack: " + e.message);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    },
+    { danger: false, confirmText: "Start Media Now" }
+  );
+}
+
+export function updateServerMetrics(data, app = null) {
   const swVal = document.getElementById("server-software-val");
   const verVal = document.getElementById("server-version-val");
-  if (swVal) swVal.innerText = data.software ? `${data.software}` : "-";
-  if (verVal) verVal.innerText = data.version ? `${data.version}` : "-";
+  setTextIfChanged(swVal, data.software ? `${data.software}` : "-");
+  setTextIfChanged(verVal, data.version ? `${data.version}` : "-");
 
   const sDot = document.getElementById("server-state-dot");
   const sText = document.getElementById("server-state-text");
@@ -215,46 +369,37 @@ export function updateServerMetrics(data) {
   const state = data.state || "-";
   const isError = state.toLowerCase() === "error";
 
-  if (sDot) sDot.className = "status-indicator-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
-  if (sText) {
-    if (isError) {
-      sText.innerHTML = `<span class="badge badge-error">ERROR</span>`;
-    } else {
-      sText.innerText = state;
-    }
+  if (sDot) {
+    const nextDotCls = "status-indicator-dot " + (state === "Online" ? "" : (state === "Asleep" ? "asleep" : "down"));
+    if (sDot.className !== nextDotCls) sDot.className = nextDotCls;
   }
-  if (stripStatus) {
-    if (isError) {
-      stripStatus.innerHTML = `<span class="badge badge-error">ERROR</span>`;
-    } else {
-      stripStatus.innerText = state;
-    }
-  }
+  const badgeHtml = renderStatusBadge(state);
+  setHtmlIfChanged(sText, badgeHtml);
+  setHtmlIfChanged(stripStatus, badgeHtml);
 
   if (data.players && data.players.count !== undefined) {
     const pCount = `${data.players.count} / ${data.players.max !== undefined ? data.players.max : 8}`;
-    if (stripPlayers) stripPlayers.innerText = pCount;
-    const cardCount = document.getElementById("server-card-player-count");
-    if (cardCount) cardCount.innerText = pCount;
+    setTextIfChanged(stripPlayers, pCount);
+    setTextIfChanged(document.getElementById("server-card-player-count"), pCount);
 
     const pList = document.getElementById("server-online-players-list");
     if (pList) {
       if (!data.players.players || data.players.players.length === 0) {
-        pList.innerHTML = `<div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:30px 0;">No players currently connected.</div>`;
+        setHtmlIfChanged(pList, `<div style="color:var(--text-muted);font-size:12.5px;text-align:center;padding:30px 0;">No players currently connected.</div>`);
       } else {
-        pList.innerHTML = data.players.players.map(p => `
+        setHtmlIfChanged(pList, data.players.players.map(p => `
           <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--bg-surface-elevated);border:1px solid var(--border-subtle);margin-bottom:6px;">
             <div style="display:flex;align-items:center;gap:10px;">
               <span class="status-indicator-dot"></span>
               <span style="font-weight:600;font-size:13px;">${escapeHtml(p)}</span>
             </div>
-            <span style="font-size:13px;color:var(--text-secondary);">Online</span>
+            ${renderStatusBadge("Online")}
           </div>
-        `).join("");
+        `).join(""));
       }
     }
   } else {
-    if (stripPlayers) stripPlayers.innerText = "-";
+    setTextIfChanged(stripPlayers, "-");
   }
 
   const perf = data.performance || {};
@@ -262,40 +407,26 @@ export function updateServerMetrics(data) {
     const usedMb = Math.round(data.stats.ram_used_mb || 0);
     const limitMb = Math.round(data.stats.ram_limit_mb || 0);
     const pct = limitMb > 0 ? Math.min(100, Math.round((usedMb / limitMb) * 100)) : 0;
-    if (stripRam) stripRam.innerText = limitMb > 0 ? `${usedMb} MB` : "-";
+    setTextIfChanged(stripRam, limitMb > 0 ? `${usedMb} MB` : "-");
     updateSquareMeter("ram-meter-track", pct, pct > 90 ? "crit" : (pct > 75 ? "warn" : ""));
-    const ramBadge = document.getElementById("ram-header-badge");
-    if (ramBadge) ramBadge.innerText = limitMb > 0 ? `${limitMb} MB MAX` : "-";
-    const usedStrong = document.getElementById("ram-used-strong");
-    if (usedStrong) usedStrong.innerText = limitMb > 0 ? `${usedMb} MB (${pct}%)` : "-";
-    const availStrong = document.getElementById("ram-avail-strong");
-    if (availStrong) availStrong.innerText = limitMb > 0 ? `${Math.max(0, limitMb - usedMb)} MB` : "-";
-    const boxAlloc = document.getElementById("ram-box-alloc");
-    if (boxAlloc) boxAlloc.innerText = limitMb > 0 ? `${(limitMb / 1024).toFixed(1)} GB` : "-";
-    const cpuVal = document.getElementById("cpu-stat-val");
-    if (cpuVal) cpuVal.innerText = data.stats.cpu_percent !== undefined ? `${data.stats.cpu_percent.toFixed(1)}%` : "-";
+    setTextIfChanged(document.getElementById("ram-header-badge"), limitMb > 0 ? `${limitMb} MB MAX` : "-");
+    setTextIfChanged(document.getElementById("ram-used-strong"), limitMb > 0 ? `${usedMb} MB (${pct}%)` : "-");
+    setTextIfChanged(document.getElementById("ram-avail-strong"), limitMb > 0 ? `${Math.max(0, limitMb - usedMb)} MB` : "-");
+    setTextIfChanged(document.getElementById("ram-box-alloc"), limitMb > 0 ? `${(limitMb / 1024).toFixed(1)} GB` : "-");
+    setTextIfChanged(document.getElementById("cpu-stat-val"), data.stats.cpu_percent !== undefined ? `${data.stats.cpu_percent.toFixed(1)}%` : "-");
     const tpsRaw = data.stats.tps !== undefined ? data.stats.tps : perf.tps;
     const msptRaw = data.stats.mspt !== undefined ? data.stats.mspt : perf.mspt;
-    const tpsVal = document.getElementById("tps-stat-val");
-    if (tpsVal) tpsVal.innerText = tpsRaw !== undefined ? `${Number(tpsRaw).toFixed(1)}` : "-";
-    const msptVal = document.getElementById("mspt-stat-val");
-    if (msptVal) msptVal.innerText = msptRaw !== undefined ? `${Number(msptRaw).toFixed(1)} ms` : "-";
+    setTextIfChanged(document.getElementById("tps-stat-val"), tpsRaw !== undefined ? `${Number(tpsRaw).toFixed(1)}` : "-");
+    setTextIfChanged(document.getElementById("mspt-stat-val"), msptRaw !== undefined ? `${Number(msptRaw).toFixed(1)} ms` : "-");
   } else {
     updateSquareMeter("ram-meter-track", 0);
-    const ramBadge = document.getElementById("ram-header-badge");
-    if (ramBadge) ramBadge.innerText = data.env && data.env.MEMORY ? `${data.env.MEMORY} MAX` : "-";
-    const boxAlloc = document.getElementById("ram-box-alloc");
-    if (boxAlloc) boxAlloc.innerText = data.env && data.env.MEMORY ? `${data.env.MEMORY}` : "-";
-    const usedStrong = document.getElementById("ram-used-strong");
-    if (usedStrong) usedStrong.innerText = "-";
-    const availStrong = document.getElementById("ram-avail-strong");
-    if (availStrong) availStrong.innerText = "-";
-    const cpuVal = document.getElementById("cpu-stat-val");
-    if (cpuVal) cpuVal.innerText = "-";
-    const tpsVal = document.getElementById("tps-stat-val");
-    if (tpsVal) tpsVal.innerText = "-";
-    const msptVal = document.getElementById("mspt-stat-val");
-    if (msptVal) msptVal.innerText = "-";
+    setTextIfChanged(document.getElementById("ram-header-badge"), data.env && data.env.MEMORY ? `${data.env.MEMORY} MAX` : "-");
+    setTextIfChanged(document.getElementById("ram-box-alloc"), data.env && data.env.MEMORY ? `${data.env.MEMORY}` : "-");
+    setTextIfChanged(document.getElementById("ram-used-strong"), "-");
+    setTextIfChanged(document.getElementById("ram-avail-strong"), "-");
+    setTextIfChanged(document.getElementById("cpu-stat-val"), "-");
+    setTextIfChanged(document.getElementById("tps-stat-val"), "-");
+    setTextIfChanged(document.getElementById("mspt-stat-val"), "-");
   }
 
   const host = data.host_analytics;
@@ -310,74 +441,67 @@ export function updateServerMetrics(data) {
   const rawTemp = (host && host.cpu_temp !== null && host.cpu_temp !== undefined && !isNaN(Number(host.cpu_temp)))
     ? Number(host.cpu_temp)
     : 48.5;
-  if (tempEl) tempEl.innerText = `${rawTemp} °C`;
+  setTextIfChanged(tempEl, `${rawTemp} °C`);
   if (tempNeedle) {
     const pct = Math.max(0, Math.min(100, rawTemp));
-    tempNeedle.style.left = `${pct}%`;
-    tempNeedle.style.display = "block";
+    const nextLeft = `${pct}%`;
+    if (tempNeedle.style.left !== nextLeft) tempNeedle.style.left = nextLeft;
+    if (tempNeedle.style.display !== "block") tempNeedle.style.display = "block";
   }
-  if (tempBar) tempBar.style.opacity = "1";
-  if (loadEl) loadEl.innerText = (host && host.load_average) ? host.load_average.join(", ") : "-";
-  if (osEl) osEl.innerText = (host && host.os_info) ? host.os_info : "-";
+  if (tempBar && tempBar.style.opacity !== "1") tempBar.style.opacity = "1";
+  setTextIfChanged(loadEl, (host && host.load_average) ? host.load_average.join(", ") : "-");
+  setTextIfChanged(osEl, (host && host.os_info) ? host.os_info : "-");
 
+  const watchState = data.watch_state || (app && app.state.watchState);
   if (mediaEl) {
-    const isOnline = state.toLowerCase() === "online";
-    if (isOnline) {
-      mediaEl.innerHTML = `<span class="badge" style="color:var(--color-warning);">Paused (mc-watch standby)</span>`;
-    } else {
-      mediaEl.innerHTML = `<span class="badge" style="color:var(--color-success);">Running (Active)</span>`;
-    }
+    const isMediaRunning = watchState ? watchState.media === "running" : state.toLowerCase() !== "online";
+    const mediaHtml = isMediaRunning
+      ? renderStatusBadge("online", "Running (Active)")
+      : renderStatusBadge("asleep", "Paused (mc-watch standby)");
+    setHtmlIfChanged(mediaEl, mediaHtml);
   }
+  renderWatchStateWidgets(watchState, app ? app.state.mediaContainers : null);
 
   if (lazymcEl) {
     const isRunning = data.lazymc_running !== false;
-    lazymcEl.innerText = isRunning ? "Active (Port 26656 • 300s sleep timer)" : "Offline";
+    const lazyHtml = isRunning
+      ? `${renderStatusBadge("online", "Online")} <span style="margin-left:6px;color:var(--text-secondary);font-size:12px;">(Port 26656 • 300s sleep timer)</span>`
+      : renderStatusBadge("offline", "Offline");
+    setHtmlIfChanged(lazymcEl, lazyHtml);
   }
 
   const hBadge = document.getElementById("telemetry-health-badge");
   if (hBadge) {
-    hBadge.style.opacity = "0.6";
-    setTimeout(() => { if (hBadge) hBadge.style.opacity = "1"; }, 300);
+    const targetCls = isError ? "badge-error badge-dot-only" : "badge-asleep badge-dot-only";
+    if (hBadge.className !== targetCls) hBadge.className = targetCls;
   }
 
   const stripIdle = document.getElementById("strip-idle");
   if (stripIdle && data.uptime_seconds !== undefined && (!data.idle || !data.idle.is_idle)) {
-    stripIdle.innerText = formatSeconds(data.uptime_seconds);
+    setTextIfChanged(stripIdle, formatSeconds(data.uptime_seconds));
   }
 
   if (host && host.disk) {
-    const diskBadge = document.getElementById("disk-header-badge");
-    if (diskBadge) diskBadge.innerText = `${host.disk.total_gb} GB TOTAL`;
-    const diskUsed = document.getElementById("disk-used-strong");
-    if (diskUsed) diskUsed.innerText = `${host.disk.used_gb} GB (${host.disk.percent}%)`;
-    const diskFree = document.getElementById("disk-free-strong");
-    if (diskFree) diskFree.innerText = `${host.disk.free_gb} GB`;
+    setTextIfChanged(document.getElementById("disk-header-badge"), `${host.disk.total_gb} GB TOTAL`);
+    setTextIfChanged(document.getElementById("disk-used-strong"), `${host.disk.used_gb} GB (${host.disk.percent}%)`);
+    setTextIfChanged(document.getElementById("disk-free-strong"), `${host.disk.free_gb} GB`);
     updateSquareMeter("disk-meter-track", host.disk.percent, host.disk.percent > 90 ? "crit" : (host.disk.percent > 75 ? "warn" : ""));
   } else {
-    const diskBadge = document.getElementById("disk-header-badge");
-    if (diskBadge) diskBadge.innerText = "-";
-    const diskUsed = document.getElementById("disk-used-strong");
-    if (diskUsed) diskUsed.innerText = "-";
-    const diskFree = document.getElementById("disk-free-strong");
-    if (diskFree) diskFree.innerText = "-";
+    setTextIfChanged(document.getElementById("disk-header-badge"), "-");
+    setTextIfChanged(document.getElementById("disk-used-strong"), "-");
+    setTextIfChanged(document.getElementById("disk-free-strong"), "-");
     updateSquareMeter("disk-meter-track", 0);
   }
 
   if (host && host.memory) {
-    const hostRamBadge = document.getElementById("host-ram-header-badge");
-    if (hostRamBadge) hostRamBadge.innerText = `${(host.memory.total_mb / 1024).toFixed(1)} GB TOTAL`;
-    const hostRamUsed = document.getElementById("host-ram-used-strong");
-    if (hostRamUsed) hostRamUsed.innerText = `${(host.memory.used_mb / 1024).toFixed(1)} GB (${host.memory.percent}%)`;
-    const hostRamFree = document.getElementById("host-ram-free-strong");
-    if (hostRamFree) hostRamFree.innerText = `${(host.memory.free_mb / 1024).toFixed(1)} GB`;
+    setTextIfChanged(document.getElementById("host-ram-header-badge"), `${(host.memory.total_mb / 1024).toFixed(1)} GB TOTAL`);
+    setTextIfChanged(document.getElementById("host-ram-used-strong"), `${(host.memory.used_mb / 1024).toFixed(1)} GB (${host.memory.percent}%)`);
+    setTextIfChanged(document.getElementById("host-ram-free-strong"), `${(host.memory.free_mb / 1024).toFixed(1)} GB`);
     updateSquareMeter("host-ram-meter-track", host.memory.percent, host.memory.percent > 90 ? "crit" : (host.memory.percent > 75 ? "warn" : ""));
   } else {
-    const hostRamBadge = document.getElementById("host-ram-header-badge");
-    if (hostRamBadge) hostRamBadge.innerText = "-";
-    const hostRamUsed = document.getElementById("host-ram-used-strong");
-    if (hostRamUsed) hostRamUsed.innerText = "-";
-    const hostRamFree = document.getElementById("host-ram-free-strong");
-    if (hostRamFree) hostRamFree.innerText = "-";
+    setTextIfChanged(document.getElementById("host-ram-header-badge"), "-");
+    setTextIfChanged(document.getElementById("host-ram-used-strong"), "-");
+    setTextIfChanged(document.getElementById("host-ram-free-strong"), "-");
     updateSquareMeter("host-ram-meter-track", 0);
   }
 }

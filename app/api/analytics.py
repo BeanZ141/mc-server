@@ -116,10 +116,10 @@ async def get_server_analytics(session: dict = Depends(get_current_user_and_sess
         "disk_used_gb": host_disk.get("used_gb", 0.0),
         "disk_total_gb": host_disk.get("total_gb", 0.0),
         "disk_percent": host_disk.get("percent", 0.0),
-        "disk_read_mbps": 0.0,
-        "disk_write_mbps": 0.0,
-        "net_in_kbps": 0.0,
-        "net_out_kbps": 0.0
+        "disk_read_mbps": sys_metrics.get("disk_read_mbps", 0.0),
+        "disk_write_mbps": sys_metrics.get("disk_write_mbps", 0.0),
+        "net_in_kbps": sys_metrics.get("net_in_kbps", 0.0),
+        "net_out_kbps": sys_metrics.get("net_out_kbps", 0.0)
     }
 
     tag_map = {

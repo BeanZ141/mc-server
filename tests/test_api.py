@@ -57,6 +57,7 @@ class TestAPIEndpoints(unittest.TestCase):
     def tearDown(self):
         from app.settings_manager import settings_manager
         settings_manager.env_path = self.orig_env_path
+        os.environ.pop("MC_WATCH_STATE_PATH", None)
         self.temp_dir.cleanup()
 
     def _setup_and_auth(self):
@@ -123,7 +124,14 @@ class TestAPIEndpoints(unittest.TestCase):
                 "difficulty": "normal",
                 "whitelist": True,
                 "allow_flight": True,
-                "spawn_protection": 32
+                "spawn_protection": 32,
+                "pvp": False,
+                "motd": "Updated MOTD",
+                "view_distance": 12,
+                "simulation_distance": 8,
+                "enable_command_block": True,
+                "allow_nether": False,
+                "spawn_monsters": False
             }
         )
         self.assertEqual(save_resp.status_code, 200)
@@ -138,6 +146,13 @@ class TestAPIEndpoints(unittest.TestCase):
         self.assertEqual(new_props["whitelist"], True)
         self.assertEqual(new_props["allow_flight"], True)
         self.assertEqual(new_props["spawn_protection"], 32)
+        self.assertEqual(new_props["pvp"], False)
+        self.assertEqual(new_props["motd"], "Updated MOTD")
+        self.assertEqual(new_props["view_distance"], 12)
+        self.assertEqual(new_props["simulation_distance"], 8)
+        self.assertEqual(new_props["enable_command_block"], True)
+        self.assertEqual(new_props["allow_nether"], False)
+        self.assertEqual(new_props["spawn_monsters"], False)
 
     def test_files_endpoints(self):
         csrf = self._setup_and_auth()
@@ -376,6 +391,110 @@ class TestAPIEndpoints(unittest.TestCase):
         with zipfile.ZipFile(io.BytesIO(dl_resp.content)) as z:
             self.assertNotIn("leak.env", z.namelist())
             self.assertIn("level.dat", z.namelist())
+
+    def test_new_endpoints_media_kick_prefs_and_cookie_security(self):
+        import json
+        from unittest.mock import AsyncMock, patch
+        from app.rcon_client import rcon_client
+        from app.system_metrics import get_system_analytics
+
+        csrf = self._setup_and_auth()
+
+        # Verify login cookie uses SameSite=Strict and /api/auth/me clears invalid cookies
+        login_resp = self.client.post("/api/auth/login", json={"password": "PalviSecurePassword2026!"})
+        self.assertEqual(login_resp.status_code, 200)
+        set_cookie_hdr = login_resp.headers.get("set-cookie", "")
+        self.assertIn("samesite=strict", set_cookie_hdr.lower())
+        csrf = login_resp.json()["csrf_token"]
+
+        # mc-watch state JSON via dynamic MC_WATCH_STATE_PATH
+        watch_file = Path(self.temp_dir.name) / "watch_state.json"
+        watch_file.write_text(json.dumps({"mc": "stopped", "media": "running", "media_start_at": None, "grace": 450}))
+        os.environ["MC_WATCH_STATE_PATH"] = str(watch_file)
+
+        status_resp = self.client.get("/api/status")
+        self.assertEqual(status_resp.status_code, 200)
+        sdata = status_resp.json()
+        self.assertEqual(sdata["watch_state"]["grace"], 450)
+        self.assertIn("entities", sdata["stats"])
+        self.assertIn("chunks", sdata["stats"])
+
+        media_resp = self.client.get("/api/media/status")
+        self.assertEqual(media_resp.status_code, 200)
+        self.assertEqual(media_resp.json()["watch_state"]["grace"], 450)
+
+        # Panel prefs webhook save & validate
+        bad_pref = self.client.post(
+            "/api/settings/panel-prefs",
+            headers={CSRF_HEADER_NAME: csrf},
+            json={"alert_webhook_url": "ftp://invalid"}
+        )
+        self.assertEqual(bad_pref.status_code, 400)
+
+        ok_pref = self.client.post(
+            "/api/settings/panel-prefs",
+            headers={CSRF_HEADER_NAME: csrf},
+            json={"alert_webhook_url": "https://discord.com/api/webhooks/12345"}
+        )
+        self.assertEqual(ok_pref.status_code, 200)
+        self.assertEqual(
+            self.client.get("/api/settings/panel-prefs").json()["alert_webhook_url"],
+            "https://discord.com/api/webhooks/12345"
+        )
+
+        # Kick validation and RCON execution + audit visibility
+        bad_kick = self.client.post(
+            "/api/players/kick",
+            headers={CSRF_HEADER_NAME: csrf},
+            json={"player": "bad name!!"}
+        )
+        self.assertEqual(bad_kick.status_code, 400)
+
+        with patch.object(rcon_client, "execute", new=AsyncMock(return_value="Kicked Steve")) as mock_exec:
+            ok_kick = self.client.post(
+                "/api/players/kick",
+                headers={CSRF_HEADER_NAME: csrf},
+                json={"player": "Steve", "reason": "AFK cleanup"}
+            )
+            self.assertEqual(ok_kick.status_code, 200)
+            mock_exec.assert_awaited_with("kick Steve AFK cleanup")
+
+        audit_resp = self.client.get("/api/audit?limit=10&offset=0")
+        self.assertEqual(audit_resp.status_code, 200)
+        actions = [e["action"] for e in audit_resp.json()["entries"]]
+        self.assertIn("kick_player", actions)
+
+        # System analytics includes disk & network throughput keys
+        sys_data = get_system_analytics()
+        for key in ("disk_read_mbps", "disk_write_mbps", "net_in_kbps", "net_out_kbps"):
+            self.assertIn(key, sys_data)
+
+        # Invalid session cookie cleared on /api/auth/me
+        fresh_client = TestClient(app, base_url="https://mcadmin.palvi.org")
+        fresh_client.cookies.set(SESSION_COOKIE_NAME, "nonexistent-stale-token")
+        me_invalid = fresh_client.get("/api/auth/me")
+        self.assertEqual(me_invalid.status_code, 200)
+        self.assertFalse(me_invalid.json()["authenticated"])
+        self.assertIn(SESSION_COOKIE_NAME, me_invalid.headers.get("set-cookie", ""))
+
+    def test_rcon_tps_cache_and_watcher_player_cache(self):
+        import asyncio
+        from unittest.mock import AsyncMock, patch
+        from app.rcon_client import RCONClient
+        from app.watcher import watcher
+
+        rc = RCONClient()
+        with patch.object(rc, "execute", new=AsyncMock(return_value="TPS from last 5s, 10s, 1m: 20.0\nTick durations: 12.1/14.5")) as mock_exec:
+            r1 = asyncio.run(rc.get_mspt_and_tps())
+            r2 = asyncio.run(rc.get_mspt_and_tps())
+            self.assertEqual(r1["tps"], 20.0)
+            self.assertEqual(r2["mspt"], 14.5)
+            self.assertEqual(mock_exec.await_count, 1)
+
+        watcher.update_player_cache({"count": 2, "max": 8, "players": ["Alice", "Bob"]})
+        cached_p = watcher.get_cached_players(max_age=5.0)
+        self.assertIsNotNone(cached_p)
+        self.assertEqual(cached_p["players"], ["Alice", "Bob"])
 
 if __name__ == "__main__":
     unittest.main()
