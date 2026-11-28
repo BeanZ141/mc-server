@@ -39,7 +39,7 @@ services:
     container_name: mc-panel
     restart: unless-stopped
     ports:
-      - "3555:3555"
+      - "172.17.0.1:3555:3555"   # only NPM (via docker0) may reach it; not the whole LAN
     security_opt:
       - no-new-privileges:true
     user: "1000:1000"

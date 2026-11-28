@@ -28,4 +28,4 @@ EXPOSE 3555
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD python -c "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:3555/healthz',timeout=4).status==200 else 1)"
 
-CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3555", "--proxy-headers", "--forwarded-allow-ips=172.17.0.1"]
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3555", "--proxy-headers", "--forwarded-allow-ips=172.30.0.1"]
